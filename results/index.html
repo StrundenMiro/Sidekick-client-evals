@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidekick Eval</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gray-50); color: var(--gray-800); line-height: 1.5; }
+
+    /* Navigation */
+    .nav { background: var(--gray-800); padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100; }
+    .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 1.5rem; }
+    .nav-logo { color: white; font-weight: 700; font-size: 1rem; cursor: pointer; }
+    .nav-formats { display: flex; gap: 0.25rem; }
+    .nav-format { color: var(--gray-400); text-decoration: none; padding: 0.35rem 0.6rem; border-radius: 4px; font-size: 0.8rem; text-transform: capitalize; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; }
+    .nav-format:hover { background: rgba(255,255,255,0.1); color: white; }
+    .nav-format.active { background: var(--primary); color: white; }
+    .nav-format-score { font-size: 0.7rem; opacity: 0.8; }
+    .nav-format-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .nav-format-dot.pass { background: var(--success); }
+    .nav-format-dot.warning { background: var(--warning); }
+    .nav-format-dot.fail { background: var(--danger); }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+    /* Dashboard */
+    .dashboard-header { margin-bottom: 1.5rem; }
+    .dashboard-header h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .dashboard-header p { color: var(--gray-600); font-size: 0.9rem; }
+
+    .format-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+
+    .format-card { background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; }
+    .format-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .format-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+    .format-card h3 { font-size: 1rem; font-weight: 600; text-transform: capitalize; }
+    .format-card-score { font-size: 1.5rem; font-weight: 700; }
+    .format-card-score.pass { color: var(--success); }
+    .format-card-score.warning { color: var(--warning); }
+    .format-card-score.fail { color: var(--danger); }
+    .format-card-meta { font-size: 0.8rem; color: var(--gray-600); }
+    .format-card-runs { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--gray-100); font-size: 0.8rem; color: var(--gray-600); }
+
+    /* Format History View */
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); text-decoration: none; font-size: 0.75rem; margin-bottom: 0.25rem; }
+    .back-link:hover { text-decoration: underline; }
+
+    .format-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gray-200); }
+    .format-header h1 { font-size: 1.5rem; font-weight: 600; text-transform: capitalize; }
+
+    .run-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .run-item { background: white; border-radius: 8px; padding: 1rem 1.25rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.1s; }
+    .run-item:hover { background: var(--gray-50); }
+    .run-item-info h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .run-item-info p { font-size: 0.8rem; color: var(--gray-600); }
+    .run-item-scores { display: flex; gap: 1rem; align-items: center; }
+    .run-item-score { text-align: center; }
+    .run-item-score .value { font-size: 1.25rem; font-weight: 700; }
+    .run-item-score .label { font-size: 0.65rem; color: var(--gray-600); text-transform: uppercase; }
+    .run-item-score.pass .value { color: var(--success); }
+    .run-item-score.warning .value { color: var(--warning); }
+    .run-item-score.fail .value { color: var(--danger); }
+
+    /* Run Detail View */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gray-200); }
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    .header-meta { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--gray-600); }
+
+    .verdict { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .verdict-score { background: white; border-radius: 8px; padding: 1rem 1.5rem; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); min-width: 100px; }
+    .verdict-score .value { font-size: 1.75rem; font-weight: 700; }
+    .verdict-score .label { font-size: 0.75rem; color: var(--gray-600); }
+    .verdict-score.fail .value { color: var(--danger); }
+    .verdict-score.pass .value { color: var(--success); }
+    .verdict-score.warning .value { color: var(--warning); }
+    .verdict-summary { flex: 1; min-width: 300px; background: white; border-radius: 8px; padding: 1rem 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .verdict-summary h3 { font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .verdict-summary p { font-size: 0.85rem; color: var(--gray-700); }
+
+    .issues { background: white; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .issues h2 { font-size: 1rem; margin-bottom: 0.75rem; }
+    .issue-list { list-style: none; }
+    .issue-item { padding: 0.5rem 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 0.75rem; font-size: 0.85rem; }
+    .issue-item:last-child { border-bottom: none; }
+    .issue-severity { font-weight: 600; width: 60px; flex-shrink: 0; }
+    .issue-severity.high { color: var(--danger); }
+    .issue-severity.medium { color: var(--warning); }
+    .issue-severity.low { color: var(--primary); }
+
+    .prompt-card { background: white; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden; }
+    .prompt-header { padding: 0.75rem 1rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
+    .prompt-header h3 { font-size: 0.9rem; font-weight: 600; }
+    .prompt-status { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 500; }
+    .prompt-status.pass { background: #D1FAE5; color: #065F46; }
+    .prompt-status.fail { background: #FEE2E2; color: #991B1B; }
+    .prompt-status.warning { background: #FEF3C7; color: #92400E; }
+    .prompt-body { padding: 1rem; }
+    .prompt-text { background: var(--gray-50); padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 0.75rem; font-family: monospace; white-space: pre-wrap; }
+    .prompt-note { font-size: 0.85rem; color: var(--gray-700); margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 6px; background: #D1FAE5; }
+    .prompt-note.fail { background: #FEE2E2; color: #991B1B; }
+    .prompt-note.warning { background: #FEF3C7; color: #92400E; }
+    .artifact-img { border: 1px solid var(--gray-200); border-radius: 6px; overflow: hidden; }
+    .artifact-img img { width: 100%; display: block; }
+
+    footer { text-align: center; padding: 1.5rem; color: var(--gray-600); font-size: 0.8rem; }
+
+    .loading { text-align: center; padding: 3rem; color: var(--gray-600); }
+    .error { text-align: center; padding: 3rem; color: var(--danger); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-content">
+      <div class="nav-logo" onclick="showDashboard()">Sidekick Eval</div>
+      <div class="nav-formats" id="nav-formats"></div>
+    </div>
+  </nav>
+
+  <div class="container" id="app">
+    <div class="loading">Loading...</div>
+  </div>
+
+  <footer>
+    Sidekick Eval &middot; Claude Code + Playwright MCP
+  </footer>
+
+  <script>
+    let runs = [];
+    let currentView = 'dashboard';
+    let currentFormat = null;
+    let currentRunId = null;
+
+    // Load data
+    async function loadData() {
+      try {
+        const response = await fetch('data/runs.json');
+        const data = await response.json();
+        runs = data.runs;
+        renderNavFormats();
+        showDashboard();
+      } catch (error) {
+        document.getElementById('app').innerHTML = `<div class="error">Error loading data: ${error.message}</div>`;
+      }
+    }
+
+    // Render format tabs in nav
+    function renderNavFormats() {
+      const formats = getFormats();
+      const formatOrder = ['table', 'stickies', 'document', 'prototype', 'flowchart', 'slides', 'image'];
+
+      let html = '';
+      formatOrder.forEach(format => {
+        if (formats[format]) {
+          const { latest } = formats[format];
+          const scoreClass = getScoreClass(latest.scores.overall);
+          const isActive = currentFormat === format ? 'active' : '';
+          html += `
+            <div class="nav-format ${isActive}" onclick="showFormat('${format}')">
+              <span class="nav-format-dot ${scoreClass}"></span>
+              ${format}
+            </div>
+          `;
+        }
+      });
+      document.getElementById('nav-formats').innerHTML = html;
+    }
+
+    // Get score class
+    function getScoreClass(score) {
+      if (score >= 8) return 'pass';
+      if (score >= 5) return 'warning';
+      return 'fail';
+    }
+
+    // Format date
+    function formatDate(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // Format time
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Get runs by format
+    function getRunsByFormat(format) {
+      return runs.filter(r => r.format === format).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    }
+
+    // Get all formats with stats
+    function getFormats() {
+      const formats = {};
+      runs.forEach(run => {
+        if (!formats[run.format]) {
+          formats[run.format] = { runs: [], latest: null };
+        }
+        formats[run.format].runs.push(run);
+      });
+
+      Object.keys(formats).forEach(format => {
+        formats[format].runs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        formats[format].latest = formats[format].runs[0];
+      });
+
+      return formats;
+    }
+
+    // Show dashboard
+    function showDashboard() {
+      currentView = 'dashboard';
+      currentFormat = null;
+      currentRunId = null;
+      renderNavFormats();
+
+      const formats = getFormats();
+      const formatOrder = ['table', 'stickies', 'document', 'prototype', 'flowchart', 'slides', 'image'];
+
+      let html = `
+        <div class="dashboard-header">
+          <h1>Test Results Dashboard</h1>
+          <p>${runs.length} test runs across ${Object.keys(formats).length} formats</p>
+        </div>
+        <div class="format-grid">
+      `;
+
+      formatOrder.forEach(format => {
+        if (formats[format]) {
+          const { latest, runs: formatRuns } = formats[format];
+          const scoreClass = getScoreClass(latest.scores.overall);
+          html += `
+            <div class="format-card" onclick="showFormat('${format}')">
+              <div class="format-card-header">
+                <h3>${format}</h3>
+                <div class="format-card-score ${scoreClass}">${latest.scores.overall}/10</div>
+              </div>
+              <div class="format-card-meta">
+                Latest: ${formatDate(latest.timestamp)}
+              </div>
+              <div class="format-card-runs">
+                ${formatRuns.length} run${formatRuns.length !== 1 ? 's' : ''}
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      html += '</div>';
+      document.getElementById('app').innerHTML = html;
+    }
+
+    // Show format history
+    function showFormat(format) {
+      currentView = 'format';
+      currentFormat = format;
+      currentRunId = null;
+      renderNavFormats();
+
+      const formatRuns = getRunsByFormat(format);
+
+      let html = `
+        <div class="format-header">
+          <h1>${format} Tests</h1>
+          <div style="color: var(--gray-600); font-size: 0.9rem;">${formatRuns.length} run${formatRuns.length !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="run-list">
+      `;
+
+      formatRuns.forEach(run => {
+        const overallClass = getScoreClass(run.scores.overall);
+        const adherenceClass = getScoreClass(run.scores.promptAdherence);
+        const iterationClass = getScoreClass(run.scores.iterationQuality);
+
+        html += `
+          <div class="run-item" onclick="showRun('${run.id}')">
+            <div class="run-item-info">
+              <h4>${formatDate(run.timestamp)} at ${formatTime(run.timestamp)}</h4>
+              <p>${run.prompts.length} prompts &middot; ${run.issues.filter(i => i.severity === 'high').length} high-severity issues</p>
+            </div>
+            <div class="run-item-scores">
+              <div class="run-item-score ${overallClass}">
+                <div class="value">${run.scores.overall}</div>
+                <div class="label">Overall</div>
+              </div>
+              <div class="run-item-score ${adherenceClass}">
+                <div class="value">${run.scores.promptAdherence}</div>
+                <div class="label">Adherence</div>
+              </div>
+              <div class="run-item-score ${iterationClass}">
+                <div class="value">${run.scores.iterationQuality}</div>
+                <div class="label">Iteration</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      document.getElementById('app').innerHTML = html;
+    }
+
+    // Show run detail
+    function showRun(runId) {
+      const run = runs.find(r => r.id === runId);
+      if (!run) return;
+
+      currentView = 'run';
+      currentFormat = run.format;
+      currentRunId = runId;
+      renderNavFormats();
+
+      const overallClass = getScoreClass(run.scores.overall);
+      const adherenceClass = getScoreClass(run.scores.promptAdherence);
+      const iterationClass = getScoreClass(run.scores.iterationQuality);
+
+      let html = `
+        <div class="header">
+          <div>
+            <a href="#" class="back-link" onclick="showFormat('${run.format}'); return false;">← All runs</a>
+            <h1 style="text-transform: capitalize;">${run.format} Test</h1>
+          </div>
+          <div class="header-meta">
+            <span>${formatDate(run.timestamp)}</span>
+            <span>${formatTime(run.timestamp)}</span>
+            <span>${run.prompts.length} prompts</span>
+          </div>
+        </div>
+
+        <div class="verdict">
+          <div class="verdict-score ${overallClass}">
+            <div class="value">${run.scores.overall}/10</div>
+            <div class="label">Overall</div>
+          </div>
+          <div class="verdict-score ${adherenceClass}">
+            <div class="value">${run.scores.promptAdherence}/10</div>
+            <div class="label">Prompt Adherence</div>
+          </div>
+          <div class="verdict-score ${iterationClass}">
+            <div class="value">${run.scores.iterationQuality}/10</div>
+            <div class="label">Iteration Quality</div>
+          </div>
+          <div class="verdict-summary">
+            <h3>Summary</h3>
+            <p>${run.summary}</p>
+          </div>
+        </div>
+
+        <div class="issues">
+          <h2>Issues</h2>
+          <ul class="issue-list">
+            ${run.issues.map(issue => `
+              <li class="issue-item">
+                <span class="issue-severity ${issue.severity}">${issue.severity.charAt(0).toUpperCase() + issue.severity.slice(1)}</span>
+                <span>${issue.text}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      `;
+
+      run.prompts.forEach(prompt => {
+        const noteClass = prompt.status === 'fail' ? 'fail' : (prompt.status === 'warning' ? 'warning' : '');
+        html += `
+          <div class="prompt-card">
+            <div class="prompt-header">
+              <h3>Prompt ${prompt.number}: ${prompt.title}</h3>
+              <span class="prompt-status ${prompt.status}">${prompt.status.charAt(0).toUpperCase() + prompt.status.slice(1)}</span>
+            </div>
+            <div class="prompt-body">
+              <div class="prompt-text">${prompt.text}</div>
+              <div class="prompt-note ${noteClass}">${prompt.note}</div>
+              <div class="artifact-img">
+                <img src="${prompt.artifact}" alt="V${prompt.number} Artifact" loading="lazy">
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('app').innerHTML = html;
+    }
+
+    // Initialize
+    loadData();
+  </script>
+</body>
+</html>

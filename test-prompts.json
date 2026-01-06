@@ -1,0 +1,74 @@
+[
+  {
+    "format": "prototype",
+    "prompts": [
+      "Create a mobile prototype for an \"Uber for elderly care\" app. Include: caregiver search, caregiver profile (verified), booking, messaging/check-ins, payment, and an emergency button. Match the vibe of the screenshots on this board.",
+      "Make the prototype much more senior-friendly: bigger text, fewer steps, clearer primary buttons, and less clutter.",
+      "Add the key edge-case screens: no caregivers available, caregiver late/cancels, verification pending, payment failed, emergency triggered."
+    ]
+  },
+  {
+    "format": "table",
+    "prompts": [
+      "Create a feature table for an \"Uber for elderly care\" app with columns: Feature, Who it helps, Why it matters, MVP or Later. Use the critical features listed on this board.",
+      "Add a column called \"How we'll test it\" and fill it in for each feature.",
+      "Choose the smallest MVP that still works end-to-end and mark everything else as Later."
+    ]
+  },
+  {
+    "format": "sticky_notes",
+    "prompts": [
+      "Create sticky notes for an \"Uber for elderly care\" app: user needs, pain points, and product ideas. Group them into clear themes.",
+      "Rewrite these stickies to be shorter and more specific. Remove duplicates.",
+      "Re-group into: Trust & safety, Booking, Communication, Payments, Emergencies. Highlight the top 5."
+    ]
+  },
+  {
+    "format": "document",
+    "prompts": [
+      "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
+      "Make this shorter and more decisive. Replace vague wording with clear choices.",
+      "Add two sections: \"Non-negotiables\" and \"Not in v1\"."
+    ]
+  },
+  {
+    "format": "image",
+    "prompts": [
+      "Create a friendly hero image for an elderly care on-demand app. It should feel safe, calm, and modern, and match the purple style on this board.",
+      "Make it simpler and less busy, but keep the same idea.",
+      "Make 3 variations: more minimal, more warm/human, and higher-contrast for accessibility."
+    ]
+  },
+  {
+    "format": "diagram_flowchart",
+    "prompts": [
+      "Draw the end-to-end flow for an elderly care booking app: find caregiver -> book -> caregiver arrives -> updates during visit -> pay -> rate. Include emergencies.",
+      "Add the main edge cases: no availability, caregiver cancels, payment fails, emergency happens.",
+      "Simplify this to the MVP flow, but keep the safety-critical steps."
+    ]
+  },
+  {
+    "format": "diagram_erd",
+    "prompts": [
+      "Create an ERD for an \"Uber for elderly care\" app with the core data: users (elder/family/caregiver), caregiver verification, bookings, messaging/check-ins, payments, ratings, and emergencies.",
+      "Improve the ERD by adding primary keys, foreign keys, and the right relationship types (1:1, 1:many, many:many).",
+      "Simplify to MVP: keep only the tables needed for booking + verification + messaging + payment + emergency, and remove the rest."
+    ]
+  },
+  {
+    "format": "diagram_mindmap",
+    "prompts": [
+      "Create a mind map for an \"Uber for elderly care\" app: users, needs, trust & safety, booking, communication/check-ins, payments, emergencies. Use what's on this board.",
+      "Expand each main branch with a few concrete examples (not generic labels).",
+      "Reduce this to the most important 10-12 nodes and mark the top 3."
+    ]
+  },
+  {
+    "format": "slides",
+    "prompts": [
+      "Create a 7-slide pitch deck for an \"Uber for elderly care\" app: problem, users, solution, critical features, trust/safety, MVP, metrics + ask. Use the context on this board.",
+      "Make the slides more exec-friendly: fewer words, stronger headlines, cleaner structure.",
+      "Add speaker notes with a tight talk track and likely objections + answers."
+    ]
+  }
+]

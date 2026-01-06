@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidekick Eval: Table Tests - Accurate Quality Assessment</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-light: #6366F1;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      line-height: 1.6;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    header {
+      background: linear-gradient(135deg, var(--danger) 0%, #DC2626 100%);
+      color: white;
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    header h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+    header p { font-size: 1.1rem; opacity: 0.9; }
+
+    .meta-info { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+    .meta-item {
+      background: rgba(255,255,255,0.15);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+    }
+
+    .meta-item span { display: block; font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; }
+    .meta-item strong { font-size: 1.1rem; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      color: var(--gray-900);
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--gray-100);
+    }
+
+    .card h3 { font-size: 1rem; color: var(--gray-700); margin: 1.25rem 0 0.75rem; }
+
+    .critical-alert {
+      background: #FEE2E2;
+      border: 2px solid var(--danger);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .critical-alert h2 { color: #991B1B; border-bottom-color: #FECACA; }
+
+    .prompt-box {
+      background: var(--gray-100);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.95rem;
+      color: var(--gray-700);
+      margin-bottom: 1rem;
+    }
+
+    .response-box {
+      background: #ECFDF5;
+      border-left: 4px solid var(--success);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+      color: #065F46;
+      margin-bottom: 1rem;
+    }
+
+    .error-box {
+      background: #FEE2E2;
+      border-left: 4px solid var(--danger);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+      color: #991B1B;
+      margin-bottom: 1rem;
+    }
+
+    .screenshot-container {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      margin-top: 1rem;
+    }
+
+    .screenshot-container img { width: 100%; height: auto; display: block; }
+
+    .screenshot-label {
+      background: var(--gray-100);
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success { background: #D1FAE5; color: #065F46; }
+    .badge-danger { background: #FEE2E2; color: #991B1B; }
+    .badge-warning { background: #FEF3C7; color: #92400E; }
+
+    .test-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-right: 0.75rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .summary-item {
+      text-align: center;
+      padding: 1.25rem;
+      background: var(--gray-50);
+      border-radius: 8px;
+    }
+
+    .summary-item .value { font-size: 2rem; font-weight: 700; color: var(--primary); }
+    .summary-item .label { font-size: 0.8rem; color: var(--gray-600); margin-top: 0.25rem; }
+    .summary-item.fail { background: #FEE2E2; }
+    .summary-item.fail .value { color: var(--danger); }
+
+    .eval-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+
+    .eval-table th, .eval-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .eval-table th { background: var(--gray-50); font-weight: 600; color: var(--gray-700); }
+
+    .severity-critical { color: var(--danger); font-weight: 700; }
+    .severity-high { color: #DC2626; font-weight: 600; }
+    .severity-medium { color: var(--warning); font-weight: 600; }
+    .severity-low { color: var(--info); font-weight: 600; }
+
+    .verdict-box {
+      background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+      border: 2px solid var(--danger);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .verdict-box h3 { color: #991B1B; margin-bottom: 0.5rem; }
+    .verdict-box p { color: #7F1D1D; }
+
+    .comparison-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+    .comparison-table th, .comparison-table td { padding: 0.5rem; border: 1px solid var(--gray-200); }
+    .comparison-table th { background: var(--gray-100); }
+    .comparison-table .lost { background: #FEE2E2; color: #991B1B; }
+    .comparison-table .changed { background: #FEF3C7; color: #92400E; }
+    .comparison-table .added { background: #D1FAE5; color: #065F46; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray-600);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Sidekick Eval: Table - CRITICAL ISSUES FOUND</h1>
+      <p>Automated evaluation revealing data loss regression between iterations</p>
+      <div class="meta-info">
+        <div class="meta-item">
+          <span>Test Date</span>
+          <strong>January 6, 2026</strong>
+        </div>
+        <div class="meta-item">
+          <span>Format</span>
+          <strong>Table</strong>
+        </div>
+        <div class="meta-item">
+          <span>Prompts Run</span>
+          <strong>3</strong>
+        </div>
+        <div class="meta-item">
+          <span>Status</span>
+          <strong>FAILED - Data Loss</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Critical Alert -->
+    <div class="critical-alert">
+      <h2>CRITICAL: Data Loss Between V1 and V2</h2>
+      <p style="margin-top: 1rem;">
+        When asked to <strong>ADD</strong> a column, Sidekick <strong>REPLACED</strong> the entire table structure,
+        losing 2 of 4 columns and all their data. This is a severe regression that would cause
+        user data loss in production.
+      </p>
+      <table class="comparison-table" style="margin-top: 1rem;">
+        <tr>
+          <th>Version</th>
+          <th>Columns</th>
+          <th>Issue</th>
+        </tr>
+        <tr>
+          <td><strong>V1</strong></td>
+          <td>Feature | Who It Helps | Why It Matters | MVP or Later</td>
+          <td>-</td>
+        </tr>
+        <tr class="lost">
+          <td><strong>V2</strong></td>
+          <td>Feature | Description | How we'll test it</td>
+          <td>LOST: "Who It Helps", "MVP or Later" columns deleted!</td>
+        </tr>
+        <tr class="changed">
+          <td><strong>V3</strong></td>
+          <td>Feature | Who it helps | Why it matters | MVP or Later | How we'll test it</td>
+          <td>Recovered structure, but content regenerated (different from V1)</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Quality Scores -->
+    <div class="card">
+      <h2>Quality Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-item fail">
+          <div class="value">3/10</div>
+          <div class="label">Prompt Adherence</div>
+        </div>
+        <div class="summary-item fail">
+          <div class="value">2/10</div>
+          <div class="label">Data Preservation</div>
+        </div>
+        <div class="summary-item">
+          <div class="value">7/10</div>
+          <div class="label">Final Output</div>
+        </div>
+        <div class="summary-item fail">
+          <div class="value">4/10</div>
+          <div class="label">Overall</div>
+        </div>
+      </div>
+      <div class="verdict-box">
+        <h3>Verdict: FAIL</h3>
+        <p>Sidekick failed to preserve existing data when adding a new column. Instead of appending
+        the "How we'll test it" column to the existing 4-column table, it completely restructured
+        the table, losing critical prioritization data. While V3 recovered the structure, the
+        original content was regenerated with different wording - the user's original data is gone.</p>
+      </div>
+    </div>
+
+    <!-- Areas for Improvement (Critical Issues) -->
+    <div class="card">
+      <h2>Critical Issues Identified</h2>
+      <table class="eval-table">
+        <thead>
+          <tr>
+            <th>Issue</th>
+            <th>Severity</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Column Deletion on Edit</td>
+            <td><span class="severity-critical">CRITICAL</span></td>
+            <td>V2 deleted "Who It Helps" and "MVP or Later" columns when user only asked to ADD a new column. This is destructive behavior.</td>
+          </tr>
+          <tr>
+            <td>Content Replacement</td>
+            <td><span class="severity-critical">CRITICAL</span></td>
+            <td>V2 renamed "Why It Matters" to "Description" and completely rewrote all cell content instead of preserving it.</td>
+          </tr>
+          <tr>
+            <td>Data Not Preserved</td>
+            <td><span class="severity-high">HIGH</span></td>
+            <td>V3 recovered structure but regenerated all "Who It Helps" and "Why It Matters" content with different wording than V1.</td>
+          </tr>
+          <tr>
+            <td>Inconsistent Behavior</td>
+            <td><span class="severity-medium">MEDIUM</span></td>
+            <td>V3 was able to understand the original structure and rebuild it, yet V2 completely ignored it. Unpredictable behavior.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Test 1: V1 -->
+    <div class="card">
+      <h2><span class="test-number">1</span> Initial Table Creation (V1)</h2>
+      <h3>Prompt</h3>
+      <div class="prompt-box">
+        Create a feature table for an "Uber for elderly care" app with columns: Feature, Who it helps, Why it matters, MVP or Later. Use the critical features listed on this board.
+      </div>
+      <h3>Sidekick Response</h3>
+      <div class="response-box">
+        I'll create a feature comparison table based on the critical features you've outlined. Table's on the board.
+      </div>
+      <h3>Result: V1 Artifact</h3>
+      <div class="screenshot-container">
+        <img src="table-v1-artifact.png" alt="V1 Table - 4 columns as requested">
+        <div class="screenshot-label">
+          <span>V1: Correct structure with 4 columns, 5 features, detailed content</span>
+          <span class="badge badge-success">Good</span>
+        </div>
+      </div>
+      <h3>V1 Data Captured</h3>
+      <table class="comparison-table">
+        <tr>
+          <th>#</th>
+          <th>Feature</th>
+          <th>Who It Helps</th>
+          <th>Why It Matters</th>
+          <th>MVP or Later</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Real-time caregiver matching</td>
+          <td>Both</td>
+          <td>Enables quick access to care services with personalized filtering options</td>
+          <td>MVP</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Verified profiles with ratings</td>
+          <td>Both</td>
+          <td>Builds trust through transparency and verification</td>
+          <td>MVP</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>In-app communication</td>
+          <td>Both</td>
+          <td>Ensures seamless coordination and peace of mind during care visits</td>
+          <td>MVP</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Flexible pricing & payment</td>
+          <td>Both</td>
+          <td>Simplifies financial transactions and offers booking flexibility</td>
+          <td>Later</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Emergency protocols</td>
+          <td>Families</td>
+          <td>Enhances safety and personalized care in critical situations</td>
+          <td>Later</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Test 2: V2 - THE PROBLEM -->
+    <div class="card" style="border: 3px solid var(--danger);">
+      <h2><span class="test-number" style="background: var(--danger);">2</span> Add Testing Column (V2) - CRITICAL FAILURE</h2>
+      <h3>Prompt</h3>
+      <div class="prompt-box">
+        Add a column called "How we'll test it" and fill it in for each feature.
+      </div>
+      <h3>Sidekick Response</h3>
+      <div class="response-box">
+        Added the testing column - each one's got a clear validation path so you can prove it works before scaling.
+      </div>
+      <h3>Result: V2 Artifact - DATA LOSS!</h3>
+      <div class="screenshot-container" style="border-color: var(--danger);">
+        <img src="table-v2-artifact.png" alt="V2 Table - Lost 2 columns!">
+        <div class="screenshot-label" style="background: #FEE2E2;">
+          <span>V2: LOST "Who It Helps" and "MVP or Later" columns!</span>
+          <span class="badge badge-danger">CRITICAL FAILURE</span>
+        </div>
+      </div>
+      <div class="error-box">
+        <strong>What went wrong:</strong>
+        <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+          <li>Column "Who It Helps" - <strong>DELETED</strong></li>
+          <li>Column "MVP or Later" - <strong>DELETED</strong> (critical prioritization data lost!)</li>
+          <li>Column "Why It Matters" - <strong>RENAMED</strong> to "Description" with completely rewritten content</li>
+          <li>User asked to ADD a column, but Sidekick REPLACED the table structure</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Test 3: V3 -->
+    <div class="card">
+      <h2><span class="test-number">3</span> MVP Prioritization (V3)</h2>
+      <h3>Prompt</h3>
+      <div class="prompt-box">
+        Choose the smallest MVP that still works end-to-end and mark everything else as Later.
+      </div>
+      <h3>Sidekick Response</h3>
+      <div class="response-box">
+        I'll adjust the MVP/Later column to reflect the leanest end-to-end flow. Done - you're down to matching, trust, and communication.
+      </div>
+      <h3>Result: V3 Artifact - Structure Recovered</h3>
+      <div class="screenshot-container">
+        <img src="table-v3-artifact.png" alt="V3 Table - Structure recovered but content different">
+        <div class="screenshot-label">
+          <span>V3: 5 columns now, but "Who It Helps" and "Why It Matters" content differs from V1</span>
+          <span class="badge badge-warning">Partial Recovery</span>
+        </div>
+      </div>
+      <h3>Content Comparison: V1 vs V3</h3>
+      <table class="comparison-table">
+        <tr>
+          <th>Row</th>
+          <th>V1 "Who It Helps"</th>
+          <th>V3 "Who it helps"</th>
+          <th>Match?</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Both</td>
+          <td class="changed">Families needing immediate care</td>
+          <td class="changed">NO</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Both</td>
+          <td class="changed">Families and seniors concerned about safety</td>
+          <td class="changed">NO</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Both</td>
+          <td class="changed">Caregivers and families</td>
+          <td class="changed">NO</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Both</td>
+          <td class="changed">Families with varying budgets</td>
+          <td class="changed">NO</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Families</td>
+          <td class="changed">Seniors with complex medical needs</td>
+          <td class="changed">NO</td>
+        </tr>
+      </table>
+      <p style="color: var(--gray-600); margin-top: 1rem; font-size: 0.9rem;">
+        <strong>Note:</strong> While V3 has the correct column structure, ALL "Who It Helps" values
+        are different from V1. The original user data was not preserved - it was regenerated.
+      </p>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card">
+      <h2>Recommendations for Sidekick</h2>
+      <table class="eval-table">
+        <tr>
+          <td style="font-weight: 600;">1. Preserve existing data</td>
+          <td>When asked to ADD a column, keep all existing columns and data intact. Only add the new column.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">2. Confirm destructive changes</td>
+          <td>If the edit would result in data loss, warn the user before proceeding.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">3. Maintain data continuity</td>
+          <td>When iterating on artifacts, preserve the exact content from previous versions unless explicitly asked to change it.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">4. Add, don't replace</td>
+          <td>The word "ADD" should never result in column deletion. This is a fundamental prompt adherence issue.</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Automation Details -->
+    <div class="card">
+      <h2>Test Details</h2>
+      <table class="eval-table">
+        <tr>
+          <td style="font-weight: 600; width: 200px;">Board URL</td>
+          <td><code>https://miro.com/app/board/uXjVGUAcwUE=/</code></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">Context Frame</td>
+          <td>Context (34 items used as context)</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">Sidekick Used</td>
+          <td>General Sidekick</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">Artifact Capture</td>
+          <td>Cmd+Shift+C (copy as image) - clean artifact extraction</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 600;">Automation Tool</td>
+          <td>Claude Code + Playwright MCP</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p>Sidekick Eval Report - Generated with Claude Code + Playwright MCP</p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem;">January 6, 2026</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,414 @@
+{
+  "runs": [
+    {
+      "id": "table-2026-01-06-1320",
+      "format": "table",
+      "timestamp": "2026-01-06T13:20:00",
+      "scores": {
+        "overall": 4,
+        "promptAdherence": 3,
+        "iterationQuality": 2
+      },
+      "summary": "V2 deleted 2 columns when asked to add 1. 'Who It Helps' and 'MVP or Later' columns were removed. V3 recovered the structure but regenerated the content with different values than V1.",
+      "issues": [
+        {"severity": "high", "text": "V2 deleted 'Who It Helps' and 'MVP or Later' columns instead of adding 'How we'll test it'"},
+        {"severity": "high", "text": "V2 renamed 'Why It Matters' to 'Description' and rewrote all content"},
+        {"severity": "medium", "text": "V3 recovered structure but 'Who It Helps' values differ from V1"}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Table",
+          "text": "Create a feature table for an \"Uber for elderly care\" app with columns: Feature, Who it helps, Why it matters, MVP or Later.",
+          "status": "pass",
+          "note": "Created table with 4 columns, 5 features. All columns populated correctly.",
+          "artifact": "artifacts/table-2026-01-06-1320/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Add Column",
+          "text": "Add a column called \"How we'll test it\" and fill it in for each feature.",
+          "status": "fail",
+          "note": "Deleted 'Who It Helps' and 'MVP or Later' columns. Renamed 'Why It Matters' to 'Description' with rewritten content. Added 'How we'll test it' but lost 2 columns in the process.",
+          "artifact": "artifacts/table-2026-01-06-1320/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "MVP Prioritization",
+          "text": "Choose the smallest MVP that still works end-to-end and mark everything else as Later.",
+          "status": "warning",
+          "note": "Recovered all 5 columns. However, 'Who It Helps' and 'Why It Matters' values were regenerated with different content than V1.",
+          "artifact": "artifacts/table-2026-01-06-1320/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "table-2026-01-06-1800",
+      "format": "table",
+      "timestamp": "2026-01-06T18:00:00",
+      "scores": {
+        "overall": 6,
+        "promptAdherence": 7,
+        "iterationQuality": 5
+      },
+      "summary": "V1 created proper 4-column table with 5 features. V2 added 'How we'll test it' column (visible with Feature column). V3 reverted to 4 original columns with correct MVP/Later priorities but LOST the 'How we'll test it' column added in V2.",
+      "issues": [
+        {"severity": "medium", "text": "V3 lost the 'How we'll test it' column that was added in V2"},
+        {"severity": "low", "text": "V2 screenshot shows only Feature and How we'll test it columns - other columns may be cropped or missing"}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Table",
+          "text": "Create a feature table for an \"Uber for elderly care\" app with columns: Feature, Who it helps, Why it matters, MVP or Later. Use the critical features listed on this board.",
+          "status": "pass",
+          "note": "Created 'Feature Priority Table' with 4 columns and 5 features: Real-time matching (MVP), Verified profiles (MVP), In-app communication (MVP), Flexible pricing (Later), Emergency protocols (Later). All columns populated correctly.",
+          "artifact": "artifacts/table-2026-01-06-1800/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Add Column",
+          "text": "Add a column called \"How we'll test it\" and fill it in for each feature.",
+          "status": "warning",
+          "note": "Created 'Feature Table Updated' with 'How we'll test it' column added. Testing approaches include beta family pilots, credential verification checks, message delivery testing, payment simulations, emergency triggers. Screenshot shows Feature and How we'll test it columns.",
+          "artifact": "artifacts/table-2026-01-06-1800/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "MVP Prioritization",
+          "text": "Choose the smallest MVP that still works end-to-end and mark everything else as Later.",
+          "status": "warning",
+          "note": "Created 'Feature Priority Table' with 4 columns: Feature, Who it helps, Why it matters, MVP or Later. MVP: matching, verified profiles, flexible payment. Later: in-app communication, emergency protocols. However, 'How we'll test it' column from V2 was dropped.",
+          "artifact": "artifacts/table-2026-01-06-1800/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "stickies-2026-01-06-1353",
+      "format": "stickies",
+      "timestamp": "2026-01-06T13:53:00",
+      "scores": {
+        "overall": 8,
+        "promptAdherence": 9,
+        "iterationQuality": 7
+      },
+      "summary": "Sidekick created sticky notes well across all 3 prompts. V1 had 50 objects across 5 themes. V2 successfully de-duplicated and shortened to 9 objects. V3 regrouped into requested themes and flagged top priorities, though created a new artifact rather than modifying V2 in place.",
+      "issues": [
+        {"severity": "medium", "text": "V3 created new artifact 'Regrouped Care Stickies' instead of updating 'Elderly Care Stickies' in place"},
+        {"severity": "low", "text": "V2 reduced from 50 to 9 objects - aggressive de-duplication may have lost some nuance"}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Stickies",
+          "text": "Create sticky notes for an \"Uber for elderly care\" app: user needs, pain points, and product ideas. Group them into clear themes.",
+          "status": "pass",
+          "note": "Created 'Elderly Care Stickies' with 50 objects across 5 themes: family needs, caregiver needs, pain points for both sides, and product ideas. Color coding applied for easy scanning.",
+          "artifact": "artifacts/stickies-2026-01-06-1353/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "De-duplicate & Shorten",
+          "text": "Rewrite these stickies to be shorter and more specific. Remove duplicates.",
+          "status": "pass",
+          "note": "Tightened and de-duped. Each note now hits one clear point. Reduced from 50 objects to 9 objects.",
+          "artifact": "artifacts/stickies-2026-01-06-1353/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Regroup & Highlight",
+          "text": "Re-group into: Trust & safety, Booking, Communication, Payments, Emergencies. Highlight the top 5.",
+          "status": "warning",
+          "note": "Created new artifact 'Regrouped Care Stickies' with 25 objects organized into the 5 requested themes with top priorities flagged. Did not modify existing artifact in place.",
+          "artifact": "artifacts/stickies-2026-01-06-1353/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "document-2026-01-06-1516",
+      "format": "document",
+      "timestamp": "2026-01-06T15:16:00",
+      "scores": {
+        "overall": 3,
+        "promptAdherence": 3,
+        "iterationQuality": 1
+      },
+      "summary": "V1 created an excellent product brief with 6 complete sections. V2 FAILED - instead of tightening V1's content, it created a blank template with placeholders. V3 FAILED CRITICALLY - instead of adding a 'Key Differentiators' section, it created an empty 'Untitled doc'. Sidekick is not iterating on previous artifacts.",
+      "issues": [
+        {"severity": "high", "text": "V2 replaced V1's complete product brief with a blank template containing placeholders like '[Metric 1]', '[Capability A]'"},
+        {"severity": "high", "text": "V3 created an empty 'Untitled doc' with template picker instead of adding content to existing document"},
+        {"severity": "high", "text": "No iteration continuity - each prompt creates disconnected artifacts, losing all prior content"}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Product Brief",
+          "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
+          "status": "pass",
+          "note": "Created 'Elderly Care Product Brief' with 6 complete sections: Overview, Problem, Users (2 types), Key Flows (5 items), MVP Scope (IN/OUT clearly delineated), Success Metrics (5), and Risks (5). Excellent first generation.",
+          "artifact": "artifacts/document-2026-01-06-1516/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Tighten Content",
+          "text": "Tighten this up: cut any fluffy language, shorten each section to 1-2 crisp sentences, and keep only the 3 most important success metrics.",
+          "status": "fail",
+          "note": "FAILED: Created blank template with placeholders instead of tightening V1's actual content. Shows generic instructions like 'State what you're building...' and placeholders like '[Metric 1]', '[Capability A]'. All V1 content lost.",
+          "artifact": "artifacts/document-2026-01-06-1516/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Add Section",
+          "text": "Add a \"Key Differentiators\" section after Problem that explains why this app beats traditional agencies. Keep the same tight style.",
+          "status": "fail",
+          "note": "CRITICAL FAILURE: Created completely empty 'Untitled doc' showing only template picker options. No content at all. Sidekick claimed it added the section but artifact is blank.",
+          "artifact": "artifacts/document-2026-01-06-1516/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "prototype-2026-01-06-1342",
+      "format": "prototype",
+      "timestamp": "2026-01-06T13:42:00",
+      "scores": {
+        "overall": 7,
+        "promptAdherence": 8,
+        "iterationQuality": 6
+      },
+      "summary": "V1 created 'Elderly Care App' with 7 screens (all requested features). V2 created 'Senior-Friendly Prototype' with 6 screens showing bigger text, bolder buttons, streamlined flows. V3 created 'Edge Case Screens' as a SEPARATE artifact with 5 screens covering all requested edge cases - but did not add to existing prototype.",
+      "issues": [
+        {"severity": "medium", "text": "V3 created a separate 'Edge Case Screens' artifact instead of adding screens to the existing prototype"},
+        {"severity": "low", "text": "V2 reduced from 7 screens to 6 screens - consolidated some flows for senior simplicity"}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Prototype",
+          "text": "Create a mobile prototype for an \"Uber for elderly care\" app. Include: caregiver search, caregiver profile (verified), booking, messaging/check-ins, payment, and an emergency button. Match the vibe of the screenshots on this board.",
+          "status": "pass",
+          "note": "Created 'Elderly Care App' prototype with 7 screens: Onboarding, Caregiver Search, Caregiver Profile (verified badge), Booking, Messaging, Payment, Emergency. Purple gradient aesthetic matches board context.",
+          "artifact": "artifacts/prototype-2026-01-06-1342/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Senior-Friendly",
+          "text": "Make the prototype much more senior-friendly: bigger text, fewer steps, clearer primary buttons, and less clutter.",
+          "status": "pass",
+          "note": "Created 'Senior-Friendly Prototype' (renamed to 'SeniorConnect') with 6 screens: Welcome, Onboarding, Home with Primary Actions, Text Size Settings, Quick Actions, Simplified Information. Bigger text, bolder buttons, streamlined flows.",
+          "artifact": "artifacts/prototype-2026-01-06-1342/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Edge Cases",
+          "text": "Add the key edge-case screens: no caregivers available, caregiver late/cancels, verification pending, payment failed, emergency triggered.",
+          "status": "warning",
+          "note": "Created 'Edge Case Screens' as a SEPARATE artifact (not added to existing prototype). Contains 5 screens: No Caregivers Available, Caregiver Late/Cancel, Verification Pending, Payment Failed, Emergency Alert Triggered. All requested edge cases covered but as new artifact.",
+          "artifact": "artifacts/prototype-2026-01-06-1342/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "flowchart-2026-01-06-1548",
+      "format": "flowchart",
+      "timestamp": "2026-01-06T15:48:00",
+      "scores": {
+        "overall": 10,
+        "promptAdherence": 10,
+        "iterationQuality": 10
+      },
+      "summary": "V1 created comprehensive 23-object booking flow. V2 successfully simplified to 7-object linear flow with clean verb-noun labels. V3 correctly added parallel emergency path with decision diamond branching from Start, expedited matching path, and proper merge at Confirm Booking. All iterations built on previous versions - excellent iteration continuity.",
+      "issues": [
+        {"severity": "low", "text": "No significant issues detected. All prompts executed correctly with proper iteration on previous artifacts."}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Booking Flow",
+          "text": "Create a flowchart showing the end-to-end booking flow for an \"Uber for elderly care\" app: from caregiver search to booking confirmation to visit completion.",
+          "status": "pass",
+          "note": "Created 'Elderly Care Booking Flow' with 23 objects. Comprehensive flow showing all steps from start through search, selection, booking, payment processing, visit completion, and feedback collection. Multiple decision points and branches included.",
+          "artifact": "artifacts/flowchart-2026-01-06-1548/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Simplify Flow",
+          "text": "Simplify: merge any steps that always happen together, remove edge cases, and ensure each box has a short verb-noun label.",
+          "status": "pass",
+          "note": "Created 'Simplified Booking Flow' reducing from 23 to 7 objects. Clean linear flow: Start App -> Search Caregivers -> Select Caregiver -> Schedule Visit -> Confirm Booking -> Receive Care -> Complete Visit. All boxes have short verb-noun labels as requested.",
+          "artifact": "artifacts/flowchart-2026-01-06-1548/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Add Emergency Path",
+          "text": "Add a parallel \"Emergency Request\" path that branches from Start and rejoins at Confirm Booking with expedited matching.",
+          "status": "pass",
+          "note": "Created 'Elderly Care Booking' with 11 objects. Added decision diamond 'Emergency Request?' after Start. Normal path (No) goes through Search -> Select -> Choose Time. Emergency path (Yes) goes through 'Expedited Matching' and both paths merge at Confirm Booking. Exactly as requested.",
+          "artifact": "artifacts/flowchart-2026-01-06-1548/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "slides-2026-01-06-1730",
+      "format": "slides",
+      "timestamp": "2026-01-06T17:30:00",
+      "scores": {
+        "overall": 7,
+        "promptAdherence": 8,
+        "iterationQuality": 6
+      },
+      "summary": "V1 created 'Elderly Care Pitch' with 7 slides (dark purple theme). V2 'Exec Pitch Deck' successfully tightened with stronger headlines and cleaner structure. V3 'Pitch Deck Notes' added speaker notes but CHANGED visual style completely from dark purple to cream/beige - breaking visual continuity.",
+      "issues": [
+        {"severity": "medium", "text": "V3 changed entire visual design from dark purple tech-style to cream/beige illustration style when asked only to add speaker notes"},
+        {"severity": "low", "text": "Note: Screenshots captured via browser screenshot method due to Cmd+Shift+C producing blank images for slides format"}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Pitch Deck",
+          "text": "Create a 7-slide pitch deck for an \"Uber for elderly care\" app: problem, users, solution, critical features, trust/safety, MVP, metrics + ask. Use the context on this board.",
+          "status": "pass",
+          "note": "Created 'Elderly Care Pitch' with 7 slides: problem statement, users (who we serve), solution (on-demand matching), critical features, trust/safety (shield), and metrics/ask. Dark purple gradient theme with professional illustrations.",
+          "artifact": "artifacts/slides-2026-01-06-1730/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Make Exec-Friendly",
+          "text": "Make the slides more exec-friendly: fewer words, stronger headlines, cleaner structure.",
+          "status": "pass",
+          "note": "Created 'Exec Pitch Deck' with 7 slides. Headlines now lead ('Care on demand for aging parents', 'The care gap is urgent', 'Two core users', 'Match, book, care', 'Trust built in'). Body copy minimal, structure clean. Maintained dark purple theme.",
+          "artifact": "artifacts/slides-2026-01-06-1730/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Add Speaker Notes",
+          "text": "Add speaker notes with a tight talk track and likely objections + answers.",
+          "status": "warning",
+          "note": "Created 'Pitch Deck Notes' with speaker notes visible below each slide. Talk track and objection handling added. However, visual style changed completely from dark purple to cream/beige with different illustrations - breaking continuity with V1/V2.",
+          "artifact": "artifacts/slides-2026-01-06-1730/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "table-2026-01-06-1900",
+      "format": "table",
+      "timestamp": "2026-01-06T19:00:00",
+      "scores": {
+        "overall": 7,
+        "promptAdherence": 7,
+        "iterationQuality": 7
+      },
+      "summary": "V1 created proper 4-column table with 5 features and MVP/Later designations. V2 LOST 3 columns when adding 'How we'll test it' - only Feature and test method remained. V3 RECOVERED all 5 columns successfully (Feature, Who it helps, Why it matters, How we'll test it, MVP or Later) with correct MVP prioritization.",
+      "issues": [
+        {"severity": "high", "text": "V2 replaced entire table structure with only 2 columns (Feature + How we'll test it) instead of adding a column"},
+        {"severity": "low", "text": "V3 successfully consolidated all columns - good recovery from V2's regression"}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Table",
+          "text": "Create a feature table for an \"Uber for elderly care\" app with columns: Feature, Who it helps, Why it matters, MVP or Later. Use the critical features listed on this board.",
+          "status": "pass",
+          "note": "Created 'Feature Priority Table' with 4 columns and 5 features: Real-time matching (Both/MVP), Verified profiles (Both/MVP), In-app communication (Both/MVP), Flexible pricing (Both/Later), Emergency protocols (Both/MVP). Clean table with tag-style MVP/Later badges.",
+          "artifact": "artifacts/table-2026-01-06-1900/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Add Column",
+          "text": "Add a column called \"How we'll test it\" and fill it in for each feature.",
+          "status": "fail",
+          "note": "REPLACED table structure instead of adding column. New table has only Feature and 'How we'll test it' columns - lost 'Who it helps', 'Why it matters', and 'MVP or Later' columns. Testing methods are detailed but original structure destroyed.",
+          "artifact": "artifacts/table-2026-01-06-1900/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "MVP Prioritization",
+          "text": "Choose the smallest MVP that still works end-to-end and mark everything else as Later.",
+          "status": "pass",
+          "note": "Successfully recovered ALL 5 columns: Feature, Who it helps, Why it matters, How we'll test it, MVP or Later. MVP: Caregiver matching, Verified profiles, Flexible pricing. Later: In-app communication, Emergency protocols. Excellent recovery consolidating V1 and V2 content.",
+          "artifact": "artifacts/table-2026-01-06-1900/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "image-2026-01-06-1613",
+      "format": "image",
+      "timestamp": "2026-01-06T16:13:00",
+      "scores": {
+        "overall": 10,
+        "promptAdherence": 10,
+        "iterationQuality": 10
+      },
+      "summary": "V1 created warm/friendly app icon with hands cradling heart on purple background. V2 successfully simplified to single clean symbol (two hands cupping heart) on gradient background. V3 correctly produced 3 color variations: warm outline, professional blue/teal, and high-contrast lime/navy. Perfect iteration continuity - each version built directly on the previous design.",
+      "issues": [
+        {"severity": "low", "text": "No significant issues detected. All prompts executed correctly with excellent iteration quality."}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create App Icon",
+          "text": "Generate an app icon for an \"Uber for elderly care\" app. Style: warm, friendly, and trustworthy. Include imagery that represents care/support.",
+          "status": "pass",
+          "note": "Created 'Elderly Care Icon' with warm purple background, multiple hands (purple and peach) cradling a heart with coral/peach gradient. Decorative plus signs and dots add friendly feel. Matches requested warm, friendly, trustworthy style with clear care/support imagery.",
+          "artifact": "artifacts/image-2026-01-06-1613/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Simplify Design",
+          "text": "Make the icon simpler - reduce to a single memorable symbol that works at small sizes. Keep the warm color palette.",
+          "status": "pass",
+          "note": "Created 'Simplified App Icon' - dramatically simplified to two hands (purple and peach) cupping a single heart on mauve/dusty rose gradient background. Clean, minimal design that works at small sizes while maintaining warm color palette. Excellent iteration on V1.",
+          "artifact": "artifacts/image-2026-01-06-1613/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Color Variations",
+          "text": "Show this icon in 3 color variations: the current warm palette, a professional blue palette, and a high-contrast accessible version.",
+          "status": "pass",
+          "note": "Created 'Icon Color Variations' showing exact same simplified hands-heart symbol in 3 palettes: (1) Warm purple/coral outline on white, (2) Professional teal/blue on light gray rounded square, (3) High-contrast lime green on dark navy rounded square. All three variations requested are present with clear accessibility consideration.",
+          "artifact": "artifacts/image-2026-01-06-1613/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "stickies-2026-01-06-1930",
+      "format": "stickies",
+      "timestamp": "2026-01-06T19:30:00",
+      "scores": {
+        "overall": 8,
+        "promptAdherence": 8,
+        "iterationQuality": 8
+      },
+      "summary": "V1 created 37 objects organized into 3 themed groups (User Needs, Pain Points, Product Ideas). V2 successfully de-duplicated to 9 concise stickies but lost the grouping structure. V3 regrouped into 5 requested themes with 15 objects and highlighted top 5 with orange color.",
+      "issues": [
+        {"severity": "medium", "text": "V2 removed theme headers (User Needs, Pain Points, Product Ideas) - lost visual grouping structure"},
+        {"severity": "low", "text": "V3 increased objects from 9 to 15, adding some redundancy with 'Critical:' labels duplicating existing stickies"}
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Stickies",
+          "text": "Create sticky notes for an \"Uber for elderly care\" app: user needs, pain points, and product ideas. Group them into clear themes.",
+          "status": "pass",
+          "note": "Created 'Elderly Care Sticky Notes' with 37 objects in 3 themed groups: User Needs (blue header, 10 stickies), Pain Points (pink header, 10 stickies), Product Ideas (green header, 14 stickies). Well-organized with color-coded headers.",
+          "artifact": "artifacts/stickies-2026-01-06-1930/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "De-duplicate & Shorten",
+          "text": "Rewrite these stickies to be shorter and more specific. Remove duplicates.",
+          "status": "warning",
+          "note": "Created 'Elderly Care Stickies' reducing from 37 to 9 objects. Stickies are shorter and more specific (e.g., 'Easy scheduling for caregivers', 'Real-time caregiver tracking'). However, theme headers were removed - lost grouping structure.",
+          "artifact": "artifacts/stickies-2026-01-06-1930/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Regroup & Highlight",
+          "text": "Re-group into: Trust & safety, Booking, Communication, Payments, Emergencies. Highlight the top 5.",
+          "status": "pass",
+          "note": "Created regrouped stickies with 15 objects. Each sticky prefixed with theme (e.g., 'Trust & Safety: User verification process'). Top 5 highlighted with orange background and 'Critical:' prefix. Themes covered: Trust & Safety (2), Booking (2), Communication (2), Payments (2), Emergencies (2), plus 5 Critical duplicates.",
+          "artifact": "artifacts/stickies-2026-01-06-1930/v3.png"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Test - Sidekick Eval</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gray-50); color: var(--gray-800); line-height: 1.5; }
+
+    .nav { background: var(--gray-800); padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100; }
+    .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; }
+    .nav-logo { color: white; font-weight: 700; font-size: 1rem; }
+    .nav-formats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .nav-group { display: flex; align-items: center; gap: 0.25rem; }
+    .nav-group-label { color: var(--gray-600); font-size: 0.7rem; text-transform: uppercase; margin-right: 0.25rem; }
+    .nav-link { color: #9CA3AF; text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+    .nav-link.active { background: var(--primary); color: white; }
+    .nav-divider { width: 1px; height: 20px; background: var(--gray-600); margin: 0 0.5rem; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gray-200); }
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    .header-meta { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--gray-600); }
+
+    .verdict { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .verdict-score { background: white; border-radius: 8px; padding: 1rem 1.5rem; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .verdict-score .value { font-size: 1.75rem; font-weight: 700; }
+    .verdict-score .label { font-size: 0.75rem; color: var(--gray-600); }
+    .verdict-score.fail .value { color: var(--danger); }
+    .verdict-score.pass .value { color: var(--success); }
+    .verdict-score.warning .value { color: var(--warning); }
+    .verdict-summary { flex: 1; background: white; border-radius: 8px; padding: 1rem 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .verdict-summary h3 { font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .verdict-summary p { font-size: 0.85rem; color: var(--gray-700); }
+
+    .issues { background: white; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .issues h2 { font-size: 1rem; margin-bottom: 0.75rem; }
+    .issue-list { list-style: none; }
+    .issue-item { padding: 0.5rem 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 0.75rem; font-size: 0.85rem; }
+    .issue-item:last-child { border-bottom: none; }
+    .issue-severity { font-weight: 600; width: 60px; flex-shrink: 0; }
+    .issue-severity.high { color: var(--danger); }
+    .issue-severity.medium { color: var(--warning); }
+    .issue-severity.low { color: var(--primary); }
+
+    .prompt-card { background: white; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden; }
+    .prompt-header { padding: 0.75rem 1rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
+    .prompt-header h3 { font-size: 0.9rem; font-weight: 600; }
+    .prompt-status { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 500; }
+    .prompt-status.pass { background: #D1FAE5; color: #065F46; }
+    .prompt-status.fail { background: #FEE2E2; color: #991B1B; }
+    .prompt-status.warning { background: #FEF3C7; color: #92400E; }
+    .prompt-body { padding: 1rem; }
+    .prompt-text { background: var(--gray-50); padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 0.75rem; font-family: monospace; }
+    .prompt-note { font-size: 0.85rem; color: var(--gray-700); margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 6px; background: #D1FAE5; }
+    .prompt-note-fail { background: #FEE2E2; color: #991B1B; }
+    .prompt-note-warning { background: #FEF3C7; color: #92400E; }
+    .artifact-img { border: 1px solid var(--gray-200); border-radius: 6px; overflow: hidden; }
+    .artifact-img img { width: 100%; display: block; }
+
+    footer { text-align: center; padding: 1.5rem; color: var(--gray-600); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-content">
+      <div class="nav-logo">Sidekick Eval</div>
+      <div class="nav-formats">
+        <div class="nav-group">
+          <span class="nav-group-label">Tables</span>
+          <a href="table-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Prototypes</span>
+          <a href="prototype-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Stickies</span>
+          <a href="stickies-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Documents</span>
+          <a href="document-2026-01-06.html" class="nav-link active">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Images</span>
+          <a href="image-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header">
+      <h1>Document Test</h1>
+      <div class="header-meta">
+        <span>January 6, 2026</span>
+        <span>3 prompts</span>
+        <span>General Sidekick</span>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-score fail">
+        <div class="value">3/10</div>
+        <div class="label">Overall</div>
+      </div>
+      <div class="verdict-score fail">
+        <div class="value">3/10</div>
+        <div class="label">Prompt Adherence</div>
+      </div>
+      <div class="verdict-score fail">
+        <div class="value">1/10</div>
+        <div class="label">Iteration Quality</div>
+      </div>
+      <div class="verdict-summary">
+        <h3>Summary</h3>
+        <p><strong>Verified from images:</strong> V1 created an excellent product brief with 6 complete sections. V2 FAILED - instead of tightening V1's content, it created a blank template with placeholders. V3 FAILED CRITICALLY - instead of adding a "Key Differentiators" section, it created an empty "Untitled doc" showing only a template picker. Sidekick is not iterating on previous artifacts - each prompt creates disconnected content.</p>
+      </div>
+    </div>
+
+    <div class="issues">
+      <h2>Issues</h2>
+      <ul class="issue-list">
+        <li class="issue-item">
+          <span class="issue-severity high">High</span>
+          <span>V2 replaced V1's complete product brief with a blank template containing placeholders like "[Metric 1]", "[Capability A]"</span>
+        </li>
+        <li class="issue-item">
+          <span class="issue-severity high">High</span>
+          <span>V3 created an empty "Untitled doc" with template picker instead of adding content to existing document</span>
+        </li>
+        <li class="issue-item">
+          <span class="issue-severity high">High</span>
+          <span>No iteration continuity - each prompt creates disconnected artifacts, losing all prior content</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 1: Create Product Brief</h3>
+        <span class="prompt-status pass">Pass</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Write a one-page product brief for an "Uber for elderly care" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.</div>
+        <p class="prompt-note">Created "Elderly Care Product Brief" with 6 complete sections: Overview, Problem, Users (2 types), Key Flows (5 items), MVP Scope (IN/OUT clearly delineated), Success Metrics (5), and Risks (5). Excellent first generation.</p>
+        <div class="artifact-img">
+          <img src="document-v1-artifact.png" alt="V1 Document">
+        </div>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 2: Tighten Content</h3>
+        <span class="prompt-status fail">Fail</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Tighten this up: cut any fluffy language, shorten each section to 1-2 crisp sentences, and keep only the 3 most important success metrics.</div>
+        <p class="prompt-note prompt-note-fail">FAILED: Created blank template with placeholders instead of tightening V1's actual content. Shows generic instructions like "State what you're building..." and placeholders like "[Metric 1]", "[Capability A]". All V1 content lost.</p>
+        <div class="artifact-img">
+          <img src="document-v2-artifact.png" alt="V2 Document">
+        </div>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 3: Add Section</h3>
+        <span class="prompt-status fail">Fail</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Add a "Key Differentiators" section after Problem that explains why this app beats traditional agencies. Keep the same tight style.</div>
+        <p class="prompt-note prompt-note-fail">CRITICAL FAILURE: Created completely empty "Untitled doc" showing only template picker options. No content at all - just "Press '/' for options or start writing" and 4 template choices. Sidekick claimed it added the section but artifact is blank.</p>
+        <div class="artifact-img">
+          <img src="document-v3-artifact.png" alt="V3 Document">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Sidekick Eval &middot; Claude Code + Playwright MCP
+  </footer>
+</body>
+</html>

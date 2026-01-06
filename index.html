@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidekick Eval Results</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-light: #6366F1;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #3B82F6;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .meta-info {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      background: rgba(255,255,255,0.15);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .meta-item span {
+      display: block;
+      font-size: 0.8rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .meta-item strong {
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      color: var(--gray-900);
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--gray-100);
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      color: var(--gray-700);
+      margin: 1.25rem 0 0.75rem;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .prompt-box {
+      background: var(--gray-100);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.95rem;
+      color: var(--gray-700);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    th {
+      background: var(--gray-50);
+      font-weight: 600;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    tr:hover {
+      background: var(--gray-50);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .badge-warning {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .badge-info {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    .severity-low {
+      color: var(--warning);
+    }
+
+    .severity-medium {
+      color: #F97316;
+    }
+
+    .severity-info {
+      color: var(--info);
+    }
+
+    .check {
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .score-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .score-item {
+      text-align: center;
+      padding: 1.25rem;
+      background: var(--gray-50);
+      border-radius: 8px;
+    }
+
+    .score-item .score {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .score-item .label {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      margin-top: 0.25rem;
+    }
+
+    .score-item.overall {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    }
+
+    .score-item.overall .score,
+    .score-item.overall .label {
+      color: white;
+    }
+
+    .methodology-steps {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .step {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .step-content h4 {
+      font-size: 0.95rem;
+      color: var(--gray-800);
+      margin-bottom: 0.25rem;
+    }
+
+    .step-content p {
+      font-size: 0.85rem;
+      color: var(--gray-600);
+    }
+
+    .screenshot-container {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .screenshot-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .screenshot-label {
+      background: var(--gray-100);
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .verdict-box {
+      background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+      border: 1px solid #A7F3D0;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .verdict-box h4 {
+      color: #065F46;
+      margin-bottom: 0.5rem;
+    }
+
+    .verdict-box p {
+      color: #047857;
+      font-size: 0.9rem;
+    }
+
+    .console-errors {
+      background: var(--gray-900);
+      color: #F87171;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+    }
+
+    .console-errors .no-errors {
+      color: #34D399;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray-600);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Sidekick Eval Results</h1>
+      <p>Automated evaluation of Miro Sidekick AI-generated content</p>
+      <div class="meta-info">
+        <div class="meta-item">
+          <span>Test Date</span>
+          <strong>January 6, 2026</strong>
+        </div>
+        <div class="meta-item">
+          <span>Sidekick</span>
+          <strong>Default (Miro AI)</strong>
+        </div>
+        <div class="meta-item">
+          <span>Generation Time</span>
+          <strong>~25 seconds</strong>
+        </div>
+        <div class="meta-item">
+          <span>Output Format</span>
+          <strong>Doc (Product Spec)</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Context Frame -->
+    <div class="card">
+      <h2>Context (Board Input)</h2>
+      <p style="color: var(--gray-600); margin-bottom: 1rem; font-size: 0.9rem;">
+        This frame is selected before sending prompts to provide the Sidekick with relevant context about the project.
+        It includes naming options, critical features, and design references.
+      </p>
+      <div class="screenshot-container">
+        <img src="context.png" alt="Context Frame - Project context for Sidekick">
+        <div class="screenshot-label">Context Frame: App naming options, critical features, and UI mockups</div>
+      </div>
+    </div>
+
+    <!-- Test Configuration -->
+    <div class="card">
+      <h2>Test Configuration</h2>
+      <h3>Input Prompt</h3>
+      <div class="prompt-box">
+        write a doc for a product spec for a care giver booking system similar to uber
+      </div>
+    </div>
+
+    <!-- Methodology & Screenshot -->
+    <div class="two-column">
+      <div class="card">
+        <h2>Testing Methodology</h2>
+        <div class="methodology-steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h4>Navigate to Miro Board</h4>
+              <p>Open the test board via Playwright browser automation with SSO authentication</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h4>Select Context Frame</h4>
+              <p>Select the "Context" frame on the board to provide project context to the Sidekick</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h4>Open Sidekick Panel</h4>
+              <p>Click the sparkle button to launch the AI creation dialog</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <h4>Submit Prompt</h4>
+              <p>Enter the test prompt and submit, then wait for generation to complete</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+              <h4>Capture Result</h4>
+              <p>Select the generated artifact on canvas and copy as image (Cmd+Shift+C)</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">6</div>
+            <div class="step-content">
+              <h4>Analyze & Evaluate</h4>
+              <p>Extract clipboard image, analyze content against heuristics</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Generated Output</h2>
+        <div class="screenshot-container">
+          <img src="test-result-1.png" alt="Generated Product Spec Document">
+          <div class="screenshot-label">Caregiver Booking System - Product Spec Document</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What's Good -->
+    <div class="card">
+      <h2>Evaluation: What's Good</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Aspect</th>
+            <th>Assessment</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Document type</td>
+            <td><span class="check">&#10003;</span> Match</td>
+            <td>Created a structured doc with headers/sections</td>
+          </tr>
+          <tr>
+            <td>Product spec format</td>
+            <td><span class="check">&#10003;</span> Match</td>
+            <td>Includes features, requirements, metrics, considerations</td>
+          </tr>
+          <tr>
+            <td>Caregiver booking</td>
+            <td><span class="check">&#10003;</span> Match</td>
+            <td>Clearly about care seekers booking caregivers</td>
+          </tr>
+          <tr>
+            <td>Uber-like features</td>
+            <td><span class="check">&#10003;</span> Match</td>
+            <td>Real-time tracking, ETA, live map, ratings, dynamic pricing, matching algorithm</td>
+          </tr>
+          <tr>
+            <td>Two-sided marketplace</td>
+            <td><span class="check">&#10003;</span> Match</td>
+            <td>Addresses both care seekers and caregivers</td>
+          </tr>
+          <tr>
+            <td>Professional quality</td>
+            <td><span class="check">&#10003;</span> Good</td>
+            <td>Well-structured, comprehensive, appropriate terminology</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- What Needs Improvement -->
+    <div class="card">
+      <h2>Evaluation: Areas for Improvement</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Issue</th>
+            <th>Severity</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Title says "Product Overview" not "Product Spec"</td>
+            <td><span class="severity-low">&#128993; Low</span></td>
+            <td>Minor naming inconsistency with prompt request</td>
+          </tr>
+          <tr>
+            <td>No explicit Uber comparison</td>
+            <td><span class="severity-low">&#128993; Low</span></td>
+            <td>Doesn't explicitly reference "like Uber" or draw parallels</td>
+          </tr>
+          <tr>
+            <td>Missing MVP scope definition</td>
+            <td><span class="severity-medium">&#128992; Medium</span></td>
+            <td>No phased rollout or v1 vs future scope defined</td>
+          </tr>
+          <tr>
+            <td>No competitive analysis</td>
+            <td><span class="severity-medium">&#128992; Medium</span></td>
+            <td>Typical in product specs - Care.com, Honor, etc. not mentioned</td>
+          </tr>
+          <tr>
+            <td>Missing pricing/business model</td>
+            <td><span class="severity-medium">&#128992; Medium</span></td>
+            <td>Commission structure, subscription tiers not defined</td>
+          </tr>
+          <tr>
+            <td>No timeline/roadmap</td>
+            <td><span class="severity-low">&#128993; Low</span></td>
+            <td>Product specs often include high-level timeline</td>
+          </tr>
+          <tr>
+            <td>User personas lack depth</td>
+            <td><span class="severity-low">&#128993; Low</span></td>
+            <td>Lists needs but no named personas with demographics</td>
+          </tr>
+          <tr>
+            <td>No wireframes/visual mockups</td>
+            <td><span class="severity-info">&#128309; Info</span></td>
+            <td>Expected limitation for text-based AI generation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Scores -->
+    <div class="card">
+      <h2>Summary Scores</h2>
+      <div class="score-grid">
+        <div class="score-item">
+          <div class="score">8/10</div>
+          <div class="label">Prompt Adherence</div>
+        </div>
+        <div class="score-item">
+          <div class="score">7/10</div>
+          <div class="label">Completeness</div>
+        </div>
+        <div class="score-item">
+          <div class="score">8/10</div>
+          <div class="label">Quality</div>
+        </div>
+        <div class="score-item overall">
+          <div class="score">7.5/10</div>
+          <div class="label">Overall</div>
+        </div>
+      </div>
+      <div class="verdict-box">
+        <h4>Verdict</h4>
+        <p>The result is a solid product spec that captures the core Uber-like model for caregiver booking. Main gaps are business model details and MVP scoping - typical for a first-pass generation that could be refined with follow-up prompts.</p>
+      </div>
+    </div>
+
+    <!-- Console Errors -->
+    <div class="card">
+      <h2>Console Errors (AI-Related)</h2>
+      <div class="console-errors">
+        <span class="no-errors">&#10003; No AI/Sidekick-specific errors detected during generation</span>
+        <br><br>
+        Other errors observed (not AI-related):
+        <br>- React hydration errors (#418, #423) - SSR mismatch
+        <br>- Split.io SDK 404/401 - Feature flag service
+        <br>- miroapp:// scheme handler - Desktop app integration
+      </div>
+    </div>
+
+    <!-- Test 2: Context Testing -->
+    <div class="card" style="border-left: 4px solid #10B981;">
+      <h2 style="color: #10B981;">Test 2: With Context Frame Selected</h2>
+      <p style="color: var(--gray-600); margin-bottom: 1rem; font-size: 0.9rem;">
+        Testing the same prompt with the Context frame selected to provide additional project context.
+        The context includes app naming options, critical features, and UI design mockups.
+      </p>
+
+      <h3>Test Configuration</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Context Selected</td>
+            <td>Context Frame (1 object selected, 34 items used as context)</td>
+          </tr>
+          <tr>
+            <td>Warning Displayed</td>
+            <td style="color: #F59E0B;">"Certain selected objects can't be used as context"</td>
+          </tr>
+          <tr>
+            <td>Result</td>
+            <td style="color: #10B981;">&#10003; Success - Document generated with context integration</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top: 1.5rem;">Generated Output with Context</h3>
+      <div class="two-column">
+        <div class="screenshot-container">
+          <img src="test-with-context-success.png" alt="Successful test with context - Sidekick panel">
+          <div class="screenshot-label">Sidekick panel showing successful context-aware generation</div>
+        </div>
+        <div class="screenshot-container">
+          <img src="test-result-with-context.png" alt="Generated Product Spec with Context">
+          <div class="screenshot-label">Generated spec incorporating context from the board</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 1.5rem;">Context Integration Analysis</h3>
+      <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 1rem; margin-top: 0.75rem;">
+        <p style="color: #065F46; font-weight: 600; margin-bottom: 0.5rem;">&#10003; Context Successfully Integrated</p>
+        <ul style="color: #047857; font-size: 0.9rem; margin-left: 1.25rem;">
+          <li><strong>Open Questions section:</strong> References product names from context frame voting options (CareNow, Kindly, CareMatch, Snugly, CareLink, CareCircle, ReadyCare, InstaCare, CareSwift, NearbyKin, CareHub)</li>
+          <li><strong>Features:</strong> Spec includes features aligned with "Critical Features" from context</li>
+          <li><strong>No policy violations:</strong> Despite warning about "certain objects", generation completed successfully</li>
+          <li><strong>No console errors:</strong> No REQUESTED_PROMPT_VIOLATION or other AI-related errors</li>
+        </ul>
+      </div>
+
+      <h3 style="margin-top: 1.5rem;">Comparison: With vs Without Context</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Aspect</th>
+            <th>Without Context (Test 1)</th>
+            <th>With Context (Test 2)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Product Names</td>
+            <td>Generic placeholder</td>
+            <td style="color: #10B981;">&#10003; Uses names from voting frame</td>
+          </tr>
+          <tr>
+            <td>Feature Alignment</td>
+            <td>Generic caregiver features</td>
+            <td style="color: #10B981;">&#10003; Aligned with context features</td>
+          </tr>
+          <tr>
+            <td>Generation Success</td>
+            <td style="color: #10B981;">&#10003; Success</td>
+            <td style="color: #10B981;">&#10003; Success</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top: 1.5rem;">Notes</h3>
+      <ul style="color: var(--gray-700); font-size: 0.9rem; margin-left: 1.25rem;">
+        <li>Warning "Certain selected objects can't be used as context" appeared but did not block generation</li>
+        <li>34 of 43 objects in the frame were used as context</li>
+        <li>Previous test session encountered REQUESTED_PROMPT_VIOLATION errors (not reproducible in this session)</li>
+        <li>Context selection method: Navigate to frame via Frames panel, then select frame with keyboard navigation while Sidekick is open</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <p>Sidekick Eval Report &bull; Generated with Playwright automation &bull; Miro AI Testing</p>
+  </footer>
+</body>
+</html>

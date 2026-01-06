@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prototype Test - Sidekick Eval</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gray-50); color: var(--gray-800); line-height: 1.5; }
+
+    /* Navigation */
+    .nav { background: var(--gray-800); padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100; }
+    .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; }
+    .nav-logo { color: white; font-weight: 700; font-size: 1rem; }
+    .nav-formats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .nav-group { display: flex; align-items: center; gap: 0.25rem; }
+    .nav-group-label { color: var(--gray-600); font-size: 0.7rem; text-transform: uppercase; margin-right: 0.25rem; }
+    .nav-link { color: #9CA3AF; text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+    .nav-link.active { background: var(--primary); color: white; }
+    .nav-divider { width: 1px; height: 20px; background: var(--gray-600); margin: 0 0.5rem; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gray-200); }
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    .header-meta { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--gray-600); }
+
+    /* Verdict */
+    .verdict { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .verdict-score { background: white; border-radius: 8px; padding: 1rem 1.5rem; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .verdict-score .value { font-size: 1.75rem; font-weight: 700; }
+    .verdict-score .label { font-size: 0.75rem; color: var(--gray-600); }
+    .verdict-score.fail .value { color: var(--danger); }
+    .verdict-score.pass .value { color: var(--success); }
+    .verdict-score.warning .value { color: var(--warning); }
+    .verdict-summary { flex: 1; background: white; border-radius: 8px; padding: 1rem 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .verdict-summary h3 { font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .verdict-summary p { font-size: 0.85rem; color: var(--gray-700); }
+
+    /* Issues */
+    .issues { background: white; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .issues h2 { font-size: 1rem; margin-bottom: 0.75rem; }
+    .issue-list { list-style: none; }
+    .issue-item { padding: 0.5rem 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 0.75rem; font-size: 0.85rem; }
+    .issue-item:last-child { border-bottom: none; }
+    .issue-severity { font-weight: 600; width: 60px; flex-shrink: 0; }
+    .issue-severity.high { color: var(--danger); }
+    .issue-severity.medium { color: var(--warning); }
+    .issue-severity.low { color: var(--primary); }
+
+    /* Prompts */
+    .prompt-card { background: white; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden; }
+    .prompt-header { padding: 0.75rem 1rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
+    .prompt-header h3 { font-size: 0.9rem; font-weight: 600; }
+    .prompt-status { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 500; }
+    .prompt-status.pass { background: #D1FAE5; color: #065F46; }
+    .prompt-status.fail { background: #FEE2E2; color: #991B1B; }
+    .prompt-status.warning { background: #FEF3C7; color: #92400E; }
+    .prompt-body { padding: 1rem; }
+    .prompt-text { background: var(--gray-50); padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 0.75rem; font-family: monospace; }
+    .prompt-note { font-size: 0.85rem; color: var(--gray-700); margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 6px; background: #D1FAE5; }
+    .prompt-note-fail { background: #FEE2E2; color: #991B1B; }
+    .prompt-note-warning { background: #FEF3C7; color: #92400E; }
+    .artifact-img { border: 1px solid var(--gray-200); border-radius: 6px; overflow: hidden; }
+    .artifact-img img { width: 100%; display: block; }
+
+    footer { text-align: center; padding: 1.5rem; color: var(--gray-600); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-content">
+      <div class="nav-logo">Sidekick Eval</div>
+      <div class="nav-formats">
+        <div class="nav-group">
+          <span class="nav-group-label">Tables</span>
+          <a href="table-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Prototypes</span>
+          <a href="prototype-2026-01-06.html" class="nav-link active">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Stickies</span>
+          <a href="stickies-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Documents</span>
+          <a href="document-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Images</span>
+          <a href="#" class="nav-link">-</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Prototype Test</h1>
+      <div class="header-meta">
+        <span>January 6, 2026</span>
+        <span>3 prompts</span>
+        <span>General Sidekick</span>
+      </div>
+    </div>
+
+    <!-- Verdict -->
+    <div class="verdict">
+      <div class="verdict-score warning">
+        <div class="value">7/10</div>
+        <div class="label">Overall</div>
+      </div>
+      <div class="verdict-score pass">
+        <div class="value">8/10</div>
+        <div class="label">Prompt Adherence</div>
+      </div>
+      <div class="verdict-score warning">
+        <div class="value">6/10</div>
+        <div class="label">Iteration Quality</div>
+      </div>
+      <div class="verdict-summary">
+        <h3>Summary</h3>
+        <p><strong>Verified:</strong> V1 created "Elderly Care App" with 7 screens (all requested features). V2 created "Senior-Friendly Prototype" with 6 screens showing bigger text, bolder buttons, streamlined flows. V3 created "Edge Case Screens" as a SEPARATE artifact with 5 screens covering all requested edge cases - but did not add to existing prototype.</p>
+      </div>
+    </div>
+
+    <!-- Issues -->
+    <div class="issues">
+      <h2>Issues</h2>
+      <ul class="issue-list">
+        <li class="issue-item">
+          <span class="issue-severity medium">Medium</span>
+          <span>V3 created a separate "Edge Case Screens" artifact instead of adding screens to the existing prototype</span>
+        </li>
+        <li class="issue-item">
+          <span class="issue-severity low">Low</span>
+          <span>V2 reduced from 7 screens to 6 screens - consolidated some flows for senior simplicity</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Prompt 1 -->
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 1: Create Prototype</h3>
+        <span class="prompt-status pass">Pass</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Create a mobile prototype for an "Uber for elderly care" app. Include: caregiver search, caregiver profile (verified), booking, messaging/check-ins, payment, and an emergency button. Match the vibe of the screenshots on this board.</div>
+        <p class="prompt-note">Created "Elderly Care App" prototype with 7 screens: Onboarding, Caregiver Search, Caregiver Profile (verified badge), Booking, Messaging, Payment, Emergency. Purple gradient aesthetic matches board context.</p>
+        <div class="artifact-img">
+          <img src="prototype-v1-verified.png" alt="V1 Prototype">
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt 2 -->
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 2: Senior-Friendly</h3>
+        <span class="prompt-status pass">Pass</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Make the prototype much more senior-friendly: bigger text, fewer steps, clearer primary buttons, and less clutter.</div>
+        <p class="prompt-note">Created "Senior-Friendly Prototype" (renamed to "SeniorConnect") with 6 screens: Welcome, Onboarding, Home with Primary Actions, Text Size Settings, Quick Actions, Simplified Information. Bigger text, bolder buttons, streamlined flows.</p>
+        <div class="artifact-img">
+          <img src="prototype-v2-verified.png" alt="V2 Prototype">
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt 3 -->
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 3: Edge Cases</h3>
+        <span class="prompt-status warning">Partial</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Add the key edge-case screens: no caregivers available, caregiver late/cancels, verification pending, payment failed, emergency triggered.</div>
+        <p class="prompt-note prompt-note-warning">Created "Edge Case Screens" as a SEPARATE artifact (not added to existing prototype). Contains 5 screens: No Caregivers Available, Caregiver Late/Cancel, Verification Pending, Payment Failed, Emergency Alert Triggered. All requested edge cases covered but as new artifact.</p>
+        <div class="artifact-img">
+          <img src="prototype-v3-verified.png" alt="V3 Prototype">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Sidekick Eval &middot; Claude Code + Playwright MCP
+  </footer>
+</body>
+</html>

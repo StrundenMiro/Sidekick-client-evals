@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table Test - Sidekick Eval</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gray-50); color: var(--gray-800); line-height: 1.5; }
+
+    /* Navigation */
+    .nav { background: var(--gray-800); padding: 0.75rem 2rem; position: sticky; top: 0; z-index: 100; }
+    .nav-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; }
+    .nav-logo { color: white; font-weight: 700; font-size: 1rem; }
+    .nav-formats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .nav-group { display: flex; align-items: center; gap: 0.25rem; }
+    .nav-group-label { color: var(--gray-600); font-size: 0.7rem; text-transform: uppercase; margin-right: 0.25rem; }
+    .nav-link { color: #9CA3AF; text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+    .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+    .nav-link.active { background: var(--primary); color: white; }
+    .nav-divider { width: 1px; height: 20px; background: var(--gray-600); margin: 0 0.5rem; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gray-200); }
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    .header-meta { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--gray-600); }
+
+    /* Verdict */
+    .verdict { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .verdict-score { background: white; border-radius: 8px; padding: 1rem 1.5rem; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .verdict-score .value { font-size: 1.75rem; font-weight: 700; }
+    .verdict-score .label { font-size: 0.75rem; color: var(--gray-600); }
+    .verdict-score.fail .value { color: var(--danger); }
+    .verdict-score.pass .value { color: var(--success); }
+    .verdict-summary { flex: 1; background: white; border-radius: 8px; padding: 1rem 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .verdict-summary h3 { font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .verdict-summary p { font-size: 0.85rem; color: var(--gray-700); }
+
+    /* Issues */
+    .issues { background: white; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .issues h2 { font-size: 1rem; margin-bottom: 0.75rem; }
+    .issue-list { list-style: none; }
+    .issue-item { padding: 0.5rem 0; border-bottom: 1px solid var(--gray-100); display: flex; gap: 0.75rem; font-size: 0.85rem; }
+    .issue-item:last-child { border-bottom: none; }
+    .issue-severity { font-weight: 600; width: 60px; flex-shrink: 0; }
+    .issue-severity.high { color: var(--danger); }
+    .issue-severity.medium { color: var(--warning); }
+    .issue-severity.low { color: var(--primary); }
+
+    /* Prompts */
+    .prompt-card { background: white; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden; }
+    .prompt-header { padding: 0.75rem 1rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
+    .prompt-header h3 { font-size: 0.9rem; font-weight: 600; }
+    .prompt-status { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 500; }
+    .prompt-status.pass { background: #D1FAE5; color: #065F46; }
+    .prompt-status.fail { background: #FEE2E2; color: #991B1B; }
+    .prompt-status.warning { background: #FEF3C7; color: #92400E; }
+    .prompt-body { padding: 1rem; }
+    .prompt-text { background: var(--gray-50); padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 0.75rem; font-family: monospace; }
+    .prompt-note { font-size: 0.85rem; color: var(--gray-700); margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 6px; background: #D1FAE5; }
+    .prompt-note-fail { background: #FEE2E2; color: #991B1B; }
+    .prompt-note-warning { background: #FEF3C7; color: #92400E; }
+    .artifact-img { border: 1px solid var(--gray-200); border-radius: 6px; overflow: hidden; }
+    .artifact-img img { width: 100%; display: block; }
+
+    /* Data table */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.75rem; }
+    .data-table th, .data-table td { padding: 0.5rem; text-align: left; border: 1px solid var(--gray-200); }
+    .data-table th { background: var(--gray-50); font-weight: 600; }
+    .data-table .lost { background: #FEE2E2; }
+    .data-table .changed { background: #FEF3C7; }
+
+    footer { text-align: center; padding: 1.5rem; color: var(--gray-600); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-content">
+      <div class="nav-logo">Sidekick Eval</div>
+      <div class="nav-formats">
+        <div class="nav-group">
+          <span class="nav-group-label">Tables</span>
+          <a href="table-2026-01-06.html" class="nav-link active">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Prototypes</span>
+          <a href="prototype-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Stickies</span>
+          <a href="stickies-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Documents</span>
+          <a href="document-2026-01-06.html" class="nav-link">Jan 6</a>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-group">
+          <span class="nav-group-label">Images</span>
+          <a href="#" class="nav-link">-</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Table Test</h1>
+      <div class="header-meta">
+        <span>January 6, 2026</span>
+        <span>3 prompts</span>
+        <span>General Sidekick</span>
+      </div>
+    </div>
+
+    <!-- Verdict -->
+    <div class="verdict">
+      <div class="verdict-score fail">
+        <div class="value">4/10</div>
+        <div class="label">Overall</div>
+      </div>
+      <div class="verdict-score fail">
+        <div class="value">3/10</div>
+        <div class="label">Prompt Adherence</div>
+      </div>
+      <div class="verdict-score fail">
+        <div class="value">2/10</div>
+        <div class="label">Data Preservation</div>
+      </div>
+      <div class="verdict-summary">
+        <h3>Summary</h3>
+        <p>V2 deleted 2 columns when asked to add 1. "Who It Helps" and "MVP or Later" columns were removed. V3 recovered the structure but regenerated the content with different values than V1.</p>
+      </div>
+    </div>
+
+    <!-- Issues -->
+    <div class="issues">
+      <h2>Issues</h2>
+      <ul class="issue-list">
+        <li class="issue-item">
+          <span class="issue-severity high">High</span>
+          <span>V2 deleted "Who It Helps" and "MVP or Later" columns instead of adding "How we'll test it"</span>
+        </li>
+        <li class="issue-item">
+          <span class="issue-severity high">High</span>
+          <span>V2 renamed "Why It Matters" to "Description" and rewrote all content</span>
+        </li>
+        <li class="issue-item">
+          <span class="issue-severity medium">Medium</span>
+          <span>V3 recovered structure but "Who It Helps" values differ from V1 (e.g., "Both" became "Families needing immediate care")</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Prompt 1 -->
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 1: Create Table</h3>
+        <span class="prompt-status pass">Pass</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Create a feature table for an "Uber for elderly care" app with columns: Feature, Who it helps, Why it matters, MVP or Later.</div>
+        <p class="prompt-note">Created table with 4 columns, 5 features. All columns populated correctly.</p>
+        <div class="artifact-img">
+          <img src="table-v1-artifact.png" alt="V1 Table">
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt 2 -->
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 2: Add Column</h3>
+        <span class="prompt-status fail">Fail</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Add a column called "How we'll test it" and fill it in for each feature.</div>
+        <p class="prompt-note prompt-note-fail">Deleted "Who It Helps" and "MVP or Later" columns. Renamed "Why It Matters" to "Description" with rewritten content. Added "How we'll test it" but lost 2 columns in the process.</p>
+        <div class="artifact-img">
+          <img src="table-v2-artifact.png" alt="V2 Table">
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt 3 -->
+    <div class="prompt-card">
+      <div class="prompt-header">
+        <h3>Prompt 3: MVP Prioritization</h3>
+        <span class="prompt-status warning">Partial</span>
+      </div>
+      <div class="prompt-body">
+        <div class="prompt-text">Choose the smallest MVP that still works end-to-end and mark everything else as Later.</div>
+        <p class="prompt-note prompt-note-warning">Recovered all 5 columns. However, "Who It Helps" and "Why It Matters" values were regenerated with different content than V1.</p>
+        <div class="artifact-img">
+          <img src="table-v3-artifact.png" alt="V3 Table">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Sidekick Eval &middot; Claude Code + Playwright MCP
+  </footer>
+</body>
+</html>
