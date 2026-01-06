@@ -199,15 +199,39 @@ After each prompt completion, report using this format:
 
 ## Post-Test Report Creation
 
-Only create the HTML report AFTER:
+Only create the report AFTER:
 1. All 3 prompts have been run
 2. All 3 captures have been verified
 3. All 3 images show actual content
 
-Assessment scores must be based on:
-- What is VISIBLE in the captured images
-- NOT on Sidekick's text descriptions
-- NOT on assumptions about what should be there
+### Creating the Run Summary
+
+For each run, create two plain-language lists:
+
+**"good" array** - What worked well (short, scannable statements):
+- Start each with "V1/V2/V3" to indicate which version
+- Focus on what was accomplished correctly
+- Keep each item under 10 words
+- Examples:
+  - "V1 created correct table structure"
+  - "V2 simplified as requested"
+  - "All iterations built on previous versions"
+
+**"bad" array** - What didn't work (short, scannable statements):
+- Focus on actual problems, not minor issues
+- Be specific but brief
+- Keep each item under 12 words
+- Examples:
+  - "V2 lost 3 columns when adding 1"
+  - "V3 created empty document"
+  - "Lost all V1 content - no iteration continuity"
+
+**Guidelines:**
+- Use plain language a non-technical person can understand
+- NO technical jargon or artifact names
+- If nothing went wrong, use an empty array: `"bad": []`
+- Maximum 4-5 items per list
+- Assessment must be based on what is VISIBLE in captured images only
 
 ---
 

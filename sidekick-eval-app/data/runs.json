@@ -4,19 +4,18 @@
       "id": "document-2026-01-06-1820",
       "format": "document",
       "timestamp": "2026-01-06T18:20:00",
-      "scores": {
-        "overall": 4,
-        "promptAdherence": 4,
-        "iterationQuality": 2
-      },
+      "rating": "bad",
       "good": [
-        "V1 created excellent product brief with all 6 sections",
-        "V3 created requested Non-negotiables and Not in v1 sections"
+        "V1 has excellent content structure with all requested sections",
+        "V1 typography and formatting is clean and professional",
+        "V3 contains thorough Non-negotiables (11 items) and Not in v1 (12 items) lists"
       ],
       "bad": [
-        "V2 created template document instead of tightening V1",
-        "V3 created standalone guide instead of integrating into V1",
-        "No iteration continuity - each version is a new document"
+        "V2 completely lost context - created generic 'Action Required' template instead of editing V1",
+        "V2 shows placeholder instructions like 'Required Inputs' instead of actual product content",
+        "V3 is presented as instructional guidance ('Add the following sections...') not integrated into V1",
+        "Zero iteration continuity - Sidekick treated each prompt as starting fresh",
+        "Critical failure pattern: AI cannot maintain document state across prompts"
       ],
       "prompts": [
         {
@@ -24,24 +23,101 @@
           "title": "Create Product Brief",
           "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
           "status": "pass",
-          "note": "Created 'CareLink — Product Brief' with 6 complete sections: Overview, Problem, Target Users, Key User Flows, MVP Scope (Phase 1), Success Metrics, and Risks & Mitigations.",
-          "artifact": "artifacts/document-2026-01-06-1820/v1.png"
+          "note": "Created 'CareLink — Product Brief' with all 7 requested sections. Content is comprehensive and specific to the elderly care domain.",
+          "artifact": "artifacts/document-2026-01-06-1820/v1.png",
+          "evaluation": {
+            "promptAdherence": {
+              "score": "great",
+              "issues": []
+            },
+            "visualQuality": {
+              "score": "great",
+              "glitches": []
+            },
+            "copyQuality": {
+              "score": "great",
+              "issues": []
+            },
+            "styleConsistency": {
+              "score": "great",
+              "issues": []
+            },
+            "improvements": []
+          }
         },
         {
           "number": 2,
           "title": "Tighten Content",
           "text": "Make this shorter and more decisive. Replace vague wording with clear choices.",
           "status": "fail",
-          "note": "FAILED: Created 'Action Required' template document with instructions instead of tightening V1's content. Shows 'Required Inputs', 'Style Rules for the Rewrite', and 'Optional Examples' - completely lost V1's product brief.",
-          "artifact": "artifacts/document-2026-01-06-1820/v2.png"
+          "note": "CRITICAL FAILURE: Created generic 'Action Required' template instead of editing V1's content. All product brief content lost.",
+          "artifact": "artifacts/document-2026-01-06-1820/v2.png",
+          "evaluation": {
+            "promptAdherence": {
+              "score": "bad",
+              "issues": [
+                "Completely ignored existing document content",
+                "Created template with placeholders instead of editing",
+                "Shows 'Required Inputs' and 'Style Rules' - not what was asked"
+              ]
+            },
+            "visualQuality": {
+              "score": "good",
+              "glitches": []
+            },
+            "copyQuality": {
+              "score": "bad",
+              "issues": [
+                "All actual product content was replaced with generic instructions",
+                "CareLink content completely lost"
+              ]
+            },
+            "styleConsistency": {
+              "score": "bad",
+              "issues": [
+                "Document format changed from product brief to instruction template"
+              ]
+            },
+            "improvements": [
+              "Should have maintained V1's content and made it more concise",
+              "Need to preserve context when iterating on documents"
+            ]
+          }
         },
         {
           "number": 3,
           "title": "Add Sections",
           "text": "Add two sections: \"Non-negotiables\" and \"Not in v1\".",
-          "status": "warning",
-          "note": "Created standalone document with 'Overview', 'Non-negotiables' (11 items), and 'Not in v1' (12 items) sections. Content is good but presented as instructional guide rather than integrated into V1's product brief.",
-          "artifact": "artifacts/document-2026-01-06-1820/v3.png"
+          "status": "fail",
+          "note": "Created standalone document with requested sections. Content quality is good but presented as instructional guide rather than integrated into the product brief.",
+          "artifact": "artifacts/document-2026-01-06-1820/v3.png",
+          "evaluation": {
+            "promptAdherence": {
+              "score": "good",
+              "issues": [
+                "Created requested sections but as standalone document",
+                "Header says 'Add the following sections...' - instructional rather than actual content"
+              ]
+            },
+            "visualQuality": {
+              "score": "great",
+              "glitches": []
+            },
+            "copyQuality": {
+              "score": "great",
+              "issues": []
+            },
+            "styleConsistency": {
+              "score": "good",
+              "issues": [
+                "Does not match V1's document style - presented as guidance instead of product brief section"
+              ]
+            },
+            "improvements": [
+              "Should integrate new sections into existing V1 document",
+              "Should not show 'Add the following...' instructional text"
+            ]
+          }
         }
       ]
     },
@@ -49,25 +125,19 @@
       "id": "table-2026-01-06-1320",
       "format": "table",
       "timestamp": "2026-01-06T13:20:00",
-      "scores": {
-        "overall": 4,
-        "promptAdherence": 3,
-        "iterationQuality": 2
-      },
+      "rating": "bad",
       "good": [
-        "V1 created correct 4-column table",
-        "V3 recovered the full structure"
+        "V1 table structure is clean with proper column headers and icons",
+        "V1 color-coded MVP/Later tags are visually clear (red MVP, black Later)",
+        "V1 'Who It Helps' uses concise purple tags (Both, Families)",
+        "V3 successfully recovered all 5 columns with testing info added"
       ],
       "bad": [
-        "V2 deleted 2 columns instead of adding 1",
-        "V2 rewrote all content unexpectedly",
-        "V3 changed some values from V1"
-      ],
-      "summary": "V2 deleted 2 columns when asked to add 1. 'Who It Helps' and 'MVP or Later' columns were removed. V3 recovered the structure but regenerated the content with different values than V1.",
-      "issues": [
-        {"severity": "high", "text": "V2 deleted 'Who It Helps' and 'MVP or Later' columns instead of adding 'How we'll test it'"},
-        {"severity": "high", "text": "V2 renamed 'Why It Matters' to 'Description' and rewrote all content"},
-        {"severity": "medium", "text": "V3 recovered structure but 'Who It Helps' values differ from V1"}
+        "V2 DELETED 2 columns (Who It Helps, MVP or Later) when asked to ADD 1 column",
+        "V2 renamed 'Why It Matters' to generic 'Description'",
+        "V2 destructive edit pattern - cannot add without destroying existing data",
+        "V3 regenerated all cell content with different values than V1",
+        "Unreliable iteration - data loss risk on every edit"
       ],
       "prompts": [
         {
@@ -75,24 +145,67 @@
           "title": "Create Table",
           "text": "Create a feature table for an \"Uber for elderly care\" app with columns: Feature, Who it helps, Why it matters, MVP or Later.",
           "status": "pass",
-          "note": "Created table with 4 columns, 5 features. All columns populated correctly.",
-          "artifact": "artifacts/table-2026-01-06-1320/v1.png"
+          "note": "Created clean 4-column table with 5 features. Color-coded tags for Who It Helps and MVP/Later.",
+          "artifact": "artifacts/table-2026-01-06-1320/v1.png",
+          "evaluation": {
+            "promptAdherence": { "score": "great", "issues": [] },
+            "visualQuality": { "score": "great", "glitches": [] },
+            "copyQuality": { "score": "great", "issues": [] },
+            "styleConsistency": { "score": "great", "issues": [] },
+            "improvements": []
+          }
         },
         {
           "number": 2,
           "title": "Add Column",
           "text": "Add a column called \"How we'll test it\" and fill it in for each feature.",
           "status": "fail",
-          "note": "Deleted 'Who It Helps' and 'MVP or Later' columns. Renamed 'Why It Matters' to 'Description' with rewritten content. Added 'How we'll test it' but lost 2 columns in the process.",
-          "artifact": "artifacts/table-2026-01-06-1320/v2.png"
+          "note": "DESTRUCTIVE EDIT: Deleted 2 columns when asked to add 1. Lost 'Who It Helps' and 'MVP or Later' columns.",
+          "artifact": "artifacts/table-2026-01-06-1320/v2.png",
+          "evaluation": {
+            "promptAdherence": {
+              "score": "bad",
+              "issues": [
+                "Deleted 'Who It Helps' column entirely",
+                "Deleted 'MVP or Later' column entirely",
+                "Renamed 'Why It Matters' to 'Description'"
+              ]
+            },
+            "visualQuality": { "score": "good", "glitches": [] },
+            "copyQuality": {
+              "score": "bad",
+              "issues": ["Lost all Who It Helps and MVP/Later data from V1"]
+            },
+            "styleConsistency": {
+              "score": "bad",
+              "issues": ["Column structure completely changed", "Lost color-coded tags"]
+            },
+            "improvements": [
+              "Should preserve all existing columns when adding new ones",
+              "Should never delete data without explicit instruction"
+            ]
+          }
         },
         {
           "number": 3,
           "title": "MVP Prioritization",
           "text": "Choose the smallest MVP that still works end-to-end and mark everything else as Later.",
-          "status": "warning",
-          "note": "Recovered all 5 columns. However, 'Who It Helps' and 'Why It Matters' values were regenerated with different content than V1.",
-          "artifact": "artifacts/table-2026-01-06-1320/v3.png"
+          "status": "pass",
+          "note": "Successfully recovered all 5 columns with MVP/Later prioritization. Good recovery from V2's regression.",
+          "artifact": "artifacts/table-2026-01-06-1320/v3.png",
+          "evaluation": {
+            "promptAdherence": { "score": "great", "issues": [] },
+            "visualQuality": { "score": "great", "glitches": [] },
+            "copyQuality": {
+              "score": "good",
+              "issues": ["Content was regenerated rather than restored from V1"]
+            },
+            "styleConsistency": {
+              "score": "good",
+              "issues": ["MVP/Later tags use different color scheme than V1 (orange vs red/black)"]
+            },
+            "improvements": []
+          }
         }
       ]
     },
@@ -100,18 +213,18 @@
       "id": "stickies-2026-01-06-1353",
       "format": "stickies",
       "timestamp": "2026-01-06T13:53:00",
-      "scores": {
-        "overall": 8,
-        "promptAdherence": 9,
-        "iterationQuality": 7
-      },
+      "rating": "good",
       "good": [
-        "V1 created well-organized themed groups",
-        "V2 successfully shortened and de-duped",
-        "V3 regrouped into requested themes"
+        "V1 has excellent color-coded theming (blue=family needs, yellow=caregiver needs, pink=pain points, green=ideas)",
+        "V1 layout is clean with clear visual groupings (~50 stickies)",
+        "V2 successfully condensed to 9 focused, actionable items",
+        "V3 expanded to 25 stickies covering all 5 requested themes"
       ],
       "bad": [
-        "V3 created new artifact instead of updating existing one"
+        "V2 lost all color coding - all stickies now uniform yellow",
+        "V2 lost thematic headers that organized V1",
+        "V3 still lacks color differentiation between themes",
+        "Lost visual richness that made V1 easy to scan by category"
       ],
       "summary": "Sidekick created sticky notes well across all 3 prompts. V1 had 50 objects across 5 themes. V2 successfully de-duplicated and shortened to 9 objects. V3 regrouped into requested themes and flagged top priorities, though created a new artifact rather than modifying V2 in place.",
       "issues": [
@@ -139,7 +252,7 @@
           "number": 3,
           "title": "Regroup & Highlight",
           "text": "Re-group into: Trust & safety, Booking, Communication, Payments, Emergencies. Highlight the top 5.",
-          "status": "warning",
+          "status": "fail",
           "note": "Created new artifact 'Regrouped Care Stickies' with 25 objects organized into the 5 requested themes with top priorities flagged. Did not modify existing artifact in place.",
           "artifact": "artifacts/stickies-2026-01-06-1353/v3.png"
         }
@@ -149,6 +262,7 @@
       "id": "document-2026-01-06-1516",
       "format": "document",
       "timestamp": "2026-01-06T15:16:00",
+      "rating": "bad",
       "scores": {
         "overall": 3,
         "promptAdherence": 3,
@@ -199,16 +313,14 @@
       "id": "flowchart-2026-01-06-1548",
       "format": "flowchart",
       "timestamp": "2026-01-06T15:48:00",
-      "scores": {
-        "overall": 10,
-        "promptAdherence": 10,
-        "iterationQuality": 10
-      },
+      "rating": "great",
       "good": [
-        "V1 created comprehensive flow",
-        "V2 simplified correctly with clean labels",
-        "V3 added emergency path exactly as requested",
-        "All iterations built on previous versions"
+        "V1 comprehensive flow with proper flowchart symbols (green ovals, yellow boxes, blue diamonds)",
+        "V2 perfect simplification to 7-step linear flow with clean verb-noun labels",
+        "V3 added emergency branch exactly as requested - decision diamond with Yes/No paths",
+        "V3 paths merge correctly at Confirm Booking",
+        "Excellent iteration continuity - each version builds on previous",
+        "Visual consistency maintained across all versions"
       ],
       "bad": [],
       "summary": "V1 created comprehensive 23-object booking flow. V2 successfully simplified to 7-object linear flow with clean verb-noun labels. V3 correctly added parallel emergency path with decision diamond branching from Start, expedited matching path, and proper merge at Confirm Booking. All iterations built on previous versions - excellent iteration continuity.",
@@ -246,22 +358,25 @@
       "id": "slides-2026-01-06-1730",
       "format": "slides",
       "timestamp": "2026-01-06T17:30:00",
-      "scores": {
-        "overall": 7,
-        "promptAdherence": 8,
-        "iterationQuality": 6
-      },
+      "rating": "bad",
       "good": [
-        "V1 created 7 slides with correct structure",
-        "V2 tightened headlines and reduced text"
+        "V1 has coherent dark purple theme with soft professional illustrations",
+        "V1 slide structure covers all requested topics",
+        "Content improved across iterations (headlines tightened, notes added)"
       ],
       "bad": [
-        "V3 changed visual style when only asked to add notes"
+        "THREE completely different visual styles across three iterations",
+        "V1→V2: Changed from soft purple illustrations to bold teal/green circular graphics",
+        "V2→V3: Changed AGAIN to cream/beige with warm earthy illustrations",
+        "Zero visual consistency - looks like 3 different designers made these",
+        "Style changes were never requested - asked to tighten copy and add notes",
+        "Unusable for real presentation - would need complete redesign for consistency"
       ],
-      "summary": "V1 created 'Elderly Care Pitch' with 7 slides (dark purple theme). V2 'Exec Pitch Deck' successfully tightened with stronger headlines and cleaner structure. V3 'Pitch Deck Notes' added speaker notes but CHANGED visual style completely from dark purple to cream/beige - breaking visual continuity.",
+      "summary": "SEVERE STYLE DRIFT: V1 (dark purple, soft illustrations) → V2 (dark with bold teal/green circular graphics) → V3 (cream/beige, warm illustrations). Three completely different visual languages. Content improved but visual execution is broken.",
       "issues": [
-        {"severity": "medium", "text": "V3 changed entire visual design from dark purple tech-style to cream/beige illustration style when asked only to add speaker notes"},
-        {"severity": "low", "text": "Note: Screenshots captured via browser screenshot method due to Cmd+Shift+C producing blank images for slides format"}
+        {"severity": "high", "text": "V1→V2: Illustration style changed completely from soft purple to bold flat teal/green circular graphics"},
+        {"severity": "high", "text": "V2→V3: Style changed AGAIN to cream/beige backgrounds with warm earthy illustrations"},
+        {"severity": "high", "text": "Three iterations = three completely different visual identities"}
       ],
       "prompts": [
         {
@@ -269,23 +384,23 @@
           "title": "Create Pitch Deck",
           "text": "Create a 7-slide pitch deck for an \"Uber for elderly care\" app: problem, users, solution, critical features, trust/safety, MVP, metrics + ask. Use the context on this board.",
           "status": "pass",
-          "note": "Created 'Elderly Care Pitch' with 7 slides: problem statement, users (who we serve), solution (on-demand matching), critical features, trust/safety (shield), and metrics/ask. Dark purple gradient theme with professional illustrations.",
+          "note": "Created 'Elderly Care Pitch' with dark purple gradient theme, soft professional illustrations. Clean structure.",
           "artifact": "artifacts/slides-2026-01-06-1730/v1.png"
         },
         {
           "number": 2,
           "title": "Make Exec-Friendly",
           "text": "Make the slides more exec-friendly: fewer words, stronger headlines, cleaner structure.",
-          "status": "pass",
-          "note": "Created 'Exec Pitch Deck' with 7 slides. Headlines now lead ('Care on demand for aging parents', 'The care gap is urgent', 'Two core users', 'Match, book, care', 'Trust built in'). Body copy minimal, structure clean. Maintained dark purple theme.",
+          "status": "fail",
+          "note": "Headlines tightened BUT visual style completely changed. Now uses bold teal/green circular graphics, flat multicolor illustrations - completely different visual language than V1.",
           "artifact": "artifacts/slides-2026-01-06-1730/v2.png"
         },
         {
           "number": 3,
           "title": "Add Speaker Notes",
           "text": "Add speaker notes with a tight talk track and likely objections + answers.",
-          "status": "warning",
-          "note": "Created 'Pitch Deck Notes' with speaker notes visible below each slide. Talk track and objection handling added. However, visual style changed completely from dark purple to cream/beige with different illustrations - breaking continuity with V1/V2.",
+          "status": "fail",
+          "note": "Asked for speaker notes but they're not visible in the output. User expectation not met - can't tell if notes were added. Additionally, style changed AGAIN to cream/beige backgrounds with warm earthy illustrations. Third completely different visual style.",
           "artifact": "artifacts/slides-2026-01-06-1730/v3.png"
         }
       ]
@@ -294,6 +409,7 @@
       "id": "table-2026-01-06-1900",
       "format": "table",
       "timestamp": "2026-01-06T19:00:00",
+      "rating": "good",
       "scores": {
         "overall": 7,
         "promptAdherence": 7,
@@ -342,16 +458,13 @@
       "id": "image-2026-01-06-1613",
       "format": "image",
       "timestamp": "2026-01-06T16:13:00",
-      "scores": {
-        "overall": 10,
-        "promptAdherence": 10,
-        "iterationQuality": 10
-      },
+      "rating": "great",
       "good": [
-        "V1 matched requested style",
-        "V2 simplified while keeping warmth",
-        "V3 produced all 3 variations requested",
-        "Perfect iteration - each version built on previous"
+        "V1 warm purple icon with hands cradling heart - professional and polished",
+        "V2 beautiful simplification to two hands + heart that works at small sizes",
+        "V2 maintained warm color palette (purple, peach, mauve gradient)",
+        "V3 delivered all 3 requested variations: warm outline, professional teal, high-contrast lime/navy",
+        "Perfect iteration continuity - each version builds on the previous design"
       ],
       "bad": [],
       "summary": "V1 created warm/friendly app icon with hands cradling heart on purple background. V2 successfully simplified to single clean symbol (two hands cupping heart) on gradient background. V3 correctly produced 3 color variations: warm outline, professional blue/teal, and high-contrast lime/navy. Perfect iteration continuity - each version built directly on the previous design.",
@@ -389,6 +502,7 @@
       "id": "stickies-2026-01-06-1930",
       "format": "stickies",
       "timestamp": "2026-01-06T19:30:00",
+      "rating": "great",
       "scores": {
         "overall": 8,
         "promptAdherence": 8,
@@ -420,7 +534,7 @@
           "number": 2,
           "title": "De-duplicate & Shorten",
           "text": "Rewrite these stickies to be shorter and more specific. Remove duplicates.",
-          "status": "warning",
+          "status": "fail",
           "note": "Created 'Elderly Care Stickies' reducing from 37 to 9 objects. Stickies are shorter and more specific (e.g., 'Easy scheduling for caregivers', 'Real-time caregiver tracking'). However, theme headers were removed - lost grouping structure.",
           "artifact": "artifacts/stickies-2026-01-06-1930/v2.png"
         },
@@ -438,6 +552,7 @@
       "id": "prototype-2026-01-06-1825",
       "format": "prototype",
       "timestamp": "2026-01-06T18:25:00",
+      "rating": "great",
       "scores": {
         "overall": 9,
         "promptAdherence": 9,
@@ -486,6 +601,7 @@
       "id": "flowchart-2026-01-06-1825",
       "format": "flowchart",
       "timestamp": "2026-01-06T18:25:00",
+      "rating": "great",
       "scores": {
         "overall": 9,
         "promptAdherence": 9,
@@ -533,22 +649,24 @@
       "id": "slides-2026-01-06-1825",
       "format": "slides",
       "timestamp": "2026-01-06T18:25:00",
-      "scores": {
-        "overall": 8,
-        "promptAdherence": 8,
-        "iterationQuality": 7
-      },
+      "rating": "good",
       "good": [
-        "V1 created complete 7-slide deck",
-        "V2 made exec-friendly with stronger headlines",
-        "V3 added detailed speaker notes with objections"
+        "V1 has cohesive purple/lavender theme with purple & orange accents",
+        "V1 slide structure covers all 7 requested topics",
+        "V2→V3 maintained consistent cream/orange style (iteration worked after V2)",
+        "Content improved across iterations - headlines tightened, notes added"
       ],
       "bad": [
-        "V3 changed visual style from dark purple to cream/orange"
+        "V1→V2: Complete color palette change from purple/lavender to cream/beige",
+        "V1→V2: Illustration style changed from purple figures to earthy tones",
+        "V1→V2: Accent colors changed from purple/yellow to orange/green",
+        "Style change was not requested - only asked to tighten copy"
       ],
-      "summary": "V1 'Elderly Care Pitch' created 7 slides with dark purple theme (Problem, Users, Solution, Features, Trust/Safety, MVP, Metrics). V2 'Exec Pitch Deck' tightened copy with stronger headlines. V3 'Pitch Deck Notes' added speaker notes but changed visual style to cream/orange illustrations.",
+      "summary": "STYLE DRIFT AT V2: V1 (purple/lavender backgrounds, purple & orange accents) → V2 (cream/beige backgrounds, orange & green accents). V3 maintained V2's style. Content improved but V1's visual identity was abandoned when editing.",
       "issues": [
-        {"severity": "medium", "text": "V3 changed visual design from dark purple to cream/beige/orange when only asked to add speaker notes"}
+        {"severity": "high", "text": "V1→V2: Background color changed from purple/lavender to cream/beige"},
+        {"severity": "high", "text": "V1→V2: Accent colors changed from purple/yellow to orange/green"},
+        {"severity": "medium", "text": "V1's visual brand abandoned - would confuse stakeholders reviewing iterations"}
       ],
       "prompts": [
         {
@@ -556,23 +674,23 @@
           "title": "Create Pitch Deck",
           "text": "Create a 7-slide pitch deck for an \"Uber for elderly care\" app: problem, users, solution, critical features, trust/safety, MVP, metrics + ask. Use the context on this board.",
           "status": "pass",
-          "note": "Created 'Elderly Care Pitch' with 7 slides: The Care Crisis (problem), Two Sides One Platform (users), On Demand Trusted Care (solution), Built for Trust and Speed (features), Safety First (trust), Launch Smart Scale Fast (MVP + metrics). Consistent dark purple/orange illustration style.",
+          "note": "Created 7 slides with purple/lavender backgrounds, purple & orange/yellow accents. Consistent illustration style throughout.",
           "artifact": "artifacts/slides-2026-01-06-1825/v1.png"
         },
         {
           "number": 2,
           "title": "Make Exec-Friendly",
           "text": "Make the slides more exec-friendly: fewer words, stronger headlines, cleaner structure.",
-          "status": "pass",
-          "note": "Created 'Exec Pitch Deck' with 7 slides. Headlines strengthened ('We connect families with verified caregivers', 'Care gap is growing'). Body copy reduced to bullet points. Maintained purple/orange visual style. Cleaner, more scannable structure.",
+          "status": "fail",
+          "note": "Headlines tightened and structure cleaner. BUT style completely changed: backgrounds now cream/beige, accents now orange/green, illustrations now earthy tones. Purple brand abandoned.",
           "artifact": "artifacts/slides-2026-01-06-1825/v2.png"
         },
         {
           "number": 3,
           "title": "Add Speaker Notes",
           "text": "Add speaker notes with a tight talk track and likely objections + answers.",
-          "status": "warning",
-          "note": "Created 'Pitch Deck Notes' with detailed speaker notes visible below each slide. Talk tracks include key points and objection handling. However, visual style changed from dark purple to cream/beige/orange illustration style - visual continuity broken.",
+          "status": "fail",
+          "note": "Asked for speaker notes but they're not visible in the output. User expectation not met - can't tell if notes were added. Slide visual maintained V2's cream/orange style.",
           "artifact": "artifacts/slides-2026-01-06-1825/v3.png"
         }
       ]
@@ -581,6 +699,7 @@
       "id": "image-2026-01-06-1825",
       "format": "image",
       "timestamp": "2026-01-06T18:25:00",
+      "rating": "great",
       "scores": {
         "overall": 10,
         "promptAdherence": 10,
