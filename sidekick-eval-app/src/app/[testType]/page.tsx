@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getFormatsByTestType, isScored, getRunRating } from '@/lib/runs';
 import { getTestType } from '@/lib/test-types';
+import { getPromptsForTestType, FORMAT_DISPLAY_ORDER } from '@/lib/test-prompts';
 import { notFound } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import RatingBadge from '@/components/RatingBadge';
@@ -16,6 +17,7 @@ export default async function TestTypePage({ params }: { params: Promise<{ testT
   }
 
   const formats = getFormatsByTestType(testType);
+  const testPrompts = getPromptsForTestType(testType);
   const formatList = FORMAT_ORDER
     .filter(f => formats[f])
     .map(f => {
@@ -77,6 +79,48 @@ export default async function TestTypePage({ params }: { params: Promise<{ testT
             </div>
           )}
         </section>
+
+        {/* Prompts Overview */}
+        {testPrompts && (
+          <section className="mt-8">
+            <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
+              Test Prompts by Format
+            </h2>
+            <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
+              {FORMAT_DISPLAY_ORDER
+                .filter(format => testPrompts[format])
+                .map(format => {
+                  const formatData = testPrompts[format];
+                  return (
+                    <div key={format} className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <h3 className="font-medium text-gray-900">{formatData.name}</h3>
+                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+                          {formatData.prompts.length} prompt{formatData.prompts.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      {formatData.description && (
+                        <p className="text-sm text-gray-500 mb-3 italic">{formatData.description}</p>
+                      )}
+                      <ol className="space-y-2">
+                        {formatData.prompts.map((prompt, i) => (
+                          <li key={i} className="text-sm">
+                            <div className="flex gap-2">
+                              <span className="text-gray-400 font-mono text-xs mt-0.5">V{i + 1}</span>
+                              <div>
+                                <span className="font-medium text-gray-700">{prompt.title}</span>
+                                <p className="text-gray-500 mt-0.5">{prompt.text}</p>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  );
+                })}
+            </div>
+          </section>
+        )}
 
         <section className="mt-8">
           <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">

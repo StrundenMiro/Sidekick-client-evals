@@ -132,7 +132,21 @@ Wait 1 second.
 
 ---
 
-### Step 4: Open Sidekick via keyboard
+### Step 4: Capture existing content (V0)
+
+**Capture V0 BEFORE opening Sidekick** - this avoids needing to re-select after Sidekick steals focus.
+
+1. Press `Meta+Shift+c` to copy the selected element as image
+2. Wait for "Copied to clipboard" confirmation in the UI
+3. Wait 1 second
+4. Save clipboard:
+```bash
+osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v0-existing.png" with write permission)'
+```
+
+---
+
+### Step 5: Open Sidekick via keyboard
 
 1. Press `Meta+Enter` (CMD+Enter) to open context menu
 2. Wait 500ms
@@ -141,33 +155,6 @@ Wait 1 second.
 5. Press `Enter` to open Sidekick
 
 Wait 2 seconds for Sidekick to fully open.
-
----
-
-### Step 5: Capture existing content (V0)
-
-**IMPORTANT:** After opening Sidekick, focus shifts to the chat panel. You must re-select the element before copying.
-
-1. Re-select the element to restore canvas focus:
-```javascript
-await miro.board.select({ id: '{element-id}' });
-```
-2. Wait 500ms for selection to register
-3. **Acquire clipboard lock:**
-```bash
-while ! mkdir /tmp/clipboard.lock 2>/dev/null; do sleep 0.5; done
-```
-4. Press `Meta+Shift+c` to copy the selected element as image
-5. Wait for "Copied to clipboard" confirmation in the UI
-6. Wait 1 second
-7. Save clipboard:
-```bash
-osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v0-existing.png" with write permission)'
-```
-8. **Release clipboard lock:**
-```bash
-rmdir /tmp/clipboard.lock
-```
 
 ---
 
@@ -180,19 +167,11 @@ rmdir /tmp/clipboard.lock
 3. Press Enter to submit
 4. Wait for generation (poll until "Generating" disappears, max 60s)
 5. Click on the result element in chat to select it on canvas
-6. **Acquire clipboard lock:**
-```bash
-while ! mkdir /tmp/clipboard.lock 2>/dev/null; do sleep 0.5; done
-```
-7. Press `Meta+Shift+c` to copy
-8. Wait 1 second
-9. Save clipboard:
+6. Press `Meta+Shift+c` to copy
+7. Wait 1 second
+8. Save clipboard:
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v1.png" with write permission)'
-```
-10. **Release clipboard lock:**
-```bash
-rmdir /tmp/clipboard.lock
 ```
 
 ---
@@ -204,19 +183,11 @@ rmdir /tmp/clipboard.lock
 3. Press Enter to submit
 4. Wait for generation (poll until complete, max 60s)
 5. Click on the result element in chat to select it on canvas
-6. **Acquire clipboard lock:**
-```bash
-while ! mkdir /tmp/clipboard.lock 2>/dev/null; do sleep 0.5; done
-```
-7. Press `Meta+Shift+c` to copy
-8. Wait 1 second
-9. Save clipboard:
+6. Press `Meta+Shift+c` to copy
+7. Wait 1 second
+8. Save clipboard:
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v2.png" with write permission)'
-```
-10. **Release clipboard lock:**
-```bash
-rmdir /tmp/clipboard.lock
 ```
 
 ---
@@ -228,19 +199,11 @@ rmdir /tmp/clipboard.lock
 3. Press Enter to submit
 4. Wait for generation (poll until complete, max 60s)
 5. Click on the result element in chat to select it on canvas
-6. **Acquire clipboard lock:**
-```bash
-while ! mkdir /tmp/clipboard.lock 2>/dev/null; do sleep 0.5; done
-```
-7. Press `Meta+Shift+c` to copy
-8. Wait 1 second
-9. Save clipboard:
+6. Press `Meta+Shift+c` to copy
+7. Wait 1 second
+8. Save clipboard:
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v3.png" with write permission)'
-```
-10. **Release clipboard lock:**
-```bash
-rmdir /tmp/clipboard.lock
 ```
 
 ---
@@ -338,11 +301,6 @@ Issues found:
 
 ### Step 15: Update runs.json
 
-**Acquire runs.json lock:**
-```bash
-while ! mkdir /tmp/runs-json.lock 2>/dev/null; do sleep 0.5; done
-```
-
 Read `/data/runs.json` and add entry:
 
 ```json
@@ -389,11 +347,6 @@ Read `/data/runs.json` and add entry:
     }
   ]
 }
-```
-
-**Release runs.json lock:**
-```bash
-rmdir /tmp/runs-json.lock
 ```
 
 ---
