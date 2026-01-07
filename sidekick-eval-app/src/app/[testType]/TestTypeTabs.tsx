@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import RatingBadge from '@/components/RatingBadge';
 import { TestPromptsByFormat, FORMAT_DISPLAY_ORDER } from '@/lib/test-prompts';
+import type { Rating } from '@/lib/runs';
 
 type TabType = 'runs' | 'prompts' | 'criteria';
 
@@ -12,7 +13,7 @@ interface FormatInfo {
   id: string;
   name: string;
   runCount: number;
-  latestRating: string;
+  latestRating: Rating | null;
   latestDate: string;
 }
 
