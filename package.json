@@ -1,0 +1,11 @@
+{
+  "name": "sidekick-eval",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd sidekick-eval-app && npm run dev",
+    "build": "cd sidekick-eval-app && npm install && npm run build",
+    "start": "cd sidekick-eval-app && npm run start",
+    "postinstall": "cd sidekick-eval-app && npm install"
+  }
+}
