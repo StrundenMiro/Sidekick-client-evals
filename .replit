@@ -15,15 +15,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Sidekick Eval Server"
+args = "Next.js Dev Server"
 
 [[workflows.workflow]]
-name = "Sidekick Eval Server"
+name = "Next.js Dev Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node server.js"
+args = "cd sidekick-eval-app && npm run dev"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
@@ -35,4 +35,5 @@ externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["node", "server.js"]
+run = ["bash", "-c", "cd sidekick-eval-app && npm run start"]
+build = ["bash", "-c", "cd sidekick-eval-app && npm run build"]
