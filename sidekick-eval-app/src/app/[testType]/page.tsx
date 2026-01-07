@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import { getFormatsByTestType, isScored, getRunRating } from '@/lib/runs';
+import { Suspense } from 'react';
+import { getFormatsByTestType, getRunRating } from '@/lib/runs';
 import { getTestType } from '@/lib/test-types';
-import { getPromptsForTestType, FORMAT_DISPLAY_ORDER } from '@/lib/test-prompts';
+import { getPromptsForTestType } from '@/lib/test-prompts';
 import { notFound } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import RatingBadge from '@/components/RatingBadge';
+import TestTypeTabs from './TestTypeTabs';
 
 const FORMAT_ORDER = ['table', 'stickies', 'document', 'prototype', 'flowchart', 'slides', 'image', 'mindmap', 'erd', 'sequence', 'class'];
 
@@ -40,101 +40,19 @@ export default async function TestTypePage({ params }: { params: Promise<{ testT
           { label: testTypeInfo.shortName }
         ]} />
 
-        <header className="mb-8">
+        <header className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">{testTypeInfo.name}</h1>
           <p className="text-gray-500 mt-1">{testTypeInfo.description}</p>
         </header>
 
-        <section>
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
-            Formats
-          </h2>
-          {formatList.length > 0 ? (
-            <ul className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
-              {formatList.map(format => (
-                <li key={format.id}>
-                  <Link
-                    href={`/${testType}/${format.id}`}
-                    className="block px-4 py-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-medium text-gray-900 capitalize">{format.name}</h3>
-                        <p className="text-sm text-gray-500">
-                          {format.runCount} run{format.runCount !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <RatingBadge rating={format.latestRating} size="sm" />
-                        <span className="text-gray-300">&rarr;</span>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-500">
-              No test runs yet for this test type.
-            </div>
-          )}
-        </section>
-
-        {/* Prompts Overview */}
-        {testPrompts && (
-          <section className="mt-8">
-            <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
-              Test Prompts by Format
-            </h2>
-            <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
-              {FORMAT_DISPLAY_ORDER
-                .filter(format => testPrompts[format])
-                .map(format => {
-                  const formatData = testPrompts[format];
-                  return (
-                    <div key={format} className="p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <h3 className="font-medium text-gray-900">{formatData.name}</h3>
-                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-                          {formatData.prompts.length} prompt{formatData.prompts.length !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-                      {formatData.description && (
-                        <p className="text-sm text-gray-500 mb-3 italic">{formatData.description}</p>
-                      )}
-                      <ol className="space-y-2">
-                        {formatData.prompts.map((prompt, i) => (
-                          <li key={i} className="text-sm">
-                            <div className="flex gap-2">
-                              <span className="text-gray-400 font-mono text-xs mt-0.5">V{i + 1}</span>
-                              <div>
-                                <span className="font-medium text-gray-700">{prompt.title}</span>
-                                <p className="text-gray-500 mt-0.5">{prompt.text}</p>
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  );
-                })}
-            </div>
-          </section>
-        )}
-
-        <section className="mt-8">
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
-            Evaluation Focus
-          </h2>
-          <ul className="bg-white rounded-lg border border-gray-200 p-4 space-y-2">
-            {testTypeInfo.evaluationFocus.map((focus, i) => (
-              <li key={i} className="text-sm text-gray-700 flex gap-2">
-                <span className="text-gray-400">&bull;</span>
-                {focus}
-              </li>
-            ))}
-          </ul>
-        </section>
+        <Suspense fallback={<div className="animate-pulse bg-gray-200 h-64 rounded-lg" />}>
+          <TestTypeTabs
+            testType={testType}
+            formatList={formatList}
+            testPrompts={testPrompts}
+            evaluationFocus={testTypeInfo.evaluationFocus}
+          />
+        </Suspense>
       </div>
     </main>
   );

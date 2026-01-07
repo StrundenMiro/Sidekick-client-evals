@@ -21,10 +21,13 @@ export const TEST_TYPES: Record<string, TestType> = {
     description: 'Tests how well Sidekick iterates on its own generated content. V1 is created from scratch, V2 and V3 refine based on feedback.',
     promptStructure: 'V1: Initial generation prompt | V2: Feedback on V1 | V3: Refinement of V2',
     evaluationFocus: [
-      'Quality of initial generation',
-      'Response to iteration feedback',
-      'Progressive improvement across versions',
-      'Avoiding regressions'
+      'Prompt Adherence — All requested content present, nothing missing or wrong',
+      'Content Quality — Specific, useful content (not generic placeholder text)',
+      'Visual Quality — Clean layout, readable text, no truncation or layout bugs',
+      'Iteration Continuity — V2 builds on V1, V3 builds on V2 (not starting fresh)',
+      'Style Preservation — Style maintained unless explicitly asked to change',
+      'Text Integrity — No garbled text, broken labels, or mid-word truncation',
+      'Format-Specific — Correct structure for the output type (tables have columns, flows have connections, etc.)'
     ]
   },
 
@@ -33,12 +36,15 @@ export const TEST_TYPES: Record<string, TestType> = {
     name: 'Iteration from Existing Board Content',
     shortName: 'Existing Content',
     description: 'Tests how well Sidekick works with and improves existing content on the board. Evaluates understanding of context and appropriate modifications.',
-    promptStructure: 'V1: Work with existing content | V2: Modify based on feedback | V3: Further refinement',
+    promptStructure: 'V0: Existing content | V1: First edit | V2: Second edit | V3: Third edit',
     evaluationFocus: [
-      'Understanding of existing content',
-      'Appropriate modifications (not over-changing)',
-      'Preserving important elements',
-      'Coherent integration with board context'
+      'Context Understanding — Did it understand the existing content before modifying?',
+      'In-Place Editing — Modified existing content (not created new from scratch)',
+      'Content Preservation — Kept what wasn\'t asked to change, no unexpected data loss',
+      'Style Preservation — Maintained colors, fonts, structure unless asked to change',
+      'Iteration Continuity — V1→V2→V3 builds progressively, each version builds on previous',
+      'Visual Quality — Clean layout, readable text, no truncation or garbled characters',
+      'No Regressions — Later versions don\'t lose changes made in earlier versions'
     ]
   },
 
