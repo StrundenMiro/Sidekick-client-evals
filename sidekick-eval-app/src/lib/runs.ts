@@ -605,11 +605,15 @@ export function scoreRun(input: ScoreInput): ScoredRun | null {
     });
   }
 
+  const rating: Rating = input.scores.overall >= 8 ? 'great' : input.scores.overall >= 5 ? 'good' : 'bad';
+
   const scoredRun: ScoredRun = {
     id: run.id,
+    testType: getRunTestType(run),
     format: run.format,
     timestamp: run.timestamp,
     state: 'scored',
+    rating,
     scores: input.scores,
     good: input.good,
     bad: input.bad,
