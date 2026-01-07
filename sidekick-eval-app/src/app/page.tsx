@@ -206,7 +206,7 @@ export default function Dashboard() {
         <footer className="pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
           Questions?{' '}
           <a
-            href="slack://user?team=T024VA4H2&id=U024VNR1Q"
+            href="https://slack.com/app_redirect?team=T024VA4H2&channel=U024VNR1Q"
             className="text-blue-600 hover:underline"
           >
             Message Fabian
