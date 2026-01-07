@@ -1,6 +1,226 @@
 {
   "runs": [
     {
+      "id": "greenfield-erd-2026-01-07-1606",
+      "testType": "ai-generated-iteration",
+      "format": "erd",
+      "timestamp": "2026-01-07T16:06:00",
+      "state": "scored",
+      "rating": "great",
+      "summary": "PERFECT ITERATION: V1 created complete ERD with all 6 entities plus normalized tables. V2 added cardinality labels and proper normalization (skills, languages, availability as separate entities). V3 added both requested entities (CaregiverAvailability and VisitNotes) exactly as asked. Each version built on the previous - textbook iteration.",
+      "good": [
+        "V1 created all 6 requested entities: USERS, CAREGIVERS, BOOKINGS, PAYMENTS, REVIEWS, EMERGENCY_CONTACTS",
+        "V1 included proper PK/FK notation throughout",
+        "V1 proactively added CAREGIVER_LANGUAGES and CAREGIVER_SKILLS as normalized junction tables",
+        "V2 added cardinality labels (1:N relationships clearly marked)",
+        "V2 normalized: CAREGIVER_SKILLS, CAREGIVER_LANGUAGES, CAREGIVER_AVAILABILITY as separate entities",
+        "V3 added CAREGIVERAVAILABILITY entity with time_slot_id, date, start_time, end_time",
+        "V3 added VISITNOTES entity linking bookings to timestamped care updates",
+        "Perfect iteration continuity - each version builds on previous without starting over",
+        "Proper ERD notation maintained throughout all versions"
+      ],
+      "bad": [],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create ERD",
+          "text": "Create an entity-relationship diagram for an \"Uber for elderly care\" app showing: Users, Caregivers, Bookings, Payments, Reviews, and Emergency Contacts.",
+          "status": "pass",
+          "note": "Excellent. Got all 6 entities I asked for plus bonus normalized tables for skills and languages. Every entity has proper PK/FK notation. Relationships are clear. This is production-ready ERD work.",
+          "artifact": "artifacts/greenfield-erd-2026-01-07-1606/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Add Cardinality",
+          "text": "Add cardinality labels to all relationships and normalize any redundant attributes.",
+          "status": "pass",
+          "note": "Perfect normalization. Skills, languages, and availability are now proper junction tables instead of embedded arrays. Cardinality is clear on all relationship lines (1:N everywhere it should be). This is how you iterate on a data model.",
+          "artifact": "artifacts/greenfield-erd-2026-01-07-1606/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Add Entities",
+          "text": "Add a \"CaregiverAvailability\" entity and a \"VisitNotes\" entity that links Bookings to timestamped care updates.",
+          "status": "pass",
+          "note": "Both entities added exactly as specified. CaregiverAvailability has time_slot_id, date, start_time, end_time. VisitNotes links to BOOKINGS with note_id, booking_id, timestamp, note_content. Built on V2, preserved all existing structure. Textbook iteration.",
+          "artifact": "artifacts/greenfield-erd-2026-01-07-1606/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "greenfield-mindmap-2026-01-07-1605",
+      "testType": "ai-generated-iteration",
+      "format": "mindmap",
+      "timestamp": "2026-01-07T16:05:00",
+      "state": "scored",
+      "rating": "good",
+      "summary": "V2→V3 iteration is excellent. V1 capture incomplete (cropped), but V2 shows comprehensive mindmap with expanded Trust & Safety branch (background checks, insurance, monitoring, incident protocols). V3 correctly added Competitive Landscape branch comparing traditional agencies, other apps (Papa, Honor, CareLinx), and family care.",
+      "good": [
+        "V2 expanded Trust & Safety branch with detailed sub-branches as requested",
+        "V3 added Competitive Landscape with exactly the comparisons asked for",
+        "Traditional agencies: Strengths (Established Trust, Licensed) and Weaknesses (Expensive, Inflexible)",
+        "Other apps section includes Papa, Honor, CareLinx, HomeHero with differentiator analysis",
+        "Informal Family Care section covers burnout risks and how we complement",
+        "Perfect iteration continuity from V2→V3 - built on previous, didn't start over"
+      ],
+      "bad": [
+        "V1 capture incomplete - only shows partial mindmap with cropped connectors",
+        "V1 file size (124KB) vs V2/V3 (557KB/488KB) confirms capture issue",
+        "Some text overlap in dense areas of V2/V3 but still readable",
+        "Console errors during generation: 'Mindmap: Some nodes still dont have parent'"
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Mindmap",
+          "text": "Create a mindmap exploring all aspects of an \"Uber for elderly care\" app - include users, features, concerns, and differentiators.",
+          "status": "fail",
+          "note": "Sidekick created the mindmap successfully ('Elderly Care App' with users, tech needs, risks, differentiators) but my capture was incomplete - only got partial view with cropped connectors. Generation worked fine, capture issue.",
+          "artifact": "artifacts/greenfield-mindmap-2026-01-07-1605/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Expand Trust & Safety",
+          "text": "Collapse less important branches and expand the \"Trust & Safety\" branch with more detail.",
+          "status": "pass",
+          "note": "Perfect. Trust & Safety is now the meaty branch with Background Checks (criminal, identity, references), Insurance & Liability (platform, caregiver bonding, professional liability), Real-time Safety Features (GPS, panic buttons, video monitoring), Regulatory compliance (HIPAA, licensing), Quality control, and Incident Reporting. Less critical stuff (tech stack, marketing) collapsed as requested.",
+          "artifact": "artifacts/greenfield-mindmap-2026-01-07-1605/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Add Competition",
+          "text": "Add a \"Competitive Landscape\" branch showing how we compare to traditional agencies, other apps, and family care.",
+          "status": "pass",
+          "note": "Exactly what I asked for. Competitive Landscape branch now shows: Traditional Agencies (Strengths: Established Trust, Licensed, Insurance Coverage; Weaknesses: Expensive, Inflexible Scheduling, Slow Booking), Other Apps (Papa, Honor, CareLinx, HomeHero with varying verification levels), Our Differentiators, and Informal Family Care (Burnout, Guilt, Scheduling Conflicts + How We Complement). Built on V2, didn't start fresh.",
+          "artifact": "artifacts/greenfield-mindmap-2026-01-07-1605/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "greenfield-flowchart-2026-01-07-1545",
+      "testType": "ai-generated-iteration",
+      "format": "flowchart",
+      "timestamp": "2026-01-07T15:45:00",
+      "state": "scored",
+      "rating": "good",
+      "summary": "V2→V3 iteration is textbook perfect. V1 capture failed (empty preview), but V2 created clean 7-step simplified flow and V3 correctly added parallel Emergency Request path that branches from Start and rejoins at Confirm Booking.",
+      "good": [
+        "V2 simplified to 7 core steps with clean verb-noun labels as requested",
+        "V3 added emergency parallel path exactly as specified",
+        "Emergency path uses blue diamond decision shape for 'Emergency Request'",
+        "Both paths merge correctly at Confirm Booking",
+        "Visual style consistent - yellow boxes, green terminals, blue decision",
+        "Perfect iteration continuity from V2→V3"
+      ],
+      "bad": [
+        "V1 capture failed - shows 'No content to display' instead of flowchart",
+        "V1 had a timeout during generation requiring retry"
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Booking Flow",
+          "text": "Create a flowchart showing the end-to-end booking flow for an \"Uber for elderly care\" app: from caregiver search to booking confirmation to visit completion.",
+          "status": "fail",
+          "note": "Capture failed. Sidekick generated the flowchart (24 objects) but my screenshot got 'No content to display' - clicked too fast before canvas rendered the preview. Generation itself worked fine, had a timeout and recovered.",
+          "artifact": "artifacts/greenfield-flowchart-2026-01-07-1545/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Simplify Flow",
+          "text": "Simplify: merge any steps that always happen together, remove edge cases, and ensure each box has a short verb-noun label.",
+          "status": "pass",
+          "note": "Perfect. 'Streamlined it down to 7 core steps—each with a clear action.' Clean horizontal flow: Start → Search Caregivers → Select Caregiver → Choose Schedule → Add Care Notes → Confirm Booking → Track Visit → Complete Visit → End. Every box has verb-noun label as requested.",
+          "artifact": "artifacts/greenfield-flowchart-2026-01-07-1545/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Add Emergency Path",
+          "text": "Add a parallel \"Emergency Request\" path that branches from Start and rejoins at Confirm Booking with expedited matching.",
+          "status": "pass",
+          "note": "Exactly what I asked for. Start now splits into 'Standard booking' and 'Urgent care needed' paths. Emergency Request diamond leads to Expedited Matching which auto-assigns caregiver and rejoins at Confirm Booking. Built on V2, didn't start over. This is how iteration should work.",
+          "artifact": "artifacts/greenfield-flowchart-2026-01-07-1545/v3.png"
+        }
+      ]
+    },
+    {
+      "id": "greenfield-image-2026-01-07-1520",
+      "testType": "ai-generated-iteration",
+      "format": "image",
+      "timestamp": "2026-01-07T15:20:00",
+      "state": "scored",
+      "rating": "great",
+      "summary": "PERFECT ITERATION: V1 created warm, professional app icon with hands cradling heart + shield. V2 beautifully simplified to just hands + heart, maintaining warm palette. Context carried forward perfectly - V2 is clearly an evolution of V1.",
+      "good": [
+        "V1 delivered exactly what was asked: warm, friendly, trustworthy icon with care imagery",
+        "V1 has professional quality - hands cradling heart with shield/checkmark for trust",
+        "V2 simplified perfectly - removed shield and dome, kept hands-heart core",
+        "V2 maintained warm color palette as requested",
+        "Perfect iteration continuity - V2 is clearly a simplified V1",
+        "Both versions work well at different sizes"
+      ],
+      "bad": [],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create App Icon",
+          "text": "Generate an app icon for an \"Uber for elderly care\" app. Style: warm, friendly, and trustworthy. Include imagery that represents care/support.",
+          "status": "pass",
+          "note": "Beautiful. Got warm purple/coral icon with hands cradling a heart, shield with checkmark inside for trust. The dome above adds protection feel. Professional quality, warm and friendly - exactly what I asked for.",
+          "artifact": "artifacts/greenfield-image-2026-01-07-1520/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Simplify Design",
+          "text": "Make the icon simpler - reduce to a single memorable symbol that works at small sizes. Keep the warm color palette.",
+          "status": "pass",
+          "note": "Perfect simplification. Same hands-heart concept but stripped down - removed the shield, checkmark, and dome. Just hands cupping a heart on warm peach background. Will work at any size. This is how iteration should work.",
+          "artifact": "artifacts/greenfield-image-2026-01-07-1520/v2.png"
+        }
+      ]
+    },
+    {
+      "id": "greenfield-document-2026-01-07-1455",
+      "testType": "ai-generated-iteration",
+      "format": "document",
+      "timestamp": "2026-01-07T14:55:00",
+      "state": "scored",
+      "rating": "bad",
+      "summary": "CRITICAL FAIL: V1 generated excellent product brief with all sections. V2 completely ignored V1 and created a generic template with placeholder text instead of editing the actual content. Classic 'Template Instead of Edit' failure pattern.",
+      "good": [
+        "V1 generated excellent product brief with all 6 requested sections",
+        "V1 content is specific to elderly care - not generic",
+        "V1 structure is clean: Problem, Target Users, Key User Flows, MVP Scope, Success Metrics, Key Risks",
+        "V1 visual quality is perfect - clean layout, proper formatting"
+      ],
+      "bad": [
+        "CRITICAL: V2 is a generic template, not an edited version of V1",
+        "V2 lost ALL specific content from V1 - replaced with placeholders",
+        "V2 has placeholder text throughout: '[specific product/output]', '[role, segment]', '[YYYY-MM-DD]'",
+        "No iteration continuity - V2 completely ignored V1",
+        "Different structure: V1 had 7 sections, V2 has 13+ generic template sections",
+        "'Template Instead of Edit' failure pattern - created how-to instead of editing"
+      ],
+      "prompts": [
+        {
+          "number": 1,
+          "title": "Create Product Brief",
+          "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
+          "status": "pass",
+          "note": "Excellent start. Got 'On-Demand Elderly Care Marketplace App — Product Brief' with all 6 sections. Problem Statement, Target Users, Key User Flows (Family + Caregiver), MVP Scope (5 items), Success Metrics (5 bullets), Key Risks (5 bullets). Clean layout, specific content. Ready to iterate.",
+          "artifact": "artifacts/greenfield-document-2026-01-07-1455/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Tighten Content",
+          "text": "Make this shorter and more decisive. Replace vague wording with clear choices.",
+          "status": "fail",
+          "note": "Complete disaster. I asked to tighten MY product brief and got a generic template titled 'Overview' with placeholder text like '[specific product/output]' and '[YYYY-MM-DD]'. All my elderly care content is gone. This is a template for HOW to write a brief, not my actual brief. Sidekick completely forgot V1 existed.",
+          "artifact": "artifacts/greenfield-document-2026-01-07-1455/v2.png"
+        }
+      ]
+    },
+    {
       "id": "brownfield-document-2026-01-07-0115",
       "testType": "existing-content-iteration",
       "format": "document",

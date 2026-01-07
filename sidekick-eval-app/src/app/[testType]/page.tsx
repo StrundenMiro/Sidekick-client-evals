@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import RatingBadge from '@/components/RatingBadge';
 
-const FORMAT_ORDER = ['table', 'stickies', 'document', 'prototype', 'flowchart', 'slides', 'image', 'diagram_erd', 'diagram_mindmap'];
+const FORMAT_ORDER = ['table', 'stickies', 'document', 'prototype', 'flowchart', 'slides', 'image', 'mindmap', 'erd', 'sequence', 'class'];
 
 export default async function TestTypePage({ params }: { params: Promise<{ testType: string }> }) {
   const { testType } = await params;
