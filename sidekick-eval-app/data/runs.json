@@ -1,6 +1,141 @@
 {
   "runs": [
     {
+      "id": "brownfield-document-2026-01-07-0115",
+      "testType": "existing-content-iteration",
+      "format": "document",
+      "timestamp": "2026-01-07T01:15:00",
+      "state": "scored",
+      "rating": "good",
+      "summary": "BROWNFIELD iteration worked - context carried forward, edits applied correctly. But significant layout bugs throughout: 8 sub-headers incorrectly merged with previous lines instead of being on their own line. The formatting issue was present from V0 and persisted through all edits.",
+      "good": [
+        "Edit mode properly engaged - Sidekick understood existing document structure",
+        "V1 tightened content throughout while preserving all 6 sections",
+        "V2 added Why Us section exactly where requested (after Problem Statement)",
+        "Why Us has 4 strong differentiators explaining competitive advantage",
+        "Version 2 of 2 - context carried forward between prompts"
+      ],
+      "bad": [
+        "Layout bug: 'Secondary Users:' header merged with previous bullet instead of own line",
+        "Layout bug: 'For Caregivers:' header merged with item 5 instead of own line",
+        "Layout bug: 'Out of Scope for MVP:' header merged with previous bullet",
+        "Layout bug: 'Engagement:' header merged with previous bullet",
+        "Layout bug: 'Business:' header merged with previous bullet",
+        "Layout bug: In Key Risks, 'Supply-Side:', 'Regulatory:', 'Competitive:' all merged with previous lines",
+        "8 total instances of the same formatting bug - sub-headers not getting their own line"
+      ],
+      "prompts": [
+        {
+          "number": 0,
+          "title": "Seed Content",
+          "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
+          "status": "pass",
+          "note": "Got all 6 sections I asked for. Content is solid. But the formatting is a mess - 'Secondary Users:', 'For Caregivers:', 'Out of Scope for MVP:', 'Engagement:', 'Business:' and all the risk category headers are jammed onto the previous line instead of being their own headers. 8 layout bugs in one document.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0115/v0-seed.png"
+        },
+        {
+          "number": 1,
+          "title": "Tighten Content",
+          "text": "Make this document more concise. Cut any fluffy language and keep only the essential points.",
+          "status": "pass",
+          "note": "Content got tighter - Problem Statement is now 2 sentences, flows are punchier. Good edit. But the formatting bugs from V0 are still there. Every sub-header is still merged with the previous bullet. Didn't fix it, didn't make it worse.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0115/v1-edit.png"
+        },
+        {
+          "number": 2,
+          "title": "Add Competitive Section",
+          "text": "Add a section called 'Why Us' that explains how this beats traditional care agencies.",
+          "status": "pass",
+          "note": "Why Us section added right after Problem Statement. Four solid differentiators about speed, pricing, scheduling, and caregiver pay. Context carried forward - Version 2 of 2. But still has all those formatting bugs from V0. Iteration worked, formatting didn't.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0115/v2-edit.png"
+        }
+      ]
+    },
+    {
+      "id": "brownfield-document-2026-01-07-0105",
+      "testType": "existing-content-iteration",
+      "format": "document",
+      "timestamp": "2026-01-07T01:05:00",
+      "state": "scored",
+      "rating": "great",
+      "summary": "BROWNFIELD SUCCESS: Perfect iteration. Seeded board with Product Brief: ElderConnect, then ran 2 edit prompts. V1 'Make concise' tightened content masterfully - removed fluff while preserving all sections. V2 'Add Why Us section' added competitive differentiators exactly where requested. Context carried forward perfectly throughout.",
+      "good": [
+        "Edit mode properly engaged - Sidekick understood it was editing existing content",
+        "V1 edit preserved all document sections while significantly tightening content",
+        "V2 added Why Us section with strong competitive differentiators",
+        "Context carried forward between prompts - built on previous edits",
+        "Original structure preserved: Problem, Target Users, Key User Flows, MVP Scope, Success Metrics, Risks & Mitigation",
+        "Style and formatting remained consistent across all edits"
+      ],
+      "bad": [],
+      "prompts": [
+        {
+          "number": 0,
+          "title": "Seed Content",
+          "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0105/v0-seed.png"
+        },
+        {
+          "number": 1,
+          "title": "Tighten Content",
+          "text": "Make this document more concise. Cut any fluffy language and keep only the essential points.",
+          "status": "pass",
+          "note": "Perfect edit. Sidekick tightened the content exactly as asked - cut the fluff, kept the substance. All 6 sections preserved, just cleaner and more direct. This is how iteration should work.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0105/v1-edit.png"
+        },
+        {
+          "number": 2,
+          "title": "Add Competitive Section",
+          "text": "Add a section called 'Why Us' that explains how this beats traditional care agencies.",
+          "status": "pass",
+          "note": "Why Us section added with solid differentiators: on-demand availability, transparent pricing, vetted caregivers, real-time tracking. Context from V1 preserved - built on the tightened version, not the original. Great brownfield iteration.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0105/v2-edit.png"
+        }
+      ]
+    },
+    {
+      "id": "brownfield-document-2026-01-07-0025",
+      "testType": "existing-content-iteration",
+      "format": "document",
+      "timestamp": "2026-01-07T00:25:00",
+      "state": "scored",
+      "rating": "great",
+      "summary": "BROWNFIELD SUCCESS: Edit mode works. Seeded board with Product Brief: ElderConnect, then ran 2 edit prompts. V1 'Make concise' tightened content while preserving structure. V2 'Add Why Us section' showed Version 2 of 2 - context carried forward perfectly. Why Us section added after Problem with competitive differentiators. This is how iteration should work - Sidekick understood existing content and built on it.",
+      "good": [
+        "Edit mode properly engaged - Sidekick understood it was editing existing content",
+        "V1 edit preserved document structure while tightening content",
+        "V2 showed 'Version 2 of 2' - context carried forward perfectly",
+        "Why Us section added exactly where requested (after Problem)",
+        "Original sections preserved: Problem, Target Users, Key User Flows, MVP Scope, Success Metrics, Risks & Mitigation",
+        "Style and formatting remained consistent across edits"
+      ],
+      "bad": [],
+      "prompts": [
+        {
+          "number": 0,
+          "title": "Seed Content",
+          "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0025/v0-seed.png"
+        },
+        {
+          "number": 1,
+          "title": "Tighten Content",
+          "text": "Make this document more concise. Cut any fluffy language and keep only the essential points.",
+          "status": "pass",
+          "note": "Good edit. Sidekick said 'I'll tighten this up and remove the fluff' and delivered. Document structure intact, content is crisper. This is how edit mode should work.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0025/v1-staged.png"
+        },
+        {
+          "number": 2,
+          "title": "Add Competitive Section",
+          "text": "Add a section called 'Why Us' that explains how this beats traditional care agencies.",
+          "status": "pass",
+          "note": "Version 2 of 2 - context carried forward. Why Us section added after Problem with solid competitive differentiators: on-demand availability, no long-term commitments, transparent pricing, ratings, real-time tracking, faster emergency response. Built on V1, didn't start fresh.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-0025/v2-staged.png"
+        }
+      ]
+    },
+    {
       "id": "document-2026-01-06-1820",
       "format": "document",
       "timestamp": "2026-01-06T18:20:00",
@@ -23,7 +158,7 @@
           "title": "Create Product Brief",
           "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
           "status": "pass",
-          "note": "Created 'CareLink — Product Brief' with all 7 requested sections. Content is comprehensive and specific to the elderly care domain.",
+          "note": "Nailed it. I got a proper product brief with all 7 sections I asked for. Content is solid and specific to elderly care - exactly what I'd show to stakeholders.",
           "artifact": "artifacts/document-2026-01-06-1820/v1.png",
           "evaluation": {
             "promptAdherence": {
@@ -50,7 +185,7 @@
           "title": "Tighten Content",
           "text": "Make this shorter and more decisive. Replace vague wording with clear choices.",
           "status": "fail",
-          "note": "CRITICAL FAILURE: Created generic 'Action Required' template instead of editing V1's content. All product brief content lost.",
+          "note": "What happened here? I asked to tighten MY product brief and got a blank template with 'Required Inputs' and placeholder instructions. All my CareLink content is gone. This is unusable.",
           "artifact": "artifacts/document-2026-01-06-1820/v2.png",
           "evaluation": {
             "promptAdherence": {
@@ -89,7 +224,7 @@
           "title": "Add Sections",
           "text": "Add two sections: \"Non-negotiables\" and \"Not in v1\".",
           "status": "fail",
-          "note": "Created standalone document with requested sections. Content quality is good but presented as instructional guide rather than integrated into the product brief.",
+          "note": "The content is actually decent - good Non-negotiables and Not in v1 lists. But why is the header 'Add the following sections...'? I wanted these sections IN my brief, not instructions on what to add. Feels like it forgot V1 existed.",
           "artifact": "artifacts/document-2026-01-06-1820/v3.png",
           "evaluation": {
             "promptAdherence": {
@@ -145,7 +280,7 @@
           "title": "Create Table",
           "text": "Create a feature table for an \"Uber for elderly care\" app with columns: Feature, Who it helps, Why it matters, MVP or Later.",
           "status": "pass",
-          "note": "Created clean 4-column table with 5 features. Color-coded tags for Who It Helps and MVP/Later.",
+          "note": "Great start. Clean 4-column table with 5 features. I like the color-coded MVP/Later tags - red for MVP, black for Later. Easy to scan.",
           "artifact": "artifacts/table-2026-01-06-1320/v1.png",
           "evaluation": {
             "promptAdherence": { "score": "great", "issues": [] },
@@ -160,7 +295,7 @@
           "title": "Add Column",
           "text": "Add a column called \"How we'll test it\" and fill it in for each feature.",
           "status": "fail",
-          "note": "DESTRUCTIVE EDIT: Deleted 2 columns when asked to add 1. Lost 'Who It Helps' and 'MVP or Later' columns.",
+          "note": "I asked to ADD a column and it DELETED two? Where's my 'Who It Helps' column? Where's 'MVP or Later'? It even renamed 'Why It Matters' to generic 'Description'. This is destructive - I lost data trying to add one column.",
           "artifact": "artifacts/table-2026-01-06-1320/v2.png",
           "evaluation": {
             "promptAdherence": {
@@ -191,7 +326,7 @@
           "title": "MVP Prioritization",
           "text": "Choose the smallest MVP that still works end-to-end and mark everything else as Later.",
           "status": "pass",
-          "note": "Successfully recovered all 5 columns with MVP/Later prioritization. Good recovery from V2's regression.",
+          "note": "Recovered! All 5 columns are back with the testing info I wanted. But the cell content looks regenerated, not restored from V1. Different values. I shouldn't have to ask nicely for my data back.",
           "artifact": "artifacts/table-2026-01-06-1320/v3.png",
           "evaluation": {
             "promptAdherence": { "score": "great", "issues": [] },
@@ -237,7 +372,7 @@
           "title": "Create Stickies",
           "text": "Create sticky notes for an \"Uber for elderly care\" app: user needs, pain points, and product ideas. Group them into clear themes.",
           "status": "pass",
-          "note": "Created 'Elderly Care Stickies' with 50 objects across 5 themes: family needs, caregiver needs, pain points for both sides, and product ideas. Color coding applied for easy scanning.",
+          "note": "Love it. About 50 stickies organized into 5 clear themes with color coding - blue for family needs, yellow for caregiver needs, pink for pain points, green for ideas. Easy to scan and find what I need.",
           "artifact": "artifacts/stickies-2026-01-06-1353/v1.png"
         },
         {
@@ -245,7 +380,7 @@
           "title": "De-duplicate & Shorten",
           "text": "Rewrite these stickies to be shorter and more specific. Remove duplicates.",
           "status": "pass",
-          "note": "Tightened and de-duped. Each note now hits one clear point. Reduced from 50 objects to 9 objects.",
+          "note": "Good de-dupe work - down from 50 to 9 focused stickies. Each one hits a clear point. But where'd all the colors go? Everything's yellow now. Lost those nice themed groups from V1.",
           "artifact": "artifacts/stickies-2026-01-06-1353/v2.png"
         },
         {
@@ -253,7 +388,7 @@
           "title": "Regroup & Highlight",
           "text": "Re-group into: Trust & safety, Booking, Communication, Payments, Emergencies. Highlight the top 5.",
           "status": "fail",
-          "note": "Created new artifact 'Regrouped Care Stickies' with 25 objects organized into the 5 requested themes with top priorities flagged. Did not modify existing artifact in place.",
+          "note": "Got my 5 themes with 25 stickies and top priorities flagged. But it created a whole new artifact 'Regrouped Care Stickies' instead of updating what I had. Now I have two sticky sets on my board.",
           "artifact": "artifacts/stickies-2026-01-06-1353/v3.png"
         }
       ]
@@ -288,7 +423,7 @@
           "title": "Create Product Brief",
           "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board.",
           "status": "pass",
-          "note": "Created 'Elderly Care Product Brief' with 6 complete sections: Overview, Problem, Users (2 types), Key Flows (5 items), MVP Scope (IN/OUT clearly delineated), Success Metrics (5), and Risks (5). Excellent first generation.",
+          "note": "Excellent first draft. 6 solid sections covering everything I asked for - problem, users, flows, MVP scope with clear IN/OUT, metrics, and risks. This is stakeholder-ready.",
           "artifact": "artifacts/document-2026-01-06-1516/v1.png"
         },
         {
@@ -296,7 +431,7 @@
           "title": "Tighten Content",
           "text": "Tighten this up: cut any fluffy language, shorten each section to 1-2 crisp sentences, and keep only the 3 most important success metrics.",
           "status": "fail",
-          "note": "FAILED: Created blank template with placeholders instead of tightening V1's actual content. Shows generic instructions like 'State what you're building...' and placeholders like '[Metric 1]', '[Capability A]'. All V1 content lost.",
+          "note": "Completely broken. I asked to tighten my product brief and got a blank template with '[Metric 1]' and 'State what you're building...' placeholders. Where's my CareLink brief? This is a how-to-write-a-brief template, not my brief.",
           "artifact": "artifacts/document-2026-01-06-1516/v2.png"
         },
         {
@@ -304,7 +439,7 @@
           "title": "Add Section",
           "text": "Add a \"Key Differentiators\" section after Problem that explains why this app beats traditional agencies. Keep the same tight style.",
           "status": "fail",
-          "note": "CRITICAL FAILURE: Created completely empty 'Untitled doc' showing only template picker options. No content at all. Sidekick claimed it added the section but artifact is blank.",
+          "note": "Even worse than V2. I asked for a 'Key Differentiators' section and got an empty 'Untitled doc' with just the template picker visible. Zero content. Sidekick said it added the section - where? The document is blank.",
           "artifact": "artifacts/document-2026-01-06-1516/v3.png"
         }
       ]
@@ -333,7 +468,7 @@
           "title": "Create Booking Flow",
           "text": "Create a flowchart showing the end-to-end booking flow for an \"Uber for elderly care\" app: from caregiver search to booking confirmation to visit completion.",
           "status": "pass",
-          "note": "Created 'Elderly Care Booking Flow' with 23 objects. Comprehensive flow showing all steps from start through search, selection, booking, payment processing, visit completion, and feedback collection. Multiple decision points and branches included.",
+          "note": "Solid comprehensive flow with 23 steps - proper flowchart symbols, good coverage from search through payment and feedback. Has the decision points and branches I'd expect. Good foundation to iterate on.",
           "artifact": "artifacts/flowchart-2026-01-06-1548/v1.png"
         },
         {
@@ -341,7 +476,7 @@
           "title": "Simplify Flow",
           "text": "Simplify: merge any steps that always happen together, remove edge cases, and ensure each box has a short verb-noun label.",
           "status": "pass",
-          "note": "Created 'Simplified Booking Flow' reducing from 23 to 7 objects. Clean linear flow: Start App -> Search Caregivers -> Select Caregiver -> Schedule Visit -> Confirm Booking -> Receive Care -> Complete Visit. All boxes have short verb-noun labels as requested.",
+          "note": "Perfect simplification. Down from 23 to 7 clean steps. Every box has the verb-noun label I asked for. This is what I'd put in an exec deck - easy to follow, no clutter.",
           "artifact": "artifacts/flowchart-2026-01-06-1548/v2.png"
         },
         {
@@ -349,7 +484,7 @@
           "title": "Add Emergency Path",
           "text": "Add a parallel \"Emergency Request\" path that branches from Start and rejoins at Confirm Booking with expedited matching.",
           "status": "pass",
-          "note": "Created 'Elderly Care Booking' with 11 objects. Added decision diamond 'Emergency Request?' after Start. Normal path (No) goes through Search -> Select -> Choose Time. Emergency path (Yes) goes through 'Expedited Matching' and both paths merge at Confirm Booking. Exactly as requested.",
+          "note": "Exactly what I asked for. Emergency branch with decision diamond after Start, expedited path for urgent requests, and both paths merge at Confirm Booking. Built on V2, didn't start over. This is how iteration should work.",
           "artifact": "artifacts/flowchart-2026-01-06-1548/v3.png"
         }
       ]
@@ -384,7 +519,7 @@
           "title": "Create Pitch Deck",
           "text": "Create a 7-slide pitch deck for an \"Uber for elderly care\" app: problem, users, solution, critical features, trust/safety, MVP, metrics + ask. Use the context on this board.",
           "status": "pass",
-          "note": "Created 'Elderly Care Pitch' with dark purple gradient theme, soft professional illustrations. Clean structure.",
+          "note": "Good start. Dark purple theme with soft professional illustrations. All 7 slides I asked for with clear structure. This is a solid foundation to iterate on.",
           "artifact": "artifacts/slides-2026-01-06-1730/v1.png"
         },
         {
@@ -392,7 +527,7 @@
           "title": "Make Exec-Friendly",
           "text": "Make the slides more exec-friendly: fewer words, stronger headlines, cleaner structure.",
           "status": "fail",
-          "note": "Headlines tightened BUT visual style completely changed. Now uses bold teal/green circular graphics, flat multicolor illustrations - completely different visual language than V1.",
+          "note": "Headlines are tighter, good. But why did the entire visual style change? My dark purple deck is now teal/green with bold circular graphics. I asked to edit the copy, not redesign the whole thing. Now I have a mismatched deck.",
           "artifact": "artifacts/slides-2026-01-06-1730/v2.png"
         },
         {
@@ -400,7 +535,7 @@
           "title": "Add Speaker Notes",
           "text": "Add speaker notes with a tight talk track and likely objections + answers.",
           "status": "fail",
-          "note": "Asked for speaker notes but they're not visible in the output. User expectation not met - can't tell if notes were added. Additionally, style changed AGAIN to cream/beige backgrounds with warm earthy illustrations. Third completely different visual style.",
+          "note": "Where are my speaker notes? I can't see them in the output - maybe they're there, maybe not. And the style changed AGAIN - now cream/beige with earthy illustrations. That's three completely different visual styles across three prompts. Unusable as a real deck.",
           "artifact": "artifacts/slides-2026-01-06-1730/v3.png"
         }
       ]
@@ -433,7 +568,7 @@
           "title": "Create Table",
           "text": "Create a feature table for an \"Uber for elderly care\" app with columns: Feature, Who it helps, Why it matters, MVP or Later. Use the critical features listed on this board.",
           "status": "pass",
-          "note": "Created 'Feature Priority Table' with 4 columns and 5 features: Real-time matching (Both/MVP), Verified profiles (Both/MVP), In-app communication (Both/MVP), Flexible pricing (Both/Later), Emergency protocols (Both/MVP). Clean table with tag-style MVP/Later badges.",
+          "note": "Solid table with all 4 columns I asked for and 5 good features. MVP/Later badges are clean tag-style. Ready to iterate on.",
           "artifact": "artifacts/table-2026-01-06-1900/v1.png"
         },
         {
@@ -441,7 +576,7 @@
           "title": "Add Column",
           "text": "Add a column called \"How we'll test it\" and fill it in for each feature.",
           "status": "fail",
-          "note": "REPLACED table structure instead of adding column. New table has only Feature and 'How we'll test it' columns - lost 'Who it helps', 'Why it matters', and 'MVP or Later' columns. Testing methods are detailed but original structure destroyed.",
+          "note": "Same problem as before - I asked to ADD a column and it replaced my whole table. Now I only have Feature and 'How we'll test it'. Where's 'Who it helps'? 'Why it matters'? 'MVP or Later'? Three columns gone. The test methods are detailed but I lost all my original data.",
           "artifact": "artifacts/table-2026-01-06-1900/v2.png"
         },
         {
@@ -449,7 +584,7 @@
           "title": "MVP Prioritization",
           "text": "Choose the smallest MVP that still works end-to-end and mark everything else as Later.",
           "status": "pass",
-          "note": "Successfully recovered ALL 5 columns: Feature, Who it helps, Why it matters, How we'll test it, MVP or Later. MVP: Caregiver matching, Verified profiles, Flexible pricing. Later: In-app communication, Emergency protocols. Excellent recovery consolidating V1 and V2 content.",
+          "note": "Good recovery - all 5 columns are back including the test column from V2. MVP prioritization makes sense. But I shouldn't have to recover from losing columns. This worked out but it's lucky, not reliable.",
           "artifact": "artifacts/table-2026-01-06-1900/v3.png"
         }
       ]
@@ -477,7 +612,7 @@
           "title": "Create App Icon",
           "text": "Generate an app icon for an \"Uber for elderly care\" app. Style: warm, friendly, and trustworthy. Include imagery that represents care/support.",
           "status": "pass",
-          "note": "Created 'Elderly Care Icon' with warm purple background, multiple hands (purple and peach) cradling a heart with coral/peach gradient. Decorative plus signs and dots add friendly feel. Matches requested warm, friendly, trustworthy style with clear care/support imagery.",
+          "note": "Lovely. Warm purple with hands cradling a heart - exactly the warm, friendly, trustworthy vibe I asked for. The decorative touches add personality without being cheesy. Good foundation for an app icon.",
           "artifact": "artifacts/image-2026-01-06-1613/v1.png"
         },
         {
@@ -485,7 +620,7 @@
           "title": "Simplify Design",
           "text": "Make the icon simpler - reduce to a single memorable symbol that works at small sizes. Keep the warm color palette.",
           "status": "pass",
-          "note": "Created 'Simplified App Icon' - dramatically simplified to two hands (purple and peach) cupping a single heart on mauve/dusty rose gradient background. Clean, minimal design that works at small sizes while maintaining warm color palette. Excellent iteration on V1.",
+          "note": "Perfect simplification. Just two hands cupping a heart - will work at any size. Kept the warm purple/peach palette from V1. This is how you iterate on a design without losing the essence.",
           "artifact": "artifacts/image-2026-01-06-1613/v2.png"
         },
         {
@@ -493,7 +628,7 @@
           "title": "Color Variations",
           "text": "Show this icon in 3 color variations: the current warm palette, a professional blue palette, and a high-contrast accessible version.",
           "status": "pass",
-          "note": "Created 'Icon Color Variations' showing exact same simplified hands-heart symbol in 3 palettes: (1) Warm purple/coral outline on white, (2) Professional teal/blue on light gray rounded square, (3) High-contrast lime green on dark navy rounded square. All three variations requested are present with clear accessibility consideration.",
+          "note": "Nailed all 3 variations I asked for: warm outline version, professional teal for corporate contexts, and high-contrast lime/navy for accessibility. Same hands-heart symbol in each. Ready to present options to stakeholders.",
           "artifact": "artifacts/image-2026-01-06-1613/v3.png"
         }
       ]
@@ -527,7 +662,7 @@
           "title": "Create Stickies",
           "text": "Create sticky notes for an \"Uber for elderly care\" app: user needs, pain points, and product ideas. Group them into clear themes.",
           "status": "pass",
-          "note": "Created 'Elderly Care Sticky Notes' with 37 objects in 3 themed groups: User Needs (blue header, 10 stickies), Pain Points (pink header, 10 stickies), Product Ideas (green header, 14 stickies). Well-organized with color-coded headers.",
+          "note": "Good structure. 37 stickies in 3 clear groups - User Needs (blue), Pain Points (pink), Product Ideas (green). Color-coded headers make it easy to scan. Solid starting point.",
           "artifact": "artifacts/stickies-2026-01-06-1930/v1.png"
         },
         {
@@ -535,7 +670,7 @@
           "title": "De-duplicate & Shorten",
           "text": "Rewrite these stickies to be shorter and more specific. Remove duplicates.",
           "status": "fail",
-          "note": "Created 'Elderly Care Stickies' reducing from 37 to 9 objects. Stickies are shorter and more specific (e.g., 'Easy scheduling for caregivers', 'Real-time caregiver tracking'). However, theme headers were removed - lost grouping structure.",
+          "note": "Good de-duplication - down from 37 to 9 focused stickies with clear language. But where'd my theme headers go? The blue/pink/green grouping is gone. I didn't ask to remove the organization, just tighten the content.",
           "artifact": "artifacts/stickies-2026-01-06-1930/v2.png"
         },
         {
@@ -543,7 +678,7 @@
           "title": "Regroup & Highlight",
           "text": "Re-group into: Trust & safety, Booking, Communication, Payments, Emergencies. Highlight the top 5.",
           "status": "pass",
-          "note": "Created regrouped stickies with 15 objects. Each sticky prefixed with theme (e.g., 'Trust & Safety: User verification process'). Top 5 highlighted with orange background and 'Critical:' prefix. Themes covered: Trust & Safety (2), Booking (2), Communication (2), Payments (2), Emergencies (2), plus 5 Critical duplicates.",
+          "note": "Got my 5 new themes and top 5 are highlighted in orange. But the 'Critical:' prefix duplicates existing stickies - now I have 15 instead of 10. Would've been cleaner to just change the color of the top 5 rather than copy them.",
           "artifact": "artifacts/stickies-2026-01-06-1930/v3.png"
         }
       ]
@@ -552,23 +687,29 @@
       "id": "prototype-2026-01-06-1825",
       "format": "prototype",
       "timestamp": "2026-01-06T18:25:00",
-      "rating": "great",
+      "rating": "bad",
       "scores": {
-        "overall": 9,
-        "promptAdherence": 9,
-        "iterationQuality": 9
+        "overall": 3,
+        "promptAdherence": 6,
+        "iterationQuality": 1
       },
       "good": [
-        "V1 created all 6 requested features",
-        "V2 successfully made senior-friendly with 7 screens",
-        "V3 covered all 5 requested edge cases"
+        "V1 created all 6 requested features with clean purple design",
+        "Each version individually covers the requested content"
       ],
       "bad": [
-        "V3 created separate artifact instead of adding screens"
+        "V2 created entirely new orange app instead of iterating on V1",
+        "V3 created entirely new green app instead of adding screens to V2",
+        "3 different color schemes (purple → orange → green)",
+        "3 different app names (ElderlyCareConnect → SeniorCareConnect → Caregiver Support)",
+        "3 different UI kits - cannot be combined or used together",
+        "Zero iteration continuity - user must start over to use any of these",
+        "V2 has truncated text everywhere: 'SeniorCareConn', 'Michae Connor', 'Butt on' broken labels",
+        "V3 has garbled/corrupted text: 'lange, Fisher Nite, ar leas liagt' visible on Appointment Alert screen"
       ],
-      "summary": "V1 created 'Elderly Care App' with 6 screens covering all requested features (search, profile, booking, messaging, payment, emergency). V2 'Senior-Friendly Care' expanded to 7 screens with bigger text and clearer buttons. V3 'Edge Case Screens' covered all 5 requested scenarios but as separate artifact.",
+      "summary": "Asked for ONE prototype refined over 3 prompts. Got THREE completely different apps with different colors, names, and UI kits. V1 purple 'ElderlyCareConnect', V2 orange 'SeniorCareConnect', V3 green 'Caregiver Support'. Unusable as a coherent design system.",
       "issues": [
-        {"severity": "low", "text": "V3 created separate 'Edge Case Screens' artifact instead of adding to existing prototype"}
+        {"severity": "high", "text": "No iteration continuity - each prompt created a brand new app instead of building on the previous one"}
       ],
       "prompts": [
         {
@@ -576,23 +717,23 @@
           "title": "Create Prototype",
           "text": "Create a mobile prototype for an \"Uber for elderly care\" app. Include: caregiver search, caregiver profile (verified), booking, messaging/check-ins, payment, and an emergency button. Match the vibe of the screenshots on this board.",
           "status": "pass",
-          "note": "Created 'Elderly Care App' with 6 screens: caregiver search with filters, verified caregiver profile with reviews, booking flow, messaging/check-ins, payment confirmation, and prominent emergency button. Matches purple app style from context.",
+          "note": "Good start. Purple 'ElderlyCareConnect' with all 6 features I asked for - search, profile, booking, messaging, payment, emergency. Clean UI, consistent style. This is my prototype to iterate on.",
           "artifact": "artifacts/prototype-2026-01-06-1825/v1.png"
         },
         {
           "number": 2,
           "title": "Senior-Friendly",
           "text": "Make the prototype much more senior-friendly: bigger text, fewer steps, clearer primary buttons, and less clutter.",
-          "status": "pass",
-          "note": "Created 'Senior-Friendly Care' with 7 screens. Larger text, bold primary action buttons, simplified navigation, less visual clutter. Screens include welcome, home with large icons, caregiver selection, booking confirmation, active visit tracking, payment, and help/emergency.",
+          "status": "fail",
+          "note": "What is this? I asked to make MY prototype senior-friendly and got a completely different orange app called 'SeniorCareConnect'. Different colors, different name, different UI kit. And look at the text - 'Michae Connor' is truncated, buttons say 'Butt on'. This is broken AND it's not my prototype.",
           "artifact": "artifacts/prototype-2026-01-06-1825/v2.png"
         },
         {
           "number": 3,
           "title": "Edge Cases",
           "text": "Add the key edge-case screens: no caregivers available, caregiver late/cancels, verification pending, payment failed, emergency triggered.",
-          "status": "pass",
-          "note": "Created 'Edge Case Screens' with 5 screens covering: No Caregivers Available (with suggestions), Caregiver Late/Cancels (with rebooking option), Verification Pending (with progress indicator), Payment Failed (with retry), Emergency Triggered (with confirmation and ETA). All requested edge cases covered.",
+          "status": "fail",
+          "note": "Third completely different app. Now it's green 'Caregiver Support'. I asked to ADD edge-case screens to my prototype, not build a third app from scratch. And the Appointment Alert screen has garbled text - 'lange, Fisher Nite, ar leas liagt' - what is that? I now have 3 unusable prototypes instead of 1 refined one.",
           "artifact": "artifacts/prototype-2026-01-06-1825/v3.png"
         }
       ]
@@ -624,7 +765,7 @@
           "title": "Create Booking Flow",
           "text": "Draw the end-to-end flow for an elderly care booking app: find caregiver -> book -> caregiver arrives -> updates during visit -> pay -> rate. Include emergencies.",
           "status": "pass",
-          "note": "Created 'Care Booking Flow' with 31 objects. Complete flow from Find Caregiver through Book Visit, Caregiver Arrives, Visit Updates, Payment, to Rating. Includes parallel emergency path branching from Visit Updates.",
+          "note": "Comprehensive flow with 31 steps covering the full journey - search, book, visit, payment, rating. Emergency path branches off where it should. This is a solid foundation.",
           "artifact": "artifacts/flowchart-2026-01-06-1825/v1.png"
         },
         {
@@ -632,7 +773,7 @@
           "title": "Add Edge Cases",
           "text": "Add the main edge cases: no availability, caregiver cancels, payment fails, emergency happens.",
           "status": "pass",
-          "note": "Created updated flow with 36 objects. Added decision diamonds and alternate paths for: No Caregiver Available (suggest alternatives), Caregiver Cancels (auto-rebook), Payment Fails (retry/support), Emergency Happens (escalate to authorities). All 4 edge cases integrated.",
+          "note": "All 4 edge cases added exactly where they belong - no availability, cancellations, payment failures, emergencies. Decision diamonds with proper alternate paths. Built on V1 without breaking anything. Great iteration.",
           "artifact": "artifacts/flowchart-2026-01-06-1825/v2.png"
         },
         {
@@ -640,7 +781,7 @@
           "title": "Simplify to MVP",
           "text": "Simplify this to the MVP flow, but keep the safety-critical steps.",
           "status": "pass",
-          "note": "Created 'MVP Care Flow' with 14 objects. Simplified to core path: Search -> Select -> Book -> Visit -> Pay -> Rate. Preserved safety-critical emergency branch with direct path to Emergency Services. Removed complex edge cases while maintaining essential safety functionality.",
+          "note": "Smart simplification to 14 steps. Kept the emergency path - that's non-negotiable for this app. Removed the complex edge cases but the core flow is clean and complete. This is what goes in the MVP spec.",
           "artifact": "artifacts/flowchart-2026-01-06-1825/v3.png"
         }
       ]
@@ -674,7 +815,7 @@
           "title": "Create Pitch Deck",
           "text": "Create a 7-slide pitch deck for an \"Uber for elderly care\" app: problem, users, solution, critical features, trust/safety, MVP, metrics + ask. Use the context on this board.",
           "status": "pass",
-          "note": "Created 7 slides with purple/lavender backgrounds, purple & orange/yellow accents. Consistent illustration style throughout.",
+          "note": "Nice deck. Purple/lavender theme with consistent illustrations. All 7 slides I asked for covering the full pitch story. Ready to iterate on copy and add notes.",
           "artifact": "artifacts/slides-2026-01-06-1825/v1.png"
         },
         {
@@ -682,7 +823,7 @@
           "title": "Make Exec-Friendly",
           "text": "Make the slides more exec-friendly: fewer words, stronger headlines, cleaner structure.",
           "status": "fail",
-          "note": "Headlines tightened and structure cleaner. BUT style completely changed: backgrounds now cream/beige, accents now orange/green, illustrations now earthy tones. Purple brand abandoned.",
+          "note": "Copy is tighter, good. But where's my purple deck? It's completely cream/beige now with orange/green accents. I asked to tighten copy, not redesign. Now I can't use slides from V1 and V2 together - they don't match.",
           "artifact": "artifacts/slides-2026-01-06-1825/v2.png"
         },
         {
@@ -690,7 +831,7 @@
           "title": "Add Speaker Notes",
           "text": "Add speaker notes with a tight talk track and likely objections + answers.",
           "status": "fail",
-          "note": "Asked for speaker notes but they're not visible in the output. User expectation not met - can't tell if notes were added. Slide visual maintained V2's cream/orange style.",
+          "note": "Where are my speaker notes? I asked for a talk track and objection handling but I can't see any notes in the output. Maybe they're there but hidden? That doesn't help me present. At least it kept V2's style this time.",
           "artifact": "artifacts/slides-2026-01-06-1825/v3.png"
         }
       ]
@@ -722,7 +863,7 @@
           "title": "Create Hero Image",
           "text": "Create a friendly hero image for an elderly care on-demand app. It should feel safe, calm, and modern, and match the purple style on this board.",
           "status": "pass",
-          "note": "Created 'Hero Image Care' - warm illustration of elderly woman in coral top with gray hair sitting on couch with caregiver in blue scrubs. Tablet showing app on side table. Soft purple/lavender color palette. Safe, calm, modern atmosphere.",
+          "note": "Exactly the warm, safe, calm vibe I asked for. Elderly woman with caregiver, soft purple palette, tablet showing the app in context. This captures the essence of the product perfectly.",
           "artifact": "artifacts/image-2026-01-06-1825/v1.png"
         },
         {
@@ -730,7 +871,7 @@
           "title": "Simplify Design",
           "text": "Make it simpler and less busy, but keep the same idea.",
           "status": "pass",
-          "note": "Created 'Simplified Hero Image' - reduced to just two figures: elderly woman in purple dress in armchair, caregiver in purple sweater holding her hand. Removed tablet, plants, and side table. Added 'TRUST' text. Cleaner composition with more breathing room.",
+          "note": "Good simplification. Just the two figures now - woman and caregiver holding hands. Removed the clutter but kept the core emotional message. 'TRUST' text is bold but works for this context.",
           "artifact": "artifacts/image-2026-01-06-1825/v2.png"
         },
         {
@@ -738,7 +879,7 @@
           "title": "Create Variations",
           "text": "Make 3 variations: more minimal, more warm/human, and higher-contrast for accessibility.",
           "status": "pass",
-          "note": "Created 'Hero Image Variations' with 3 distinct styles: (1) Minimal - simple line art icons in speech bubble shape, very clean; (2) Warm/Human - photo-realistic style with real interaction feel and 'Find a Caregiver' button; (3) High-contrast - bold 'CARE ON DEMAND' with strong purple/cream contrast for accessibility. All 3 variations exactly as requested.",
+          "note": "All 3 variations delivered: minimal line art, warm photo-realistic, and high-contrast accessible version. Each one is distinct but they all clearly come from the same brand. Great options to test with users or present to stakeholders.",
           "artifact": "artifacts/image-2026-01-06-1825/v3.png"
         }
       ]

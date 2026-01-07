@@ -1,10 +1,106 @@
 # Frank's Evaluation Runbook
 
-## What I Missed (Slides Example)
-- V1→V2→V3 had THREE completely different color palettes
-- V1→V2→V3 had THREE completely different illustration styles
-- I noted "style changed" but didn't catch it was a complete visual identity change
-- I didn't check for text overlapping or truncation
+## TL;DR - Read This First
+
+### Who is Frank?
+Frank is an EPD (Engineering, Product, Design) product builder at Miro. He's not a prompt engineer - he doesn't craft clever prompts or work around AI limitations. He writes plain English like any PM or designer would: "Make this senior-friendly" or "Add a column for testing."
+
+### The #1 Rule: "Edit MY thing"
+When Frank says "make this senior-friendly" he means **modify the prototype I just made**. Not "create a new senior-friendly prototype." This is the most common failure mode.
+
+**Frank's mental model:**
+- V1: "Create a prototype" → Gets purple ElderlyCareConnect app
+- V2: "Make it senior-friendly" → Expects HIS purple app with bigger text
+- V2 FAIL: Gets a completely different orange SeniorCareConnect app
+
+If V2 doesn't look like an evolution of V1, it's a FAIL. Period.
+
+### The 3 Questions for Every Prompt
+1. **Did it edit the existing artifact?** (not create a new one)
+2. **Did it preserve what wasn't asked to change?** (colors, content, structure)
+3. **Can I see what I asked for?** (if it's invisible, expectation not met)
+
+### Visual Inspection is Mandatory
+Don't just glance at artifacts. **ZOOM IN. READ EVERY LABEL.** Look for:
+- Truncated text ("Michae Connor", "SeniorCareConn")
+- Garbled text ("leas liagt", random characters)
+- Broken labels ("Butt on" instead of "Button")
+
+If you skip this, you WILL miss failures.
+
+---
+
+## Writing in Frank's Voice
+
+Frank is an EPD product builder, not a prompt engineer or QA tester. He writes plain prompts with real expectations. Evaluation notes should sound like him.
+
+### Voice Principles
+- **First person**: "I asked for..." not "User asked for..."
+- **Opinionated**: "This is broken" not "There may be an issue"
+- **Direct**: State the problem, don't hedge
+- **Real expectations**: "I expected my prototype to be modified, not a new one"
+- **Stakeholder mindset**: "This is what I'd show to stakeholders" or "I can't use this in a real deck"
+
+### Good Examples
+| Instead of... | Write... |
+|---------------|----------|
+| "Created table with requested columns" | "Solid table with all 4 columns I asked for. Ready to iterate on." |
+| "CRITICAL FAILURE: Lost columns when adding" | "I asked to ADD a column and it DELETED two? Where's my data?" |
+| "Style changed between iterations" | "Where's my purple deck? It's completely cream/beige now. I asked to tighten copy, not redesign." |
+| "Created new prototype instead of iterating" | "What is this? I asked to make MY prototype senior-friendly and got a completely different orange app." |
+| "Text truncation detected in UI" | "Look at the text - 'Michae Connor' is truncated, buttons say 'Butt on'. This is broken." |
+| "All variations delivered as requested" | "Nailed all 3 variations. Ready to present options to stakeholders." |
+
+### Tone by Result
+- **Pass**: Confident, brief, forward-looking ("Great start. Ready to iterate on.")
+- **Fail**: Frustrated but specific ("What happened here? I asked for X and got Y.")
+- **Great run**: Appreciative of good iteration ("This is how iteration should work.")
+
+---
+
+## Known Failure Patterns
+
+These issues have been observed across multiple runs. Check for them in EVERY evaluation.
+
+### Cross-Format Patterns
+
+| Pattern | Description | Seen In |
+|---------|-------------|---------|
+| **Destructive Add** | Adding content deletes existing content | Tables (add column → lose columns), Documents |
+| **Context Amnesia** | V2/V3 ignores previous artifact, starts fresh | Documents, Prototypes, Slides |
+| **Style Drift** | Visual style changes when only content edit requested | Slides, Prototypes |
+| **Template Instead of Edit** | Creates template/instructions instead of editing actual content | Documents |
+| **New Artifact Instead of Edit** | Creates new object instead of modifying existing | Stickies, Prototypes |
+| **Invisible Features** | Claims to add feature but can't see it in output | Slides (speaker notes) |
+| **Visual Glitches** | Truncated text, garbled text, broken labels | Prototypes |
+
+### Format-Specific Patterns
+
+**Tables**
+- "Add column" often replaces entire table structure
+- Column names get renamed without asking (e.g., "Why It Matters" → "Description")
+- Recovery sometimes regenerates content with different values
+
+**Documents**
+- "Tighten" or "edit" often produces blank template with placeholders
+- "Add section" creates standalone doc instead of integrating
+- May show instructional text ("Add the following...") instead of actual content
+
+**Prototypes**
+- Creates entirely new app instead of iterating (different name, colors, UI kit)
+- Text truncation common: names cut off, labels broken
+- Garbled/placeholder text appears in complex screens
+- Each iteration may use completely different color scheme
+
+**Slides**
+- Background colors change between iterations
+- Illustration style changes without request
+- Speaker notes may be "added" but invisible in output
+
+**Stickies**
+- De-duplication may remove color coding
+- Theme headers removed when editing content
+- May create new artifact instead of updating existing
 
 ---
 
@@ -203,15 +299,38 @@ This is a **product issue**, not a user issue. EPD expects to see what they aske
 - [ ] **Flow logic** - Navigation makes sense?
 - [ ] **Completeness** - All requested states present?
 
+#### Visual Quality (CRITICAL - inspect every screen)
+- [ ] **Text truncation** - Any text cut off? Look for "..." or words ending mid-letter
+- [ ] **Garbled text** - Any corrupted/placeholder text? Random strings like "leas liagt"
+- [ ] **Broken labels** - Buttons/labels making sense? "Butt on" instead of "Button"
+- [ ] **Name truncation** - User names cut off? "Michae Connor" instead of "Michael Connor"
+- [ ] **App name consistency** - Same app name across all screens?
+- [ ] **Icon rendering** - Icons fully rendered, not broken or missing?
+- [ ] **Image placeholders** - Any gray boxes or broken image indicators?
+- [ ] **Alignment** - Text/elements properly aligned, not offset?
+
 #### Visual Consistency
 - [ ] **UI kit** - Same buttons, inputs, cards throughout?
-- [ ] **Colors** - Consistent brand colors?
+- [ ] **Colors** - Consistent brand colors across ALL iterations?
 - [ ] **Typography** - Same fonts across screens?
 - [ ] **Spacing** - Consistent padding, margins?
+- [ ] **App name** - Same app name V1→V2→V3?
+- [ ] **Color scheme** - Same palette V1→V2→V3?
 
 #### Iteration Behavior
 - [ ] **Adding screens** - New screens match existing style?
 - [ ] **Editing flows** - Changes don't break navigation?
+- [ ] **Iteration on SAME prototype** - V2 should modify V1, not create new app
+- [ ] **UI kit preservation** - Same buttons/inputs/cards when iterating
+
+#### Red Flags
+- Different app names between iterations (e.g. ElderlyCareConnect → SeniorCareConnect) = CRITICAL FAIL
+- Different color schemes between iterations (e.g. purple → orange → green) = CRITICAL FAIL
+- Created new prototype instead of iterating on existing = CRITICAL FAIL
+- Truncated text visible on any screen = FAIL
+- Garbled/corrupted text visible anywhere = FAIL
+- Broken button labels = FAIL
+- UI kit changed between iterations = FAIL
 
 ---
 
@@ -242,10 +361,79 @@ This is a **product issue**, not a user issue. EPD expects to see what they aske
 
 ---
 
+## Writing Run Summaries
+
+Each run has `good` and `bad` arrays that summarize what worked and what didn't across ALL prompts.
+
+### The `good` array
+List what Sidekick did well. Be specific:
+- "V1 has excellent content structure with all requested sections"
+- "V2 successfully simplified to 7-step linear flow"
+- "Perfect iteration continuity - each version builds on previous"
+
+### The `bad` array
+List what failed. Be specific and actionable:
+- "V2 DELETED 2 columns when asked to ADD 1 column"
+- "3 different color schemes (purple → orange → green)"
+- "V2 has truncated text: 'Michae Connor', 'Butt on'"
+
+**Rules:**
+- Be specific (which version, what exactly happened)
+- Include visual glitches found during inspection
+- If iteration failed, say HOW (new app, lost data, style change)
+- These should tell the full story without reading individual notes
+
+---
+
 ## How to Use This Runbook
 
-1. **Before scoring**: Open V1, V2, V3 side by side
-2. **First pass**: Quick scan for obvious issues (colors, layout)
-3. **Second pass**: Go through format-specific checklist
-4. **Document**: Note specific issues, not just "style changed"
-5. **Rate**: Use severity guide to determine Bad/Good/Great
+### Evaluation Process
+
+1. **Setup**: Open V1, V2, V3 side by side
+2. **The 3 Questions**: For each V2/V3, ask:
+   - Did it edit the existing artifact? (or create new?)
+   - Did it preserve what wasn't asked to change?
+   - Can I see what I asked for?
+3. **Visual Inspection** (DON'T SKIP THIS):
+   - ZOOM IN on every screen/section
+   - READ every label, button, name
+   - Look for truncation, garbled text, broken labels
+   - Check app names, color schemes across iterations
+4. **Pattern Check**: Look for Known Failure Patterns
+5. **Checklist**: Go through format-specific checklist
+6. **Write**: Notes in Frank's voice, populate good/bad arrays
+7. **Rate**: Bad/Good/Great based on severity guide
+
+### Quick Reference: Frank's Voice
+- "I asked for X and got Y" (not "User requested X")
+- "This is broken" (not "There may be an issue")
+- "Where's my purple deck?" (not "Style has changed")
+- "Ready to show stakeholders" (not "Output appears correct")
+
+### When You Find a New Issue
+If you discover a failure pattern not documented here:
+1. Add it to "Known Failure Patterns" with the format where you found it
+2. Check if it exists in other formats too
+3. Add specific checks to the relevant format checklist
+
+---
+
+## Final Sanity Check
+
+Before submitting an evaluation, verify:
+
+- [ ] **Did I zoom in?** - Actually looked at every label, not just glanced
+- [ ] **Did I check iteration continuity?** - V2 looks like evolution of V1?
+- [ ] **Did I catch style drift?** - Colors, fonts, UI kit same across versions?
+- [ ] **Did I note visual glitches?** - Any truncated/garbled text in `bad` array?
+- [ ] **Are my notes in Frank's voice?** - First person, opinionated, specific?
+- [ ] **Does the rating match the failures?** - 2+ fails or critical = Bad?
+
+### Trust Your Gut
+If something looks "off" but you can't articulate why - investigate. Compare V1 and V2 side by side. The issue is probably:
+- A subtle color change
+- A font/spacing difference
+- Content that was regenerated not preserved
+- An app name or element name change
+
+Don't dismiss hunches. Frank wouldn't.

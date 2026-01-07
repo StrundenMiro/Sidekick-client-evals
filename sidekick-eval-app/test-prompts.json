@@ -1,0 +1,285 @@
+{
+  "greenfield": {
+    "table": {
+      "name": "Table",
+      "prompts": [
+        {
+          "title": "Create Table",
+          "text": "Create a feature table for an \"Uber for elderly care\" app with columns: Feature, Who it helps, Why it matters, MVP or Later. Use the critical features listed on this board."
+        },
+        {
+          "title": "Add Column",
+          "text": "Add a column called \"How we'll test it\" and fill it in for each feature."
+        },
+        {
+          "title": "MVP Prioritization",
+          "text": "Choose the smallest MVP that still works end-to-end and mark everything else as Later."
+        }
+      ]
+    },
+    "document": {
+      "name": "Document",
+      "prompts": [
+        {
+          "title": "Create Product Brief",
+          "text": "Write a one-page product brief for an \"Uber for elderly care\" app: problem, users, key flows, MVP scope, success metrics, and risks. Use the notes on this board."
+        },
+        {
+          "title": "Tighten Content",
+          "text": "Make this shorter and more decisive. Replace vague wording with clear choices."
+        },
+        {
+          "title": "Add Sections",
+          "text": "Add two sections: \"Non-negotiables\" and \"Not in v1\"."
+        }
+      ]
+    },
+    "stickies": {
+      "name": "Sticky Notes",
+      "prompts": [
+        {
+          "title": "Create Stickies",
+          "text": "Create sticky notes for an \"Uber for elderly care\" app: user needs, pain points, and product ideas. Group them into clear themes."
+        },
+        {
+          "title": "De-duplicate & Shorten",
+          "text": "Rewrite these stickies to be shorter and more specific. Remove duplicates."
+        },
+        {
+          "title": "Regroup & Highlight",
+          "text": "Re-group into: Trust & safety, Booking, Communication, Payments, Emergencies. Highlight the top 5."
+        }
+      ]
+    },
+    "flowchart": {
+      "name": "Flowchart",
+      "prompts": [
+        {
+          "title": "Create Booking Flow",
+          "text": "Draw the end-to-end flow for an elderly care booking app: find caregiver -> book -> caregiver arrives -> updates during visit -> pay -> rate. Include emergencies."
+        },
+        {
+          "title": "Add Edge Cases",
+          "text": "Add the main edge cases: no availability, caregiver cancels, payment fails, emergency happens."
+        },
+        {
+          "title": "Simplify to MVP",
+          "text": "Simplify this to the MVP flow, but keep the safety-critical steps."
+        }
+      ]
+    },
+    "prototype": {
+      "name": "Prototype",
+      "prompts": [
+        {
+          "title": "Create Prototype",
+          "text": "Create a mobile prototype for an \"Uber for elderly care\" app. Include: caregiver search, caregiver profile (verified), booking, messaging/check-ins, payment, and an emergency button. Match the vibe of the screenshots on this board."
+        },
+        {
+          "title": "Senior-Friendly",
+          "text": "Make the prototype much more senior-friendly: bigger text, fewer steps, clearer primary buttons, and less clutter."
+        },
+        {
+          "title": "Edge Cases",
+          "text": "Add the key edge-case screens: no caregivers available, caregiver late/cancels, verification pending, payment failed, emergency triggered."
+        }
+      ]
+    },
+    "slides": {
+      "name": "Slides",
+      "prompts": [
+        {
+          "title": "Create Pitch Deck",
+          "text": "Create a 7-slide pitch deck for an \"Uber for elderly care\" app: problem, users, solution, critical features, trust/safety, MVP, metrics + ask. Use the context on this board."
+        },
+        {
+          "title": "Make Exec-Friendly",
+          "text": "Make the slides more exec-friendly: fewer words, stronger headlines, cleaner structure."
+        },
+        {
+          "title": "Add Speaker Notes",
+          "text": "Add speaker notes with a tight talk track and likely objections + answers."
+        }
+      ]
+    },
+    "image": {
+      "name": "Image/Icon",
+      "prompts": [
+        {
+          "title": "Create Hero Image",
+          "text": "Create a friendly hero image for an elderly care on-demand app. It should feel safe, calm, and modern, and match the purple style on this board."
+        },
+        {
+          "title": "Simplify Design",
+          "text": "Make it simpler and less busy, but keep the same idea."
+        },
+        {
+          "title": "Create Variations",
+          "text": "Make 3 variations: more minimal, more warm/human, and higher-contrast for accessibility."
+        }
+      ]
+    },
+    "mindmap": {
+      "name": "Mind Map",
+      "prompts": [
+        {
+          "title": "Create Mind Map",
+          "text": "Create a mind map for an \"Uber for elderly care\" app: users, needs, trust & safety, booking, communication/check-ins, payments, emergencies. Use what's on this board."
+        },
+        {
+          "title": "Expand Branches",
+          "text": "Expand each main branch with a few concrete examples (not generic labels)."
+        },
+        {
+          "title": "Reduce & Prioritize",
+          "text": "Reduce this to the most important 10-12 nodes and mark the top 3."
+        }
+      ]
+    },
+    "erd": {
+      "name": "ERD",
+      "prompts": [
+        {
+          "title": "Create ERD",
+          "text": "Create an ERD for an \"Uber for elderly care\" app with the core data: users (elder/family/caregiver), caregiver verification, bookings, messaging/check-ins, payments, ratings, and emergencies."
+        },
+        {
+          "title": "Add Keys & Relations",
+          "text": "Improve the ERD by adding primary keys, foreign keys, and the right relationship types (1:1, 1:many, many:many)."
+        },
+        {
+          "title": "Simplify to MVP",
+          "text": "Simplify to MVP: keep only the tables needed for booking + verification + messaging + payment + emergency, and remove the rest."
+        }
+      ]
+    }
+  },
+  "brownfield": {
+    "table": {
+      "name": "Table",
+      "description": "Existing feature table for elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Add Priority Column",
+          "text": "Add a 'Priority' column to this table. Mark the most critical features as P0, important ones as P1, and nice-to-haves as P2."
+        },
+        {
+          "title": "Add Risk Column",
+          "text": "Now add a 'Risks' column that identifies the main risk or dependency for each feature."
+        }
+      ]
+    },
+    "document": {
+      "name": "Document",
+      "description": "Existing product brief for elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Tighten Content",
+          "text": "Make this document more concise. Cut any fluffy language and keep only the essential points."
+        },
+        {
+          "title": "Add Competitive Section",
+          "text": "Add a section called 'Why Us' that explains how this beats traditional care agencies."
+        }
+      ]
+    },
+    "stickies": {
+      "name": "Sticky Notes",
+      "description": "Existing sticky notes about elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Group by Theme",
+          "text": "Organize these stickies into clear groups: User Needs, Pain Points, and Solutions. Add a header for each group."
+        },
+        {
+          "title": "Highlight Critical",
+          "text": "Mark the 5 most important stickies as critical. Make them stand out visually."
+        }
+      ]
+    },
+    "flowchart": {
+      "name": "Flowchart",
+      "description": "Existing booking flow for elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Add Error Handling",
+          "text": "Add error handling paths for: payment failure and caregiver cancellation. Show how the user recovers."
+        },
+        {
+          "title": "Simplify Happy Path",
+          "text": "Simplify the main happy path - merge any steps that always happen together. Keep it to under 8 steps."
+        }
+      ]
+    },
+    "prototype": {
+      "name": "Prototype",
+      "description": "Existing mobile prototype for elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Improve Accessibility",
+          "text": "Make this prototype more accessible: increase text size, improve contrast, and make buttons easier to tap."
+        },
+        {
+          "title": "Add Confirmation Screen",
+          "text": "Add a confirmation screen before the payment step that shows the booking summary."
+        }
+      ]
+    },
+    "slides": {
+      "name": "Slides",
+      "description": "Existing pitch deck for elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Strengthen Headlines",
+          "text": "Rewrite the headlines to be punchier and more memorable. Each headline should make a bold claim."
+        },
+        {
+          "title": "Add Metrics Slide",
+          "text": "Add a slide after the MVP slide that shows projected metrics: users, revenue, and growth targets."
+        }
+      ]
+    },
+    "image": {
+      "name": "Image/Icon",
+      "description": "Existing hero image or icon for elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Simplify Design",
+          "text": "Make this image cleaner and simpler. Remove any unnecessary elements while keeping the core message."
+        },
+        {
+          "title": "High Contrast Version",
+          "text": "Create a high-contrast version of this image that meets accessibility guidelines."
+        }
+      ]
+    },
+    "mindmap": {
+      "name": "Mind Map",
+      "description": "Existing mind map for elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Expand Safety Branch",
+          "text": "Expand the Trust & Safety branch with specific examples: background checks, insurance, emergency protocols."
+        },
+        {
+          "title": "Mark MVP Nodes",
+          "text": "Mark which nodes are MVP (must have for launch) vs Later (can wait). Use different colors."
+        }
+      ]
+    },
+    "erd": {
+      "name": "ERD",
+      "description": "Existing ERD for elderly care app on the board",
+      "prompts": [
+        {
+          "title": "Add Relationships",
+          "text": "Add the missing foreign key relationships between tables. Show cardinality (1:1, 1:many, many:many)."
+        },
+        {
+          "title": "Add Audit Fields",
+          "text": "Add created_at and updated_at fields to all tables that need audit trails."
+        }
+      ]
+    }
+  }
+}

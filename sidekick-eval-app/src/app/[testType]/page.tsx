@@ -34,7 +34,7 @@ export default async function TestTypePage({ params }: { params: Promise<{ testT
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto p-6">
         <Breadcrumbs items={[
-          { label: 'Frank', href: '/' },
+          { label: 'Dashboard', href: '/' },
           { label: testTypeInfo.shortName }
         ]} />
 

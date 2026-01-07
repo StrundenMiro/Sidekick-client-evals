@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Lightbox from '@/components/Lightbox';
 import RatingBadge from '@/components/RatingBadge';
 import type { Run, CaptureRun, ScoredRun, LegacyRun, CapturePrompt, ScoredPrompt, VisualEvaluation, Rating } from '@/lib/runs';
@@ -104,16 +105,55 @@ function EvaluationIssues({ evaluation }: { evaluation: VisualEvaluation }) {
   );
 }
 
+interface RunNavInfo {
+  prevRunId: string | null;
+  nextRunId: string | null;
+  currentIndex: number;
+  totalRuns: number;
+}
+
 interface Props {
   run: Run;
   testType: string;
   format: string;
+  nav?: RunNavInfo;
 }
 
-export default function RunDetail({ run, testType, format }: Props) {
+export default function RunDetail({ run, testType, format, nav }: Props) {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const scored = isScored(run);
   const capturing = isCapturing(run);
+
+  const RunNav = () => {
+    if (!nav || nav.totalRuns <= 1) return null;
+    return (
+      <div className="flex items-center gap-1 text-sm">
+        {nav.prevRunId ? (
+          <Link
+            href={`/${testType}/${format}/${nav.prevRunId}`}
+            className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 hover:text-gray-900"
+          >
+            ←
+          </Link>
+        ) : (
+          <span className="w-7 h-7 flex items-center justify-center text-gray-300">←</span>
+        )}
+        <span className="text-gray-500 px-1">
+          {nav.currentIndex + 1} of {nav.totalRuns}
+        </span>
+        {nav.nextRunId ? (
+          <Link
+            href={`/${testType}/${format}/${nav.nextRunId}`}
+            className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 hover:text-gray-900"
+          >
+            →
+          </Link>
+        ) : (
+          <span className="w-7 h-7 flex items-center justify-center text-gray-300">→</span>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -132,7 +172,10 @@ export default function RunDetail({ run, testType, format }: Props) {
             </span>
           )}
         </div>
-        <p className="text-gray-500">{new Date(run.timestamp).toLocaleString()}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-gray-500">{new Date(run.timestamp).toISOString().split('T')[0]}</p>
+          <RunNav />
+        </div>
 
         {/* Rating */}
         {scored && (
@@ -248,16 +291,28 @@ export default function RunDetail({ run, testType, format }: Props) {
                   </div>
 
                   <div className="mb-4">
-                    <p className="text-sm text-gray-500 mb-1">
-                      {promptScored ? 'Result:' : 'Observation:'}
-                    </p>
-                    <p className="text-gray-700">
-                      {promptScored ? prompt.note : (prompt as CapturePrompt).observation || 'No observation recorded'}
-                    </p>
+                    {promptScored ? (
+                      <div className="flex gap-3 items-start">
+                        <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                          🤖
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">Frank&apos;s take</p>
+                          <p className="text-gray-700">{prompt.note}</p>
 
-                    {/* Show evaluation issues only when present */}
-                    {promptScored && prompt.evaluation && hasEvaluationIssues(prompt.evaluation) && (
-                      <EvaluationIssues evaluation={prompt.evaluation} />
+                          {/* Show evaluation issues only when present */}
+                          {prompt.evaluation && hasEvaluationIssues(prompt.evaluation) && (
+                            <EvaluationIssues evaluation={prompt.evaluation} />
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm text-gray-500 mb-1">Observation:</p>
+                        <p className="text-gray-700">
+                          {(prompt as CapturePrompt).observation || 'No observation recorded'}
+                        </p>
+                      </>
                     )}
                   </div>
 

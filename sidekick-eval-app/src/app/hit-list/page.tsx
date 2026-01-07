@@ -9,8 +9,8 @@ export default function HitListPage() {
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto p-6">
         <Breadcrumbs items={[
-          { label: 'Frank', href: '/' },
-          { label: "Frank's Hit List" }
+          { label: 'Dashboard', href: '/' },
+          { label: 'Issues I Found' }
         ]} />
 
         <HitListClient themes={themes} />

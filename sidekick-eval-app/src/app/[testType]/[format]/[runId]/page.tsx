@@ -1,4 +1,4 @@
-import { getRunById } from '@/lib/runs';
+import { getRunById, getRunsByTestTypeAndFormat } from '@/lib/runs';
 import { getTestType } from '@/lib/test-types';
 import { notFound } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -13,17 +13,33 @@ export default async function RunPage({ params }: { params: Promise<{ testType: 
     notFound();
   }
 
+  // Get all runs for this format to enable prev/next navigation
+  // Reverse so oldest is #1 and newest is last (chronological order)
+  const allRuns = getRunsByTestTypeAndFormat(testType, format).reverse();
+  const currentIndex = allRuns.findIndex(r => r.id === runId);
+  const prevRun = currentIndex > 0 ? allRuns[currentIndex - 1] : null;
+  const nextRun = currentIndex < allRuns.length - 1 ? allRuns[currentIndex + 1] : null;
+
+  const nav = {
+    prevRunId: prevRun?.id ?? null,
+    nextRunId: nextRun?.id ?? null,
+    currentIndex,
+    totalRuns: allRuns.length
+  };
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto p-6">
-        <Breadcrumbs items={[
-          { label: 'Frank', href: '/' },
-          { label: testTypeInfo.shortName, href: `/${testType}` },
-          { label: format.replace('_', ' '), href: `/${testType}/${format}` },
-          { label: runId }
-        ]} />
+        <div className="mb-6">
+          <Breadcrumbs items={[
+            { label: 'Dashboard', href: '/' },
+            { label: testTypeInfo.shortName, href: `/${testType}` },
+            { label: format.replace('_', ' '), href: `/${testType}/${format}` },
+            { label: runId }
+          ]} />
+        </div>
 
-        <RunDetail run={run} testType={testType} format={format} />
+        <RunDetail run={run} testType={testType} format={format} nav={nav} />
       </div>
     </main>
   );

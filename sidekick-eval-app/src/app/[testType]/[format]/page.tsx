@@ -35,7 +35,7 @@ export default async function FormatPage({ params }: { params: Promise<{ testTyp
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto p-6">
         <Breadcrumbs items={[
-          { label: 'Frank', href: '/' },
+          { label: 'Dashboard', href: '/' },
           { label: testTypeInfo.shortName, href: `/${testType}` },
           { label: format.replace('_', ' ') }
         ]} />
@@ -69,7 +69,7 @@ export default async function FormatPage({ params }: { params: Promise<{ testTyp
                             </span>
                           </div>
                           <p className="text-sm text-gray-500 mt-0.5">
-                            {new Date(run.timestamp).toLocaleString()}
+                            {new Date(run.timestamp).toISOString().split('T')[0]}
                             {isCapturing(run) && ` • ${run.prompts.length}/3 prompts`}
                           </p>
                         </div>
