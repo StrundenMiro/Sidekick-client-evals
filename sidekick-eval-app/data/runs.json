@@ -1,6 +1,60 @@
 {
   "runs": [
     {
+      "id": "brownfield-document-2026-01-07-1730",
+      "testType": "existing-content-iteration",
+      "format": "document",
+      "timestamp": "2026-01-07T17:30:00",
+      "state": "scored",
+      "rating": "bad",
+      "summary": "V1 and V2 perfect - Edit Document mode worked beautifully. V3 CRITICAL FAIL: Asked to rewrite Success Metrics and got a standalone metrics document instead of editing the existing brief. Lost entire document structure.",
+      "good": [
+        "Edit Document mode properly engaged via CMD+Enter keyboard flow",
+        "V1 correctly tightened content - removed fluff while preserving all sections",
+        "V2 added 'Why Us' section exactly where requested (after Problem Statement)",
+        "V2 included 4 strong competitive differentiators (Speed, Transparency, Flexibility, Trust)",
+        "Context carried forward perfectly from V0→V1→V2"
+      ],
+      "bad": [
+        "CRITICAL: V3 created standalone 'Success Metrics' document instead of editing existing brief",
+        "V3 lost entire document structure - Overview, Problem, Why Us, Target Users, Key User Flows, MVP Scope, Risks all gone",
+        "File size dropped from 557KB (V2) to 370KB (V3) confirming content loss",
+        "No iteration continuity for V3 - broke the chain"
+      ],
+      "prompts": [
+        {
+          "number": 0,
+          "title": "Existing Content",
+          "text": "Pre-existing product brief document on board",
+          "artifact": "artifacts/brownfield-document-2026-01-07-1730/v0-existing.png"
+        },
+        {
+          "number": 1,
+          "title": "Tighten Content",
+          "text": "Make this document more concise. Cut any fluffy language and keep only the essential points.",
+          "status": "pass",
+          "note": "Perfect edit. Sidekick tightened the Overview, shortened bullets throughout, preserved all sections. Context from V0 understood and respected. This is how Edit mode should work.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-1730/v1.png"
+        },
+        {
+          "number": 2,
+          "title": "Add Competitive Section",
+          "text": "Add a section called \"Why Us\" after Problem that explains how this beats traditional care agencies.",
+          "status": "pass",
+          "note": "Nailed it. Why Us section added after Problem Statement with 4 differentiators: Speed (instant matching), Transparency (verified credentials), Flexibility (on-demand bookings), Trust (ID verification). Built on V1, didn't start fresh.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-1730/v2.png"
+        },
+        {
+          "number": 3,
+          "title": "Improve Metrics",
+          "text": "Rewrite the Success Metrics to be more specific and measurable.",
+          "status": "fail",
+          "note": "Disaster. I asked to rewrite the metrics IN my document and got a standalone 'Success Metrics' page. Where's my Overview? Problem Statement? Why Us? Target Users? All gone. The metrics themselves are better - specific targets with tracking methods - but my entire product brief disappeared.",
+          "artifact": "artifacts/brownfield-document-2026-01-07-1730/v3.png"
+        }
+      ]
+    },
+    {
       "id": "greenfield-erd-2026-01-07-1606",
       "testType": "ai-generated-iteration",
       "format": "erd",
