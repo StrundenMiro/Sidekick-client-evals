@@ -33,15 +33,19 @@ Extract: run id, format, test type, and artifact paths.
 
 ---
 
-## Step 2: Read Artifacts
+## Step 2: Detect Test Type & Read Artifacts
 
-Read all artifact images for this run:
-- V0 (if brownfield - existing content before edits)
+Check what artifacts exist at: `/sidekick-eval-app/public/artifacts/{run-id}/`
+
+**Auto-detect mode:**
+- If `v0-existing.png` exists → **Brownfield mode** (iterating on existing content)
+- If no V0 → **Greenfield mode** (started from scratch)
+
+Read all artifact images:
+- V0 (brownfield only - existing content before edits)
 - V1 (first iteration)
 - V2 (second iteration)
 - V3 (third iteration)
-
-Artifacts are at: `/sidekick-eval-app/public/artifacts/{run-id}/`
 
 ---
 
@@ -62,6 +66,8 @@ Artifacts are at: `/sidekick-eval-app/public/artifacts/{run-id}/`
 
 ## Step 4: Answer Core Questions
 
+### If BROWNFIELD (V0 exists):
+
 **For V0 → V1 (First Iteration):**
 1. Did it understand the existing content?
 2. Did it modify in place? (not create new from scratch)
@@ -77,6 +83,23 @@ Artifacts are at: `/sidekick-eval-app/public/artifacts/{run-id}/`
 8. Did it build on V2? (not start fresh)
 9. Is the full context preserved across all versions?
 10. Can you trace the evolution from V0 through V3?
+
+### If GREENFIELD (no V0):
+
+**For V1 (Initial Generation):**
+1. Did it follow the prompt?
+2. Is the output complete and usable?
+3. Any visual glitches?
+
+**For V1 → V2 (Second Iteration):**
+4. Did it build on V1? (not start fresh)
+5. Did it preserve V1's content while adding V2's changes?
+6. Any regressions from V1?
+
+**For V2 → V3 (Third Iteration):**
+7. Did it build on V2? (not start fresh)
+8. Is iteration continuity maintained across all versions?
+9. Can you trace the evolution from V1 through V3?
 
 ---
 
