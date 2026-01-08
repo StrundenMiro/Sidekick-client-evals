@@ -5,7 +5,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Lightbox from '@/components/Lightbox';
 import RatingBadge from '@/components/RatingBadge';
+import PromptAnnotation from '@/components/PromptAnnotation';
 import type { Run, CaptureRun, ScoredRun, LegacyRun, CapturePrompt, ScoredPrompt, VisualEvaluation, Rating } from '@/lib/runs';
+
+// Annotation type for props
+interface Annotation {
+  id: string;
+  runId: string;
+  promptNumber: number;
+  issueType: string;
+  severity: 'high' | 'medium' | 'low';
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 function getStatusClass(status: string): string {
   switch (status) {
@@ -117,9 +130,10 @@ interface Props {
   testType: string;
   format: string;
   nav?: RunNavInfo;
+  annotationsByPrompt?: Record<number, Annotation>;
 }
 
-export default function RunDetail({ run, testType, format, nav }: Props) {
+export default function RunDetail({ run, testType, format, nav, annotationsByPrompt = {} }: Props) {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const scored = isScored(run);
   const capturing = isCapturing(run);
@@ -264,7 +278,7 @@ export default function RunDetail({ run, testType, format, nav }: Props) {
             const promptScored = isScoredPrompt(prompt);
 
             return (
-              <div key={prompt.number} className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div key={prompt.number} id={`v${prompt.number}`} className="bg-white rounded-lg shadow-sm overflow-hidden scroll-mt-6">
                 {/* Prompt Header */}
                 <div className="flex justify-between items-center px-4 py-3 bg-gray-100 border-b border-gray-200">
                   <h3 className="font-semibold text-gray-900">
@@ -292,20 +306,33 @@ export default function RunDetail({ run, testType, format, nav }: Props) {
 
                   <div className="mb-4">
                     {promptScored ? (
-                      <div className="flex gap-3 items-start">
-                        <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                          🤖
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400 mb-1">Frank&apos;s take</p>
-                          <p className="text-gray-700">{prompt.note}</p>
+                      <>
+                        {/* Frank's AI take */}
+                        <div className="flex gap-3 items-start">
+                          <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                            🤖
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-400 mb-1">Frank&apos;s take</p>
+                            <p className="text-gray-700">{prompt.note}</p>
 
-                          {/* Show evaluation issues only when present */}
-                          {prompt.evaluation && hasEvaluationIssues(prompt.evaluation) && (
-                            <EvaluationIssues evaluation={prompt.evaluation} />
-                          )}
+                            {/* Show evaluation issues only when present */}
+                            {prompt.evaluation && hasEvaluationIssues(prompt.evaluation) && (
+                              <EvaluationIssues evaluation={prompt.evaluation} />
+                            )}
+                          </div>
                         </div>
-                      </div>
+
+                        {/* Human take */}
+                        <div className="mt-3 pt-3 border-t border-dashed border-gray-200">
+                          <PromptAnnotation
+                            runId={run.id}
+                            promptNumber={prompt.number}
+                            initialAnnotation={annotationsByPrompt[prompt.number] || null}
+                            minimal
+                          />
+                        </div>
+                      </>
                     ) : (
                       <>
                         <p className="text-sm text-gray-500 mb-1">Observation:</p>

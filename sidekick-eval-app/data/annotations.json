@@ -1,0 +1,44 @@
+{
+  "annotations": [
+    {
+      "id": "greenfield-document-2026-01-07-1455-v2-1767827632187",
+      "runId": "greenfield-document-2026-01-07-1455",
+      "promptNumber": 2,
+      "issueType": "other",
+      "severity": "high",
+      "note": "",
+      "createdAt": "2026-01-07T23:13:52.187Z",
+      "updatedAt": "2026-01-07T23:26:48.704Z"
+    },
+    {
+      "id": "table-2026-01-06-1900-v2-1767828222262",
+      "runId": "table-2026-01-06-1900",
+      "promptNumber": 2,
+      "issueType": "context-lost",
+      "severity": "high",
+      "note": "",
+      "createdAt": "2026-01-07T23:23:42.262Z",
+      "updatedAt": "2026-01-07T23:56:59.836Z"
+    },
+    {
+      "id": "table-2026-01-06-1900-v1-1767828283877",
+      "runId": "table-2026-01-06-1900",
+      "promptNumber": 1,
+      "issueType": "other",
+      "severity": "high",
+      "note": "In this version we had tags but they got changed to standard copy in the next version/",
+      "createdAt": "2026-01-07T23:24:43.877Z",
+      "updatedAt": "2026-01-07T23:56:52.538Z"
+    },
+    {
+      "id": "table-2026-01-06-1900-v3-1767829604873",
+      "runId": "table-2026-01-06-1900",
+      "promptNumber": 3,
+      "issueType": "other",
+      "severity": "high",
+      "note": "We lost the tags. The overall quality is shocking",
+      "createdAt": "2026-01-07T23:46:44.873Z",
+      "updatedAt": "2026-01-07T23:56:52.575Z"
+    }
+  ]
+}
