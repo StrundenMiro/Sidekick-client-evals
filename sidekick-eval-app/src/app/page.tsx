@@ -118,34 +118,21 @@ export default async function Dashboard() {
               <li key={format.name}>
                 <Link
                   href={`/format/${format.name}`}
-                  className="block px-4 py-4 hover:bg-gray-50 transition-colors group"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <FormatIcon format={format.name} size={24} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-medium text-gray-900 capitalize">{format.name}</h3>
-                          {format.criticalCount > 0 && (
-                            <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
-                              {format.criticalCount} critical
-                            </span>
-                          )}
-                          {format.majorCount > 0 && (
-                            <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
-                              {format.majorCount} major
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                          {format.runCount} run{format.runCount !== 1 ? 's' : ''} · {format.useCases.size} use-case{format.useCases.size !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="ml-4 px-3 py-1 text-sm text-gray-500 group-hover:text-gray-900 group-hover:bg-gray-100 rounded transition-colors">
-                      Open →
+                  <FormatIcon format={format.name} size={20} />
+                  <span className="font-medium text-gray-900 capitalize">{format.name}</span>
+                  <span className="text-xs text-gray-400">{format.runCount} runs</span>
+                  {format.criticalCount > 0 && (
+                    <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
+                      {format.criticalCount} critical
                     </span>
-                  </div>
+                  )}
+                  {format.majorCount > 0 && (
+                    <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
+                      {format.majorCount} major
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}
