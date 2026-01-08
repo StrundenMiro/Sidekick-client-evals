@@ -118,14 +118,13 @@ export default async function Dashboard() {
               <li key={format.name}>
                 <Link
                   href={`/format/${format.name}`}
-                  className="flex items-center px-4 py-2.5 hover:bg-gray-50 transition-colors group"
+                  className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors group"
                 >
-                  <div className="flex items-center gap-2 w-32">
+                  <div className="flex items-center gap-2">
                     <FormatIcon format={format.name} size={18} />
                     <span className="font-medium text-gray-900 capitalize">{format.name}</span>
                   </div>
-                  <span className="text-xs text-gray-400 w-16">{format.runCount} runs</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {format.criticalCount > 0 && (
                       <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-red-100 group-hover:text-red-700 transition-colors">
                         {format.criticalCount} critical
@@ -136,6 +135,7 @@ export default async function Dashboard() {
                         {format.majorCount} major
                       </span>
                     )}
+                    <span className="text-xs text-gray-400 w-14 text-right">{format.runCount} runs</span>
                   </div>
                 </Link>
               </li>
