@@ -21,6 +21,7 @@ export default async function Dashboard() {
     name: string;
     criticalCount: number;
     majorCount: number;
+    needTriageCount: number;
     runCount: number;
     useCases: Set<string>;
   }>();
@@ -32,6 +33,7 @@ export default async function Dashboard() {
         name: run.format,
         criticalCount: 0,
         majorCount: 0,
+        needTriageCount: 0,
         runCount: 0,
         useCases: new Set()
       });
@@ -57,6 +59,13 @@ export default async function Dashboard() {
       stats.criticalCount++;
     } else if (annotation.severity === 'medium') {
       stats.majorCount++;
+    }
+
+    // Count need triage (not praise, not assigned to resolved fix)
+    if (annotation.severity !== 'good') {
+      if (!annotation.plannedFixId || !resolvedFixIds.has(annotation.plannedFixId)) {
+        stats.needTriageCount++;
+      }
     }
   });
 
@@ -153,6 +162,11 @@ export default async function Dashboard() {
                     <span className="font-medium text-gray-900 capitalize">{format.displayName}</span>
                   </div>
                   <div className="flex items-center gap-3">
+                    {format.needTriageCount > 0 && (
+                      <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-amber-100 text-amber-700">
+                        {format.needTriageCount} need triage
+                      </span>
+                    )}
                     {format.criticalCount > 0 && (
                       <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-red-100 group-hover:text-red-700 transition-colors">
                         {format.criticalCount} critical
