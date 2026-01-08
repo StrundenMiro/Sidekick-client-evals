@@ -83,29 +83,35 @@ export default async function Dashboard() {
           </p>
         </header>
 
-        {/* Summary Stats */}
+        {/* All Issues Overview */}
         {totalAnnotations > 0 && (
-          <div className="mb-6 flex items-center gap-4 text-sm">
-            <span className="text-gray-500">
-              <strong className="text-gray-900">{totalAnnotations}</strong> issues found
-            </span>
-            {totalCritical > 0 && (
-              <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
-                {totalCritical} critical
-              </span>
-            )}
-            {totalMajor > 0 && (
-              <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
-                {totalMajor} major
-              </span>
-            )}
+          <section className="mb-6">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+              All Issues
+            </h2>
             <Link
               href="/issues"
-              className="ml-auto text-gray-400 hover:text-gray-600 text-xs"
+              className="flex items-center justify-between px-4 py-2.5 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors group"
             >
-              View all →
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">📋</span>
+                <span className="font-medium text-gray-900">Issues Overview</span>
+              </div>
+              <div className="flex items-center gap-3">
+                {totalCritical > 0 && (
+                  <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-red-100 group-hover:text-red-700 transition-colors">
+                    {totalCritical} critical
+                  </span>
+                )}
+                {totalMajor > 0 && (
+                  <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-orange-100 group-hover:text-orange-700 transition-colors">
+                    {totalMajor} major
+                  </span>
+                )}
+                <span className="text-xs text-gray-400 w-14 text-right">{totalAnnotations} total</span>
+              </div>
             </Link>
-          </div>
+          </section>
         )}
 
         {/* Formats List */}
