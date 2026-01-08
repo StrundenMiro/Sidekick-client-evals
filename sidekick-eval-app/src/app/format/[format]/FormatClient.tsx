@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { EnrichedIssue, UseCase } from './page';
+import FormatIcon from '@/components/FormatIcon';
 
 type Severity = 'high' | 'medium' | 'low' | 'good';
 type Tab = 'issues' | 'usecases';
@@ -84,7 +85,10 @@ export default function FormatClient({ format, issues, useCases }: Props) {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 capitalize">{format}</h1>
+        <div className="flex items-center gap-3">
+          <FormatIcon format={format} size={32} />
+          <h1 className="text-2xl font-bold text-gray-900 capitalize">{format}</h1>
+        </div>
         <div className="flex items-center gap-3 mt-2">
           {criticalCount > 0 && (
             <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
