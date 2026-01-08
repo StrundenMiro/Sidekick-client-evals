@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS planned_fixes (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   jira_ticket TEXT,
+  owner TEXT,
+  resolved BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -77,9 +79,15 @@ CREATE INDEX IF NOT EXISTS idx_annotations_planned_fix_id ON annotations(planned
 --   id TEXT PRIMARY KEY,
 --   name TEXT NOT NULL,
 --   jira_ticket TEXT,
+--   owner TEXT,
+--   resolved BOOLEAN DEFAULT FALSE,
 --   created_at TIMESTAMPTZ DEFAULT NOW(),
 --   updated_at TIMESTAMPTZ DEFAULT NOW()
 -- );
 --
 -- ALTER TABLE annotations ADD COLUMN IF NOT EXISTS planned_fix_id TEXT REFERENCES planned_fixes(id) ON DELETE SET NULL;
 -- CREATE INDEX IF NOT EXISTS idx_annotations_planned_fix_id ON annotations(planned_fix_id);
+--
+-- Migration: Add owner and resolved columns to planned_fixes
+-- ALTER TABLE planned_fixes ADD COLUMN IF NOT EXISTS owner TEXT;
+-- ALTER TABLE planned_fixes ADD COLUMN IF NOT EXISTS resolved BOOLEAN DEFAULT FALSE;

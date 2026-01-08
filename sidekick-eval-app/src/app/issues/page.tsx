@@ -1,14 +1,16 @@
 import Link from 'next/link';
 import { getAnnotationsAsync } from '@/lib/annotations';
 import { getRunsAsync, getRunTestType } from '@/lib/runs';
+import { getPlannedFixesAsync } from '@/lib/plannedFixes';
 import IssuesClient, { EnrichedIssue } from './IssuesClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function IssuesPage() {
-  const [annotations, runs] = await Promise.all([
+  const [annotations, runs, plannedFixes] = await Promise.all([
     getAnnotationsAsync(),
-    getRunsAsync()
+    getRunsAsync(),
+    getPlannedFixesAsync()
   ]);
 
   // Create a map of runs by ID for quick lookup
@@ -36,7 +38,9 @@ export default async function IssuesPage() {
         format: run.format,
         artifactPath: `/artifacts/${annotation.runId}/v${annotation.promptNumber}.png`,
         link: `/${testTypeRaw}/${run.format}/${annotation.runId}#v${annotation.promptNumber}`,
-        createdAt: annotation.createdAt
+        createdAt: annotation.createdAt,
+        plannedFixId: annotation.plannedFixId || null,
+        owner: annotation.owner || null
       } as EnrichedIssue;
     })
     .filter((issue): issue is EnrichedIssue => issue !== null);
@@ -63,7 +67,7 @@ export default async function IssuesPage() {
           </Link>
         </nav>
 
-        <IssuesClient issues={enrichedIssues} totalRuns={runs.length} />
+        <IssuesClient issues={enrichedIssues} totalRuns={runs.length} plannedFixes={plannedFixes} />
       </div>
     </div>
   );

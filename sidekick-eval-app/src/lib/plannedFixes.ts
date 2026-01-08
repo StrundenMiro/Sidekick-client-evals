@@ -7,6 +7,7 @@ export interface PlannedFix {
   name: string;
   jiraTicket: string | null;
   owner: string | null;
+  resolved: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +53,7 @@ interface DbPlannedFix {
   name: string;
   jira_ticket: string | null;
   owner: string | null;
+  resolved: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -62,6 +64,7 @@ function dbToPlannedFix(row: DbPlannedFix): PlannedFix {
     name: row.name,
     jiraTicket: row.jira_ticket,
     owner: row.owner,
+    resolved: row.resolved ?? false,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString()
   };
@@ -91,19 +94,20 @@ async function savePlannedFixToDb(fix: Omit<PlannedFix, 'id' | 'createdAt' | 'up
         name = $1,
         jira_ticket = $2,
         owner = $3,
-        updated_at = $4
-      WHERE id = $5
+        resolved = $4,
+        updated_at = $5
+      WHERE id = $6
       RETURNING *
-    `, [fix.name, fix.jiraTicket, fix.owner, now, fix.id]);
+    `, [fix.name, fix.jiraTicket, fix.owner, fix.resolved ?? false, now, fix.id]);
     return dbToPlannedFix(row!);
   }
 
   const id = `fix-${Date.now()}`;
   const row = await queryOne<DbPlannedFix>(`
-    INSERT INTO planned_fixes (id, name, jira_ticket, owner, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $5)
+    INSERT INTO planned_fixes (id, name, jira_ticket, owner, resolved, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $6)
     RETURNING *
-  `, [id, fix.name, fix.jiraTicket, fix.owner, now]);
+  `, [id, fix.name, fix.jiraTicket, fix.owner, fix.resolved ?? false, now]);
 
   return dbToPlannedFix(row!);
 }
@@ -151,6 +155,7 @@ export async function savePlannedFixAsync(fix: Omit<PlannedFix, 'id' | 'createdA
         name: fix.name,
         jiraTicket: fix.jiraTicket,
         owner: fix.owner,
+        resolved: fix.resolved ?? false,
         updatedAt: now
       };
       fixes[idx] = updated;
@@ -164,6 +169,7 @@ export async function savePlannedFixAsync(fix: Omit<PlannedFix, 'id' | 'createdA
     name: fix.name,
     jiraTicket: fix.jiraTicket,
     owner: fix.owner,
+    resolved: fix.resolved ?? false,
     createdAt: now,
     updatedAt: now
   };

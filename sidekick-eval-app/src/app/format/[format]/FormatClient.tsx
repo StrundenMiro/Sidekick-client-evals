@@ -9,7 +9,7 @@ import FormatIcon from '@/components/FormatIcon';
 import { PlannedFix } from '@/lib/plannedFixes';
 
 type Severity = 'high' | 'medium' | 'low' | 'good';
-type Tab = 'issues' | 'usecases';
+type Tab = 'open' | 'fixed' | 'praise' | 'usecases';
 
 const severityConfig: Record<Severity, { label: string; color: string; bg: string; bar: string; order: number }> = {
   high: { label: 'Critical', color: 'text-red-700', bg: 'bg-red-100', bar: 'bg-red-500', order: 0 },
@@ -153,12 +153,13 @@ function EditFixModal({
 }: {
   fix: PlannedFix | null;
   onClose: () => void;
-  onSave: (id: string, name: string, jiraTicket: string, owner: string) => Promise<void>;
+  onSave: (id: string, name: string, jiraTicket: string, owner: string, resolved: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }) {
   const [name, setName] = useState(fix?.name || '');
   const [jiraTicket, setJiraTicket] = useState(fix?.jiraTicket || '');
   const [owner, setOwner] = useState(fix?.owner || '');
+  const [resolved, setResolved] = useState(fix?.resolved || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -166,6 +167,7 @@ function EditFixModal({
       setName(fix.name);
       setJiraTicket(fix.jiraTicket || '');
       setOwner(fix.owner || '');
+      setResolved(fix.resolved || false);
     }
   }, [fix]);
 
@@ -173,7 +175,7 @@ function EditFixModal({
     e.preventDefault();
     if (!name.trim() || !fix) return;
     setIsSubmitting(true);
-    await onSave(fix.id, name.trim(), jiraTicket.trim(), owner.trim());
+    await onSave(fix.id, name.trim(), jiraTicket.trim(), owner.trim(), resolved);
     setIsSubmitting(false);
     onClose();
   };
@@ -232,6 +234,21 @@ function EditFixModal({
               placeholder="e.g., @john"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
             />
+          </div>
+
+          <div className="flex items-center gap-3 pt-2 pb-2 border-t border-gray-100">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={resolved}
+                onChange={e => setResolved(e.target.checked)}
+                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              />
+              <span className="text-sm text-gray-700">Mark as resolved</span>
+            </label>
+            {resolved && (
+              <span className="text-xs text-green-600">Issues will be hidden</span>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -446,7 +463,7 @@ function FixDropdown({
 
 export default function FormatClient({ format, issues, useCases, plannedFixes: initialFixes }: Props) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<Tab>('issues');
+  const [activeTab, setActiveTab] = useState<Tab>('open');
   const [localIssues, setLocalIssues] = useState(issues);
   const [fixes, setFixes] = useState(initialFixes);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -474,8 +491,42 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
     setFixes(initialFixes);
   }, [initialFixes]);
 
+  // Get resolved fix IDs for filtering
+  const resolvedFixIds = useMemo(() => {
+    return new Set(fixes.filter(f => f.resolved).map(f => f.id));
+  }, [fixes]);
+
+  // Separate issues from praise (good severity)
+  const issuesOnly = useMemo(() => {
+    return localIssues.filter(i => i.severity !== 'good');
+  }, [localIssues]);
+
+  const praiseOnly = useMemo(() => {
+    return localIssues.filter(i => i.severity === 'good');
+  }, [localIssues]);
+
+  // Count fixed issues (excluding praise)
+  const fixedIssueCount = useMemo(() => {
+    return issuesOnly.filter(i => i.plannedFixId && resolvedFixIds.has(i.plannedFixId)).length;
+  }, [issuesOnly, resolvedFixIds]);
+
+  // Count open issues (excluding praise and fixed)
+  const openIssueCount = useMemo(() => {
+    return issuesOnly.filter(i => !i.plannedFixId || !resolvedFixIds.has(i.plannedFixId)).length;
+  }, [issuesOnly, resolvedFixIds]);
+
   const sortedIssues = useMemo(() => {
-    return [...localIssues].sort((a, b) => {
+    let filtered: typeof localIssues = [];
+
+    if (activeTab === 'praise') {
+      filtered = praiseOnly;
+    } else if (activeTab === 'fixed') {
+      filtered = issuesOnly.filter(i => i.plannedFixId && resolvedFixIds.has(i.plannedFixId));
+    } else if (activeTab === 'open') {
+      filtered = issuesOnly.filter(i => !i.plannedFixId || !resolvedFixIds.has(i.plannedFixId));
+    }
+
+    return filtered.sort((a, b) => {
       // Sort by severity first
       if (severityConfig[a.severity].order !== severityConfig[b.severity].order) {
         return severityConfig[a.severity].order - severityConfig[b.severity].order;
@@ -483,7 +534,7 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
       // Then by date (newest first)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  }, [localIssues]);
+  }, [localIssues, activeTab, resolvedFixIds, issuesOnly, praiseOnly]);
 
   const handleAssignFix = async (issueId: string, fixId: string | null) => {
     const issue = localIssues.find(i => i.id === issueId);
@@ -592,10 +643,10 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
     }
   };
 
-  const handleSaveFix = async (id: string, name: string, jiraTicket: string, owner: string) => {
+  const handleSaveFix = async (id: string, name: string, jiraTicket: string, owner: string, resolved: boolean) => {
     // Update local state
     setFixes(prev =>
-      prev.map(f => f.id === id ? { ...f, name, jiraTicket: jiraTicket || null, owner: owner || null } : f)
+      prev.map(f => f.id === id ? { ...f, name, jiraTicket: jiraTicket || null, owner: owner || null, resolved } : f)
     );
 
     // Save to API
@@ -603,7 +654,7 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
       await fetch('/api/planned-fixes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, name, jiraTicket: jiraTicket || null, owner: owner || null })
+        body: JSON.stringify({ id, name, jiraTicket: jiraTicket || null, owner: owner || null, resolved })
       });
     } catch (error) {
       console.error('Failed to save fix:', error);
@@ -649,14 +700,34 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex gap-6">
           <button
-            onClick={() => setActiveTab('issues')}
+            onClick={() => setActiveTab('open')}
             className={`py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
-              activeTab === 'issues'
+              activeTab === 'open'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Issues ({issues.length})
+            Open Issues ({openIssueCount})
+          </button>
+          <button
+            onClick={() => setActiveTab('fixed')}
+            className={`py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
+              activeTab === 'fixed'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Fixed Issues ({fixedIssueCount})
+          </button>
+          <button
+            onClick={() => setActiveTab('praise')}
+            className={`py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
+              activeTab === 'praise'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Praise ({praiseOnly.length})
           </button>
           <button
             onClick={() => setActiveTab('usecases')}
@@ -671,8 +742,8 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
         </nav>
       </div>
 
-      {/* Issues Tab */}
-      {activeTab === 'issues' && (
+      {/* Issues Tab (Open, Fixed, or Praise) */}
+      {(activeTab === 'open' || activeTab === 'fixed' || activeTab === 'praise') && (
         <div>
           {/* Issues Table */}
           <div className="bg-white rounded-lg border border-gray-200">
@@ -688,9 +759,11 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Use-case
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Planned Fix
-                    </th>
+                    {activeTab !== 'praise' && (
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Planned Fix
+                      </th>
+                    )}
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                       Screenshot
                     </th>
@@ -719,15 +792,17 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
                           {issue.useCase === 'greenfield' ? 'GF' : 'BF'}
                         </span>
                       </td>
-                      <td className="px-3 py-2">
-                        <FixDropdown
-                          issue={issue}
-                          fixes={fixes}
-                          onAssign={handleAssignFix}
-                          onOpenCreateModal={() => openCreateModal(issue.id)}
-                          onEditFix={setEditingFix}
-                        />
-                      </td>
+                      {activeTab !== 'praise' && (
+                        <td className="px-3 py-2">
+                          <FixDropdown
+                            issue={issue}
+                            fixes={fixes}
+                            onAssign={handleAssignFix}
+                            onOpenCreateModal={() => openCreateModal(issue.id)}
+                            onEditFix={setEditingFix}
+                          />
+                        </td>
+                      )}
                       <td className="px-3 py-2">
                         <Link href={issue.link} className="block">
                           <div className="relative w-16 h-12 rounded overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors">
@@ -749,7 +824,7 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
 
             {sortedIssues.length === 0 && (
               <div className="text-center py-8 text-gray-500">
-                No issues found
+                {activeTab === 'fixed' ? 'No fixed issues yet' : activeTab === 'praise' ? 'No praise items yet' : 'No open issues'}
               </div>
             )}
           </div>

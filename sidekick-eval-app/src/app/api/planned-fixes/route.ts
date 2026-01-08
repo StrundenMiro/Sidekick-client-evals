@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, name, jiraTicket, owner } = body;
+    const { id, name, jiraTicket, owner, resolved } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
       id,
       name,
       jiraTicket: jiraTicket || null,
-      owner: owner || null
+      owner: owner || null,
+      resolved: resolved ?? false
     });
 
     return NextResponse.json({ plannedFix });
