@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, runId, promptNumber, issueType, severity, note } = body;
+    const { id, runId, promptNumber, author, issueType, severity, note } = body;
 
     if (!runId || promptNumber === undefined || !issueType || !severity) {
       return NextResponse.json(
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
       id, // Optional - if provided, updates existing
       runId,
       promptNumber: parseInt(promptNumber, 10),
+      author: (author || 'human') as 'frank' | 'human',
       issueType: issueType as IssueType,
       severity: severity as Severity,
       note: note || ''

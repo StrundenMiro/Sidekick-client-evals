@@ -48,12 +48,33 @@ Review the "Known Failure Patterns" section in the runbook. Check for:
 
 ## Step 5: Write Evaluation
 
-**Save via API** (do NOT edit runs.json directly) - first read the existing run, update its fields, then POST to the API:
+**Save findings as annotations** - each finding is a separate annotation with author='frank'.
 
-### For each prompt, write a `note` in Frank's voice:
+### For each prompt, create annotations via API:
+Each finding should be a separate annotation. Use Frank's voice:
 - First person: "I asked for..." not "User asked for..."
 - Opinionated: "This is broken" not "There may be an issue"
 - Specific: Name exact issues ("'Michae Connor' is truncated")
+
+**POST to /api/annotations** for each finding:
+```json
+{
+  "runId": "{run-id}",
+  "promptNumber": 1,
+  "author": "frank",
+  "issueType": "other",
+  "severity": "good|low|medium|high",
+  "note": "One specific finding"
+}
+```
+
+Severity guide:
+- `good` (green) - Something that worked well
+- `low` (blue) - Minor observation, not really an issue
+- `medium` (amber) - Moderate issue, should be noted
+- `high` (red) - Critical issue, clear failure
+
+**One finding per annotation.** If you have 5 things to say about V2, create 5 annotations.
 
 ### Set `status` for each prompt:
 - "pass" - Did what was asked, preserved existing, visible result

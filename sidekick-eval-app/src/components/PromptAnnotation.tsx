@@ -2,12 +2,14 @@
 
 import { useState, useCallback, useRef } from 'react';
 
-type Severity = 'high' | 'medium' | 'low';
+type Severity = 'high' | 'medium' | 'low' | 'good';
+type Author = 'frank' | 'human';
 
 interface Annotation {
   id: string;
   runId: string;
   promptNumber: number;
+  author: Author;
   issueType: string;
   severity: Severity;
   note: string;
@@ -24,10 +26,12 @@ interface Props {
 
 function getSeverityColor(severity: Severity, type: 'bg' | 'dot' = 'bg') {
   if (type === 'dot') {
-    return severity === 'high' ? 'bg-red-500' :
+    return severity === 'good' ? 'bg-green-500' :
+           severity === 'high' ? 'bg-red-500' :
            severity === 'medium' ? 'bg-amber-500' : 'bg-blue-500';
   }
-  return severity === 'high' ? 'bg-red-100' :
+  return severity === 'good' ? 'bg-green-100' :
+         severity === 'high' ? 'bg-red-100' :
          severity === 'medium' ? 'bg-orange-100' : 'bg-blue-100';
 }
 
@@ -41,26 +45,34 @@ function AnnotationItem({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const isFrank = annotation.author === 'frank';
+
   return (
     <div className="flex gap-3 items-start group">
-      <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 bg-slate-200 text-slate-500">
-        👤
+      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
+        isFrank ? 'bg-gradient-to-br from-blue-400 to-purple-500' : 'bg-slate-200 text-slate-500'
+      }`}>
+        {isFrank ? '🤖' : '👤'}
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-xs text-gray-400">Human take</p>
-          <button
-            onClick={onEdit}
-            className="text-xs text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            Edit
-          </button>
-          <button
-            onClick={onDelete}
-            className="text-xs text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            ×
-          </button>
+          <p className="text-xs text-gray-400">{isFrank ? "Frank's take" : 'Human take'}</p>
+          {!isFrank && (
+            <>
+              <button
+                onClick={onEdit}
+                className="text-xs text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                Edit
+              </button>
+              <button
+                onClick={onDelete}
+                className="text-xs text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                ×
+              </button>
+            </>
+          )}
         </div>
         <p className="text-gray-700">
           <span className={`rounded px-1.5 py-0.5 ${getSeverityColor(annotation.severity)}`}>
@@ -75,7 +87,7 @@ function AnnotationItem({
 // Annotation editor (inline)
 function AnnotationEditor({
   initialNote = '',
-  initialSeverity = 'high' as Severity,
+  initialSeverity = 'medium' as Severity,
   onSave,
   onCancel,
   autoFocus = true
@@ -120,8 +132,8 @@ function AnnotationEditor({
           autoFocus={autoFocus}
         />
         <div className="flex items-center gap-2 mt-2">
-          <div className="flex gap-1">
-            {(['high', 'medium', 'low'] as const).map((s) => (
+          <div className="flex gap-1.5">
+            {(['good', 'low', 'medium', 'high'] as const).map((s) => (
               <button
                 key={s}
                 onMouseDown={(e) => e.preventDefault()}
@@ -157,6 +169,7 @@ export default function PromptAnnotation({ runId, promptNumber, initialAnnotatio
           id: existingId,
           runId,
           promptNumber,
+          author: 'human',
           issueType: 'other',
           severity,
           note

@@ -13,12 +13,14 @@ export const ISSUE_TYPES = [
 ] as const;
 
 export type IssueType = typeof ISSUE_TYPES[number]['id'];
-export type Severity = 'high' | 'medium' | 'low';
+export type Severity = 'high' | 'medium' | 'low' | 'good';
+export type Author = 'frank' | 'human';
 
 export interface Annotation {
   id: string;
   runId: string;
   promptNumber: number;
+  author: Author;
   issueType: IssueType;
   severity: Severity;
   note: string;
@@ -66,6 +68,7 @@ interface DbAnnotation {
   id: string;
   run_id: string;
   prompt_number: number;
+  author: string;
   issue_type: string;
   severity: string;
   note: string;
@@ -78,6 +81,7 @@ function dbToAnnotation(row: DbAnnotation): Annotation {
     id: row.id,
     runId: row.run_id,
     promptNumber: row.prompt_number,
+    author: (row.author || 'human') as Author,
     issueType: row.issue_type as IssueType,
     severity: row.severity as Severity,
     note: row.note || '',
@@ -129,10 +133,10 @@ async function saveAnnotationToDb(annotation: Omit<Annotation, 'id' | 'createdAt
   // Otherwise create new annotation
   const id = `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`;
   const row = await queryOne<DbAnnotation>(`
-    INSERT INTO annotations (id, run_id, prompt_number, issue_type, severity, note, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+    INSERT INTO annotations (id, run_id, prompt_number, author, issue_type, severity, note, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
     RETURNING *
-  `, [id, annotation.runId, annotation.promptNumber, annotation.issueType, annotation.severity, annotation.note, now]);
+  `, [id, annotation.runId, annotation.promptNumber, annotation.author || 'human', annotation.issueType, annotation.severity, annotation.note, now]);
 
   return dbToAnnotation(row!);
 }
@@ -201,34 +205,20 @@ export async function getAnnotationForPromptAsync(runId: string, promptNumber: n
 }
 
 export function saveAnnotation(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'>): Annotation {
-  // Sync version - file only
+  // Sync version - file only, always creates new (no upsert)
   const annotations = getAnnotationsFromFile();
-  const existingIdx = annotations.findIndex(
-    a => a.runId === annotation.runId && a.promptNumber === annotation.promptNumber
-  );
-
   const now = new Date().toISOString();
 
-  if (existingIdx >= 0) {
-    const updated: Annotation = {
-      ...annotations[existingIdx],
-      ...annotation,
-      updatedAt: now
-    };
-    annotations[existingIdx] = updated;
-    saveAnnotationsToFile(annotations);
-    return updated;
-  } else {
-    const newAnnotation: Annotation = {
-      id: `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`,
-      ...annotation,
-      createdAt: now,
-      updatedAt: now
-    };
-    annotations.push(newAnnotation);
-    saveAnnotationsToFile(annotations);
-    return newAnnotation;
-  }
+  const newAnnotation: Annotation = {
+    id: `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`,
+    ...annotation,
+    author: annotation.author || 'human',
+    createdAt: now,
+    updatedAt: now
+  };
+  annotations.push(newAnnotation);
+  saveAnnotationsToFile(annotations);
+  return newAnnotation;
 }
 
 export async function saveAnnotationAsync(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Promise<Annotation> {

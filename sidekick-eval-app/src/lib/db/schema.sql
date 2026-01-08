@@ -42,8 +42,9 @@ CREATE TABLE IF NOT EXISTS annotations (
   id TEXT PRIMARY KEY,
   run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
   prompt_number INTEGER NOT NULL,
+  author TEXT NOT NULL DEFAULT 'human', -- 'frank' or 'human'
   issue_type TEXT NOT NULL,
-  severity TEXT NOT NULL, -- 'high', 'medium', 'low'
+  severity TEXT NOT NULL, -- 'good', 'high', 'medium', 'low'
   note TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
