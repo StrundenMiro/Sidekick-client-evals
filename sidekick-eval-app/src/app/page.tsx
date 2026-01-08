@@ -92,7 +92,7 @@ export default async function Dashboard() {
 
         {/* Compact Frank Header */}
         <header className="flex items-center gap-3 py-4 mb-6 border-b border-gray-200">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-sm flex-shrink-0">
+          <div className="text-2xl flex-shrink-0">
             🤖
           </div>
           <p className="text-sm text-gray-500">
