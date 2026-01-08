@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveCapturePrompt } from '@/lib/runs';
+import { saveCapturePromptAsync } from '@/lib/runs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const run = saveCapturePrompt(runId, {
+    const run = await saveCapturePromptAsync(runId, {
       number,
       title,
       text,

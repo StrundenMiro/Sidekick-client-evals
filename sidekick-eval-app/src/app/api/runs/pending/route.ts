@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getPendingRuns, getCapturingRuns } from '@/lib/runs';
+import { getPendingRunsAsync, getCapturingRunsAsync } from '@/lib/runs';
 
 export async function GET() {
   try {
-    const pending = getPendingRuns();
-    const capturing = getCapturingRuns();
+    const pending = await getPendingRunsAsync();
+    const capturing = await getCapturingRunsAsync();
 
     return NextResponse.json({
       pending,    // Ready for scoring

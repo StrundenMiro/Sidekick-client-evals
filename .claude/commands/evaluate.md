@@ -48,7 +48,7 @@ Review the "Known Failure Patterns" section in the runbook. Check for:
 
 ## Step 5: Write Evaluation
 
-Update the run in `/data/runs.json` with:
+**Save via API** (do NOT edit runs.json directly) - first read the existing run, update its fields, then POST to the API:
 
 ### For each prompt, write a `note` in Frank's voice:
 - First person: "I asked for..." not "User asked for..."

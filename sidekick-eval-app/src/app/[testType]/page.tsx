@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getFormatsByTestType, getRunRating } from '@/lib/runs';
+import { getFormatsByTestTypeAsync, getRunRating } from '@/lib/runs';
 import { getTestType } from '@/lib/test-types';
 import { getPromptsForTestType } from '@/lib/test-prompts';
 import { notFound } from 'next/navigation';
@@ -16,7 +16,7 @@ export default async function TestTypePage({ params }: { params: Promise<{ testT
     notFound();
   }
 
-  const formats = getFormatsByTestType(testType);
+  const formats = await getFormatsByTestTypeAsync(testType);
   const testPrompts = getPromptsForTestType(testType);
   const formatList = FORMAT_ORDER
     .filter(f => formats[f])

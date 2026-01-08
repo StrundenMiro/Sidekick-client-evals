@@ -179,10 +179,10 @@ Count your enumerated issues:
 
 ## Part 6: Write Results
 
-Add entry to `/data/runs.json`:
+**Save via script** (do NOT edit runs.json directly):
 
-```json
-{
+```bash
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-run.ts '{
   "id": "{run-id}",
   "testType": "existing-content-iteration",
   "format": "$ARGUMENTS",
@@ -203,7 +203,7 @@ Add entry to `/data/runs.json`:
       "title": "{title from brownfield.$ARGUMENTS.prompts[0]}",
       "text": "{text from brownfield.$ARGUMENTS.prompts[0]}",
       "status": "pass|fail",
-      "note": "{Frank's voice: What did you find? Include any layout bugs here.}",
+      "note": "{Franks voice: What did you find? Include any layout bugs here.}",
       "artifact": "artifacts/{run-id}/v1-edit.png"
     },
     {
@@ -211,12 +211,14 @@ Add entry to `/data/runs.json`:
       "title": "{title from brownfield.$ARGUMENTS.prompts[1]}",
       "text": "{text from brownfield.$ARGUMENTS.prompts[1]}",
       "status": "pass|fail",
-      "note": "{Frank's voice: What did you find? Did context carry forward?}",
+      "note": "{Franks voice: What did you find? Did context carry forward?}",
       "artifact": "artifacts/{run-id}/v2-edit.png"
     }
   ]
-}
+}'
 ```
+
+**Note**: The script reads DATABASE_URL from .env.local automatically, so it works both locally and on Replit.
 
 ### Frank's Voice Examples
 - "I clicked Edit with AI on my table. It understood the structure and made the edit I asked for."

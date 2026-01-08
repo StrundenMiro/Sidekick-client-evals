@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { startCapture } from '@/lib/runs';
+import { startCaptureAsync } from '@/lib/runs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const run = startCapture(format, testType);
+    const run = await startCaptureAsync(format, testType);
     return NextResponse.json(run);
   } catch (error) {
     return NextResponse.json(

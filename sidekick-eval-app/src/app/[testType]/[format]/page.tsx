@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getRunsByTestTypeAndFormat, isScored, isCapturing, getRunRating, type Run } from '@/lib/runs';
+import { getRunsByTestTypeAndFormatAsync, isScored, isCapturing, getRunRating, type Run } from '@/lib/runs';
 import { getTestType } from '@/lib/test-types';
 import { notFound } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -29,7 +29,7 @@ export default async function FormatPage({ params }: { params: Promise<{ testTyp
     notFound();
   }
 
-  const runs = getRunsByTestTypeAndFormat(testType, format);
+  const runs = await getRunsByTestTypeAndFormatAsync(testType, format);
 
   return (
     <main className="min-h-screen bg-gray-50">

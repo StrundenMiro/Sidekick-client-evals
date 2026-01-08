@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { scoreRun, ScoreInput } from '@/lib/runs';
+import { scoreRunAsync, ScoreInput } from '@/lib/runs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const run = scoreRun({
+    const run = await scoreRunAsync({
       runId,
       scores,
       good: good || [],

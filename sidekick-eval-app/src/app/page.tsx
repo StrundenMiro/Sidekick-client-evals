@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { getRunsByTestType, isScored, getRunRating, getAllIssues } from '@/lib/runs';
+import { getRunsByTestTypeAsync, isScored, getRunRating, getAllIssuesAsync } from '@/lib/runs';
 import { getAllTestTypes } from '@/lib/test-types';
 
-export default function Dashboard() {
-  const runsByTestType = getRunsByTestType();
+export default async function Dashboard() {
+  const runsByTestType = await getRunsByTestTypeAsync();
   const testTypes = getAllTestTypes();
-  const issues = getAllIssues();
+  const issues = await getAllIssuesAsync();
   const criticalIssues = issues.filter(t => t.severity === 'high');
 
   // Calculate stats for each test type

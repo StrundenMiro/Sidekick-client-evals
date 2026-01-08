@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { type IssueTheme } from '@/lib/runs';
 
 function getSeverityStyle(severity: string) {
@@ -91,6 +92,50 @@ ${theme.occurrences.slice(0, 5).map(o => `* ${o.runId} (${o.format})`).join('\n'
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Before/After Example Images */}
+          {theme.example && (
+            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+              <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">Visual Example</p>
+                <p className="text-xs text-gray-500 mt-0.5">{theme.example.caption}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-0.5 bg-gray-200">
+                <div className="bg-white">
+                  <div className="px-2 py-1.5 bg-green-50 border-b border-green-100">
+                    <span className="text-xs font-medium text-green-700">{theme.example.beforeLabel}</span>
+                  </div>
+                  <Link href={`/${theme.example.testType}/${theme.example.format}/${theme.example.runId}`}>
+                    <div className="relative aspect-[4/3] bg-gray-100 hover:opacity-90 transition-opacity">
+                      <Image
+                        src={theme.example.beforeImage}
+                        alt={theme.example.beforeLabel}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 50vw, 300px"
+                      />
+                    </div>
+                  </Link>
+                </div>
+                <div className="bg-white">
+                  <div className="px-2 py-1.5 bg-red-50 border-b border-red-100">
+                    <span className="text-xs font-medium text-red-700">{theme.example.afterLabel}</span>
+                  </div>
+                  <Link href={`/${theme.example.testType}/${theme.example.format}/${theme.example.runId}`}>
+                    <div className="relative aspect-[4/3] bg-gray-100 hover:opacity-90 transition-opacity">
+                      <Image
+                        src={theme.example.afterImage}
+                        alt={theme.example.afterLabel}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 50vw, 300px"
+                      />
+                    </div>
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
 

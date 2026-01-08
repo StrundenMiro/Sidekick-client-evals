@@ -304,12 +304,12 @@ Issues found:
 
 ## Part 4: Write Results
 
-### Step 13: Update runs.json
+### Step 13: Save via script
 
-Read `/data/runs.json` and add entry:
+**Save via script** (do NOT edit runs.json directly):
 
-```json
-{
+```bash
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-run.ts '{
   "id": "{run-id}",
   "testType": "ai-generated-iteration",
   "format": "{format}",
@@ -325,7 +325,7 @@ Read `/data/runs.json` and add entry:
       "title": "{title1}",
       "text": "{prompt1}",
       "status": "pass|fail",
-      "note": "{Frank's voice}",
+      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v1.png"
     },
     {
@@ -333,7 +333,7 @@ Read `/data/runs.json` and add entry:
       "title": "{title2}",
       "text": "{prompt2}",
       "status": "pass|fail",
-      "note": "{Frank's voice}",
+      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v2.png"
     },
     {
@@ -341,12 +341,14 @@ Read `/data/runs.json` and add entry:
       "title": "{title3}",
       "text": "{prompt3}",
       "status": "pass|fail",
-      "note": "{Frank's voice}",
+      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v3.png"
     }
   ]
-}
+}'
 ```
+
+**Note**: The script reads DATABASE_URL from .env.local automatically, so it works both locally and on Replit.
 
 ---
 

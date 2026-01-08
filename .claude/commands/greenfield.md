@@ -88,10 +88,10 @@ Navigate to Miro board: `https://miro.com/app/board/uXjVGUAcwUE=/`
 
 ## Part 4: Write Results
 
-Add entry to `/data/runs.json`:
+**Save via script** (do NOT edit runs.json directly):
 
-```json
-{
+```bash
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-run.ts '{
   "id": "{run-id}",
   "testType": "ai-generated-iteration",
   "format": "$ARGUMENTS",
@@ -106,7 +106,7 @@ Add entry to `/data/runs.json`:
       "title": "{title from test-prompts.json}",
       "text": "{prompt text from test-prompts.json}",
       "status": "pass|fail",
-      "note": "{Frank's voice}",
+      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v1.png"
     },
     {
@@ -114,7 +114,7 @@ Add entry to `/data/runs.json`:
       "title": "{title from test-prompts.json}",
       "text": "{prompt text}",
       "status": "pass|fail",
-      "note": "{Frank's voice}",
+      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v2.png"
     },
     {
@@ -122,12 +122,14 @@ Add entry to `/data/runs.json`:
       "title": "{title from test-prompts.json}",
       "text": "{prompt text}",
       "status": "pass|fail",
-      "note": "{Frank's voice}",
+      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v3.png"
     }
   ]
-}
+}'
 ```
+
+**Note**: The script reads DATABASE_URL from .env.local automatically, so it works both locally and on Replit.
 
 ### Frank's Voice for Notes
 

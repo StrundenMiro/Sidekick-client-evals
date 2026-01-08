@@ -1,9 +1,9 @@
-import { getAllIssues } from '@/lib/runs';
+import { getAllIssuesAsync } from '@/lib/runs';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import HitListClient from './HitListClient';
 
-export default function HitListPage() {
-  const themes = getAllIssues();
+export default async function HitListPage() {
+  const themes = await getAllIssuesAsync();
 
   return (
     <main className="min-h-screen bg-gray-50">
