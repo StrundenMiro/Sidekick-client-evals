@@ -97,6 +97,7 @@ function AnnotationEditor({
   const [note, setNote] = useState(initialNote);
   const [severity, setSeverity] = useState<Severity>(initialSeverity);
   const [isSaving, setIsSaving] = useState(false);
+  const [hoveredSeverity, setHoveredSeverity] = useState<Severity | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -136,32 +137,30 @@ function AnnotationEditor({
             if (e.key === 'Escape') onCancel();
           }}
           onBlur={handleSave}
-          placeholder="Add your thoughts... (Shift+Enter for new line)"
+          placeholder="Add your thoughts..."
           rows={1}
           className={`w-full text-gray-700 border-none focus:outline-none rounded px-1.5 py-0.5 resize-none overflow-hidden ${getSeverityColor(severity)}`}
           autoFocus={autoFocus}
         />
         <div className="flex items-center gap-2 mt-2">
-          <div className="flex gap-1.5 group/severity">
+          <div className="flex gap-1.5 items-center">
             {(['good', 'low', 'medium', 'high'] as const).map((s) => (
               <button
                 key={s}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setSeverity(s)}
+                onMouseEnter={() => setHoveredSeverity(s)}
+                onMouseLeave={() => setHoveredSeverity(null)}
                 className={`w-3 h-3 rounded-full ${getSeverityColor(s, 'dot')} ${
                   severity === s ? 'ring-2 ring-offset-1 ring-gray-400' : 'hover:opacity-70'
-                } peer/${s}`}
+                }`}
                 style={{ opacity: severity === s ? 1 : 0.4 }}
-                title={s}
               />
             ))}
-            <span className="text-xs text-gray-400 ml-1 capitalize hidden group-hover/severity:inline">
-              {severity}
+            <span className="text-xs text-gray-400 ml-1 capitalize">
+              {hoveredSeverity || (isSaving ? 'Saving...' : '')}
             </span>
           </div>
-          <span className="text-xs text-gray-400">
-            {isSaving ? 'Saving...' : ''}
-          </span>
         </div>
       </div>
     </div>
