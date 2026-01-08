@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 type Severity = 'high' | 'medium' | 'low' | 'good';
 type Author = 'frank' | 'human';
@@ -97,6 +97,16 @@ function AnnotationEditor({
   const [note, setNote] = useState(initialNote);
   const [severity, setSeverity] = useState<Severity>(initialSeverity);
   const [isSaving, setIsSaving] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [note]);
 
   const handleSave = async () => {
     if (!note.trim()) {
@@ -115,6 +125,7 @@ function AnnotationEditor({
       </div>
       <div className="flex-1">
         <textarea
+          ref={textareaRef}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           onKeyDown={(e) => {
@@ -126,8 +137,8 @@ function AnnotationEditor({
           }}
           onBlur={handleSave}
           placeholder="Add your thoughts... (Shift+Enter for new line)"
-          rows={2}
-          className={`w-full text-gray-700 border-none focus:outline-none rounded px-1.5 py-0.5 resize-none ${getSeverityColor(severity)}`}
+          rows={1}
+          className={`w-full text-gray-700 border-none focus:outline-none rounded px-1.5 py-0.5 resize-none overflow-hidden ${getSeverityColor(severity)}`}
           autoFocus={autoFocus}
         />
         <div className="flex items-center gap-2 mt-2">
