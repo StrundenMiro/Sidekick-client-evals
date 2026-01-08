@@ -151,7 +151,7 @@ function AnnotationEditor({
                 onClick={() => setSeverity(s)}
                 onMouseEnter={() => setHoveredSeverity(s)}
                 onMouseLeave={() => setHoveredSeverity(null)}
-                className={`w-3 h-3 rounded-full ${getSeverityColor(s, 'dot')} ${
+                className={`w-3 h-3 rounded-full transition-all ${getSeverityColor(s, 'dot')} ${
                   severity === s ? 'ring-2 ring-offset-1 ring-gray-400' : 'hover:opacity-70'
                 }`}
                 style={{ opacity: severity === s ? 1 : 0.4 }}
