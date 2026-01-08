@@ -158,7 +158,7 @@ function AnnotationEditor({
               />
             ))}
             <span className="text-xs text-gray-400 ml-1 capitalize">
-              {hoveredSeverity || (isSaving ? 'Saving...' : '')}
+              {isSaving ? 'Saving...' : (hoveredSeverity || severity)}
             </span>
           </div>
         </div>
