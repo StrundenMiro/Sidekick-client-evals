@@ -32,6 +32,8 @@ export interface Annotation {
   issueType: IssueType;
   severity: Severity;
   note: string;
+  plannedFixId: string | null;
+  owner: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -80,6 +82,8 @@ interface DbAnnotation {
   issue_type: string;
   severity: string;
   note: string;
+  planned_fix_id: string | null;
+  owner: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -93,6 +97,8 @@ function dbToAnnotation(row: DbAnnotation): Annotation {
     issueType: row.issue_type as IssueType,
     severity: row.severity as Severity,
     note: row.note || '',
+    plannedFixId: row.planned_fix_id,
+    owner: row.owner,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString()
   };
@@ -131,20 +137,22 @@ async function saveAnnotationToDb(annotation: Omit<Annotation, 'id' | 'createdAt
         issue_type = $1,
         severity = $2,
         note = $3,
-        updated_at = $4
-      WHERE id = $5
+        planned_fix_id = $4,
+        owner = $5,
+        updated_at = $6
+      WHERE id = $7
       RETURNING *
-    `, [annotation.issueType, annotation.severity, annotation.note, now, annotation.id]);
+    `, [annotation.issueType, annotation.severity, annotation.note, annotation.plannedFixId, annotation.owner, now, annotation.id]);
     return dbToAnnotation(row!);
   }
 
   // Otherwise create new annotation
   const id = `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`;
   const row = await queryOne<DbAnnotation>(`
-    INSERT INTO annotations (id, run_id, prompt_number, author, issue_type, severity, note, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
+    INSERT INTO annotations (id, run_id, prompt_number, author, issue_type, severity, note, planned_fix_id, owner, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)
     RETURNING *
-  `, [id, annotation.runId, annotation.promptNumber, annotation.author || 'human', annotation.issueType, annotation.severity, annotation.note, now]);
+  `, [id, annotation.runId, annotation.promptNumber, annotation.author || 'human', annotation.issueType, annotation.severity, annotation.note, annotation.plannedFixId, annotation.owner, now]);
 
   return dbToAnnotation(row!);
 }
@@ -221,6 +229,8 @@ export function saveAnnotation(annotation: Omit<Annotation, 'id' | 'createdAt' |
     id: `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`,
     ...annotation,
     author: annotation.author || 'human',
+    plannedFixId: annotation.plannedFixId || null,
+    owner: annotation.owner || null,
     createdAt: now,
     updatedAt: now
   };
@@ -243,6 +253,8 @@ export async function saveAnnotationAsync(annotation: Omit<Annotation, 'id' | 'c
         issueType: annotation.issueType,
         severity: annotation.severity,
         note: annotation.note,
+        plannedFixId: annotation.plannedFixId ?? annotations[idx].plannedFixId,
+        owner: annotation.owner ?? annotations[idx].owner,
         updatedAt: new Date().toISOString()
       };
       annotations[idx] = updated;

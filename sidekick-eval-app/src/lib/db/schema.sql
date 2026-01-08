@@ -37,6 +37,15 @@ CREATE TABLE IF NOT EXISTS prompts (
   UNIQUE(run_id, number)
 );
 
+-- Planned fixes table (for grouping issues by solution)
+CREATE TABLE IF NOT EXISTS planned_fixes (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  jira_ticket TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Annotations table (supports multiple annotations per prompt)
 CREATE TABLE IF NOT EXISTS annotations (
   id TEXT PRIMARY KEY,
@@ -46,6 +55,7 @@ CREATE TABLE IF NOT EXISTS annotations (
   issue_type TEXT NOT NULL,
   severity TEXT NOT NULL, -- 'good', 'high', 'medium', 'low'
   note TEXT DEFAULT '',
+  planned_fix_id TEXT REFERENCES planned_fixes(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
   -- Note: No unique constraint - allows multiple annotations per prompt
@@ -58,3 +68,18 @@ CREATE INDEX IF NOT EXISTS idx_runs_state ON runs(state);
 CREATE INDEX IF NOT EXISTS idx_runs_timestamp ON runs(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_prompts_run_id ON prompts(run_id);
 CREATE INDEX IF NOT EXISTS idx_annotations_run_id ON annotations(run_id);
+CREATE INDEX IF NOT EXISTS idx_annotations_planned_fix_id ON annotations(planned_fix_id);
+
+-- Migration: Add planned_fix_id to existing annotations table
+-- Run this if you have an existing database:
+--
+-- CREATE TABLE IF NOT EXISTS planned_fixes (
+--   id TEXT PRIMARY KEY,
+--   name TEXT NOT NULL,
+--   jira_ticket TEXT,
+--   created_at TIMESTAMPTZ DEFAULT NOW(),
+--   updated_at TIMESTAMPTZ DEFAULT NOW()
+-- );
+--
+-- ALTER TABLE annotations ADD COLUMN IF NOT EXISTS planned_fix_id TEXT REFERENCES planned_fixes(id) ON DELETE SET NULL;
+-- CREATE INDEX IF NOT EXISTS idx_annotations_planned_fix_id ON annotations(planned_fix_id);

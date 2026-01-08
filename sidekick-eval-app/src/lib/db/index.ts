@@ -87,16 +87,25 @@ export async function initializeSchema(): Promise<void> {
       UNIQUE(run_id, number)
     );
 
+    CREATE TABLE IF NOT EXISTS planned_fixes (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      jira_ticket TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS annotations (
       id TEXT PRIMARY KEY,
       run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
       prompt_number INTEGER NOT NULL,
+      author TEXT NOT NULL DEFAULT 'human',
       issue_type TEXT NOT NULL,
       severity TEXT NOT NULL,
       note TEXT DEFAULT '',
+      planned_fix_id TEXT REFERENCES planned_fixes(id) ON DELETE SET NULL,
       created_at TIMESTAMPTZ DEFAULT NOW(),
-      updated_at TIMESTAMPTZ DEFAULT NOW(),
-      UNIQUE(run_id, prompt_number)
+      updated_at TIMESTAMPTZ DEFAULT NOW()
     );
 
     CREATE INDEX IF NOT EXISTS idx_runs_format ON runs(format);
@@ -105,10 +114,42 @@ export async function initializeSchema(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_runs_timestamp ON runs(timestamp DESC);
     CREATE INDEX IF NOT EXISTS idx_prompts_run_id ON prompts(run_id);
     CREATE INDEX IF NOT EXISTS idx_annotations_run_id ON annotations(run_id);
+    CREATE INDEX IF NOT EXISTS idx_annotations_planned_fix_id ON annotations(planned_fix_id);
   `;
 
   await pool.query(schema);
   console.log('Database schema initialized');
+}
+
+// Run migrations for existing databases
+export async function runMigrations(): Promise<void> {
+  // Add planned_fixes table if not exists
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS planned_fixes (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      jira_ticket TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+
+  // Add planned_fix_id column if not exists
+  await pool.query(`
+    ALTER TABLE annotations ADD COLUMN IF NOT EXISTS planned_fix_id TEXT REFERENCES planned_fixes(id) ON DELETE SET NULL
+  `);
+
+  // Add author column if not exists
+  await pool.query(`
+    ALTER TABLE annotations ADD COLUMN IF NOT EXISTS author TEXT DEFAULT 'human'
+  `);
+
+  // Create index if not exists
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_annotations_planned_fix_id ON annotations(planned_fix_id)
+  `);
+
+  console.log('Database migrations completed');
 }
 
 // Check if using database or fallback to JSON

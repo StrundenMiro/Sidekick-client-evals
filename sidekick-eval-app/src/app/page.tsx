@@ -55,18 +55,22 @@ export default async function Dashboard() {
     }
   });
 
-  // Convert to sorted array
-  const formats = Array.from(formatStats.values())
-    .sort((a, b) => {
-      // Sort by critical count first, then major, then alphabetically
-      if (a.criticalCount !== b.criticalCount) return b.criticalCount - a.criticalCount;
-      if (a.majorCount !== b.majorCount) return b.majorCount - a.majorCount;
-      return a.name.localeCompare(b.name);
-    });
+  // Define which formats are diagram types (will be prefixed with "Diagram - ")
+  const diagramFormats = new Set(['flowchart', 'erd', 'mindmap', 'diagram']);
+
+  // Convert to sorted array with display names
+  const allFormats = Array.from(formatStats.values())
+    .map(f => ({
+      ...f,
+      displayName: diagramFormats.has(f.name.toLowerCase())
+        ? `Diagram - ${f.name.charAt(0).toUpperCase() + f.name.slice(1)}`
+        : f.name
+    }))
+    .sort((a, b) => b.displayName.localeCompare(a.displayName));
 
   // Total counts
-  const totalCritical = formats.reduce((sum, f) => sum + f.criticalCount, 0);
-  const totalMajor = formats.reduce((sum, f) => sum + f.majorCount, 0);
+  const totalCritical = allFormats.reduce((sum, f) => sum + f.criticalCount, 0);
+  const totalMajor = allFormats.reduce((sum, f) => sum + f.majorCount, 0);
   const totalAnnotations = annotations.length;
 
   return (
@@ -120,7 +124,7 @@ export default async function Dashboard() {
             Formats
           </h2>
           <ul className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
-            {formats.map(format => (
+            {allFormats.map(format => (
               <li key={format.name}>
                 <Link
                   href={`/format/${format.name}`}
@@ -128,7 +132,7 @@ export default async function Dashboard() {
                 >
                   <div className="flex items-center gap-2">
                     <FormatIcon format={format.name} size={18} />
-                    <span className="font-medium text-gray-900 capitalize">{format.name}</span>
+                    <span className="font-medium text-gray-900 capitalize">{format.displayName}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     {format.criticalCount > 0 && (

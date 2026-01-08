@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getRunsAsync, getRunTestType, Run } from '@/lib/runs';
 import { getAnnotationsAsync, Annotation, SEVERITY_CONFIG } from '@/lib/annotations';
+import { getPlannedFixesAsync, PlannedFix } from '@/lib/plannedFixes';
 import FormatClient from './FormatClient';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,8 @@ export interface EnrichedIssue {
   artifactPath: string;
   link: string;
   createdAt: string;
+  plannedFixId: string | null;
+  owner: string | null;
 }
 
 export interface UseCase {
@@ -38,9 +41,10 @@ export interface UseCase {
 export default async function FormatPage({ params }: Props) {
   const { format } = await params;
 
-  const [runs, annotations] = await Promise.all([
+  const [runs, annotations, plannedFixes] = await Promise.all([
     getRunsAsync(),
-    getAnnotationsAsync()
+    getAnnotationsAsync(),
+    getPlannedFixesAsync()
   ]);
 
   // Filter runs for this format
@@ -69,7 +73,9 @@ export default async function FormatPage({ params }: Props) {
         useCase,
         artifactPath: `/artifacts/${annotation.runId}/v${annotation.promptNumber}.png`,
         link: `/${testType}/${format}/${annotation.runId}#v${annotation.promptNumber}`,
-        createdAt: annotation.createdAt
+        createdAt: annotation.createdAt,
+        plannedFixId: annotation.plannedFixId,
+        owner: annotation.owner
       };
     });
 
@@ -125,6 +131,7 @@ export default async function FormatPage({ params }: Props) {
           format={format}
           issues={enrichedIssues}
           useCases={useCases}
+          plannedFixes={plannedFixes}
         />
       </div>
     </div>

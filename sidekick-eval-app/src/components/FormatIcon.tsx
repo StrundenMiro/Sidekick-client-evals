@@ -1,4 +1,5 @@
 // Miro format icons with brand colors
+import React from 'react';
 
 interface FormatIconProps {
   format: string;
@@ -10,6 +11,8 @@ interface FormatIconProps {
 const formatColors: Record<string, string> = {
   diagram: '#7B68EE',      // Purple
   flowchart: '#7B68EE',    // Purple (same as diagram)
+  mindmap: '#7B68EE',      // Purple (same as diagram)
+  erd: '#7B68EE',          // Purple (same as diagram)
   document: '#4A90D9',     // Blue
   doc: '#4A90D9',          // Blue (alias)
   prototype: '#E91E8C',    // Pink/Magenta
@@ -18,8 +21,6 @@ const formatColors: Record<string, string> = {
   timeline: '#FF6B6B',     // Coral/Red
   kanban: '#9B59B6',       // Purple
   stickies: '#FFD93D',     // Yellow
-  mindmap: '#00D4AA',      // Mint
-  erd: '#6366F1',          // Indigo
   image: '#EC4899',        // Pink
 };
 
@@ -30,7 +31,7 @@ export default function FormatIcon({ format, size = 20, className = '' }: Format
   const color = formatColors[normalizedFormat] || defaultColor;
 
   // SVG icons from Miro
-  const icons: Record<string, JSX.Element> = {
+  const icons: Record<string, React.ReactElement> = {
     diagram: (
       <path fill={color} fillRule="evenodd" d="M18.5 2A2.5 2.5 0 0 1 21 4.5v3a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 13 7.5V6h-3a2.999 2.999 0 0 0-2.826 2H7.5a2.5 2.5 0 0 1 2.5 2.5v3A2.5 2.5 0 0 1 7.5 16H7a2 2 0 0 0 2 2h4v-1.5a2.5 2.5 0 0 1 2.5-2.5h3a2.5 2.5 0 0 1 2.5 2.5v3a2.5 2.5 0 0 1-2.5 2.5h-3a2.501 2.501 0 0 1-2.45-2H9a4 4 0 0 1-4-4h-.5A2.5 2.5 0 0 1 2 13.5v-3A2.5 2.5 0 0 1 4.5 8h.6A5.003 5.003 0 0 1 10 4h3.05a2.5 2.5 0 0 1 2.45-2h3Zm-3 14a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Zm-11-6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Zm11-6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Z" clipRule="evenodd" />
     ),
@@ -62,13 +63,13 @@ export default function FormatIcon({ format, size = 20, className = '' }: Format
       <path fill={color} fillRule="evenodd" d="M4 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5v3a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V4Zm2 0h12v12h-5a1 1 0 0 0-1 1v3H6V4Z" clipRule="evenodd" />
     ),
     mindmap: (
-      <path fill={color} fillRule="evenodd" d="M12 2a3 3 0 0 1 3 3v1.17a3.001 3.001 0 0 1 2.83 2.83H19a3 3 0 1 1 0 6h-1.17a3.001 3.001 0 0 1-2.83 2.83V19a3 3 0 1 1-6 0v-1.17a3.001 3.001 0 0 1-2.83-2.83H5a3 3 0 1 1 0-6h1.17A3.001 3.001 0 0 1 9 6.17V5a3 3 0 0 1 3-3Zm0 2a1 1 0 0 0-1 1v2a1 1 0 0 1-1 1H8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 1 1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 1 1-1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-2a1 1 0 0 1-1-1V5a1 1 0 0 0-1-1Z" clipRule="evenodd" />
+      <path fill={color} fillRule="evenodd" d="M18.5 2A2.5 2.5 0 0 1 21 4.5v3a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 13 7.5V6h-3a2.999 2.999 0 0 0-2.826 2H7.5a2.5 2.5 0 0 1 2.5 2.5v3A2.5 2.5 0 0 1 7.5 16H7a2 2 0 0 0 2 2h4v-1.5a2.5 2.5 0 0 1 2.5-2.5h3a2.5 2.5 0 0 1 2.5 2.5v3a2.5 2.5 0 0 1-2.5 2.5h-3a2.501 2.501 0 0 1-2.45-2H9a4 4 0 0 1-4-4h-.5A2.5 2.5 0 0 1 2 13.5v-3A2.5 2.5 0 0 1 4.5 8h.6A5.003 5.003 0 0 1 10 4h3.05a2.5 2.5 0 0 1 2.45-2h3Zm-3 14a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Zm-11-6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Zm11-6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Z" clipRule="evenodd" />
     ),
     erd: (
-      <path fill={color} fillRule="evenodd" d="M4 5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm2 0h4v4H6V5Zm6 8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4Zm2 0h4v4h-4v-4ZM4 13a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4Zm2 0h4v4H6v-4Z" clipRule="evenodd" />
+      <path fill={color} fillRule="evenodd" d="M18.5 2A2.5 2.5 0 0 1 21 4.5v3a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 13 7.5V6h-3a2.999 2.999 0 0 0-2.826 2H7.5a2.5 2.5 0 0 1 2.5 2.5v3A2.5 2.5 0 0 1 7.5 16H7a2 2 0 0 0 2 2h4v-1.5a2.5 2.5 0 0 1 2.5-2.5h3a2.5 2.5 0 0 1 2.5 2.5v3a2.5 2.5 0 0 1-2.5 2.5h-3a2.501 2.501 0 0 1-2.45-2H9a4 4 0 0 1-4-4h-.5A2.5 2.5 0 0 1 2 13.5v-3A2.5 2.5 0 0 1 4.5 8h.6A5.003 5.003 0 0 1 10 4h3.05a2.5 2.5 0 0 1 2.45-2h3Zm-3 14a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Zm-11-6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Zm11-6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3Z" clipRule="evenodd" />
     ),
     image: (
-      <path fill={color} fillRule="evenodd" d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm2 0h12v9l-3.5-3.5a1 1 0 0 0-1.4 0L9 14.5l-1.5-1.5a1 1 0 0 0-1.4 0L4 15V5h2Zm0 14h12v-1.6l-4.2-4.2L9 18l-1.5-1.5L4 20h2v-1ZM8 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd" />
+      <path fill={color} fillRule="evenodd" d="M6 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H6Zm0 2h12a1 1 0 0 1 1 1v8.586l-2.293-2.293a1 1 0 0 0-1.414 0L12 15.586l-2.293-2.293a1 1 0 0 0-1.414 0L5 16.586V6a1 1 0 0 1 1-1Zm-1 14v-1.586l4-4 2.293 2.293a1 1 0 0 0 1.414 0L16 12.414l3 3V18a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" clipRule="evenodd" />
     ),
   };
 

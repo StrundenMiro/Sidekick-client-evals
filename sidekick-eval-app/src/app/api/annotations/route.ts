@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, runId, promptNumber, author, issueType, severity, note } = body;
+    const { id, runId, promptNumber, author, issueType, severity, note, plannedFixId, owner } = body;
 
     if (!runId || promptNumber === undefined || !issueType || !severity) {
       return NextResponse.json(
@@ -59,7 +59,9 @@ export async function POST(request: NextRequest) {
       author: (author || 'human') as 'frank' | 'human',
       issueType: issueType as IssueType,
       severity: severity as Severity,
-      note: note || ''
+      note: note || '',
+      plannedFixId: plannedFixId || null,
+      owner: owner || null
     });
 
     return NextResponse.json({ annotation });
