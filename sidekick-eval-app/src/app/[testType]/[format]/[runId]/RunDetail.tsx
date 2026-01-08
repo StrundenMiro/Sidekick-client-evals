@@ -486,33 +486,13 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                   <div className="mb-4">
                     {promptScored ? (
                       <>
-                        {/* Frank's AI take - only show if note exists */}
-                        {prompt.note && prompt.note.trim() && (
-                          <div className="flex gap-3 items-start">
-                            <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                              🤖
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-400 mb-1">Frank&apos;s take</p>
-                              <p className="text-gray-700">{prompt.note}</p>
-
-                              {/* Show evaluation issues only when present */}
-                              {prompt.evaluation && hasEvaluationIssues(prompt.evaluation) && (
-                                <EvaluationIssues evaluation={prompt.evaluation} />
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Human take */}
-                        <div className={prompt.note && prompt.note.trim() ? "mt-3 pt-3 border-t border-dashed border-gray-200" : ""}>
-                          <PromptAnnotation
+                        {/* All annotations (Frank + Human) */}
+                        <PromptAnnotation
                             runId={run.id}
                             promptNumber={prompt.number}
                             initialAnnotations={annotationsByPrompt[prompt.number] || []}
                             minimal
                           />
-                        </div>
                       </>
                     ) : (
                       <>
