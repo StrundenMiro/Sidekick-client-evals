@@ -155,7 +155,13 @@ function AnnotationEditor({
 }
 
 export default function PromptAnnotation({ runId, promptNumber, initialAnnotations = [], minimal }: Props) {
-  const [annotations, setAnnotations] = useState<Annotation[]>(initialAnnotations);
+  // Sort: Frank's annotations first, then human's
+  const sortedInitial = [...initialAnnotations].sort((a, b) => {
+    if (a.author === 'frank' && b.author !== 'frank') return -1;
+    if (a.author !== 'frank' && b.author === 'frank') return 1;
+    return 0;
+  });
+  const [annotations, setAnnotations] = useState<Annotation[]>(sortedInitial);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
