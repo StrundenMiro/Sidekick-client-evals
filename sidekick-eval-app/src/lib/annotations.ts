@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { query, queryOne, isDatabaseConfigured } from './db';
 
 // Issue types that can be quickly selected
 export const ISSUE_TYPES = [
@@ -31,22 +32,135 @@ export interface AnnotationsData {
 
 const DATA_PATH = path.join(process.cwd(), 'data', 'annotations.json');
 
-// Ensure the file exists
+// ============================================
+// File-based storage (fallback)
+// ============================================
+
 function ensureDataFile() {
   if (!fs.existsSync(DATA_PATH)) {
+    const dir = path.dirname(DATA_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     fs.writeFileSync(DATA_PATH, JSON.stringify({ annotations: [] }, null, 2));
   }
 }
 
-export function getAnnotations(): Annotation[] {
+function getAnnotationsFromFile(): Annotation[] {
   ensureDataFile();
   const data = fs.readFileSync(DATA_PATH, 'utf-8');
   const parsed: AnnotationsData = JSON.parse(data);
   return parsed.annotations;
 }
 
+function saveAnnotationsToFile(annotations: Annotation[]): void {
+  ensureDataFile();
+  fs.writeFileSync(DATA_PATH, JSON.stringify({ annotations }, null, 2));
+}
+
+// ============================================
+// Database storage
+// ============================================
+
+interface DbAnnotation {
+  id: string;
+  run_id: string;
+  prompt_number: number;
+  issue_type: string;
+  severity: string;
+  note: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+function dbToAnnotation(row: DbAnnotation): Annotation {
+  return {
+    id: row.id,
+    runId: row.run_id,
+    promptNumber: row.prompt_number,
+    issueType: row.issue_type as IssueType,
+    severity: row.severity as Severity,
+    note: row.note || '',
+    createdAt: row.created_at.toISOString(),
+    updatedAt: row.updated_at.toISOString()
+  };
+}
+
+async function getAnnotationsFromDb(): Promise<Annotation[]> {
+  const rows = await query<DbAnnotation>(
+    'SELECT * FROM annotations ORDER BY created_at DESC'
+  );
+  return rows.map(dbToAnnotation);
+}
+
+async function getAnnotationsForRunFromDb(runId: string): Promise<Annotation[]> {
+  const rows = await query<DbAnnotation>(
+    'SELECT * FROM annotations WHERE run_id = $1 ORDER BY prompt_number',
+    [runId]
+  );
+  return rows.map(dbToAnnotation);
+}
+
+async function getAnnotationForPromptFromDb(runId: string, promptNumber: number): Promise<Annotation | null> {
+  const row = await queryOne<DbAnnotation>(
+    'SELECT * FROM annotations WHERE run_id = $1 AND prompt_number = $2',
+    [runId, promptNumber]
+  );
+  return row ? dbToAnnotation(row) : null;
+}
+
+async function saveAnnotationToDb(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Annotation> {
+  const id = `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`;
+  const now = new Date();
+
+  const row = await queryOne<DbAnnotation>(`
+    INSERT INTO annotations (id, run_id, prompt_number, issue_type, severity, note, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+    ON CONFLICT (run_id, prompt_number)
+    DO UPDATE SET
+      issue_type = EXCLUDED.issue_type,
+      severity = EXCLUDED.severity,
+      note = EXCLUDED.note,
+      updated_at = EXCLUDED.updated_at
+    RETURNING *
+  `, [id, annotation.runId, annotation.promptNumber, annotation.issueType, annotation.severity, annotation.note, now]);
+
+  return dbToAnnotation(row!);
+}
+
+async function deleteAnnotationFromDb(runId: string, promptNumber: number): Promise<boolean> {
+  const result = await query(
+    'DELETE FROM annotations WHERE run_id = $1 AND prompt_number = $2 RETURNING id',
+    [runId, promptNumber]
+  );
+  return result.length > 0;
+}
+
+// ============================================
+// Public API (auto-selects storage backend)
+// ============================================
+
+export function getAnnotations(): Annotation[] {
+  // Sync version always uses file
+  return getAnnotationsFromFile();
+}
+
+export async function getAnnotationsAsync(): Promise<Annotation[]> {
+  if (isDatabaseConfigured()) {
+    return getAnnotationsFromDb();
+  }
+  return getAnnotationsFromFile();
+}
+
 export function getAnnotationsForRun(runId: string): Annotation[] {
   return getAnnotations().filter(a => a.runId === runId);
+}
+
+export async function getAnnotationsForRunAsync(runId: string): Promise<Annotation[]> {
+  if (isDatabaseConfigured()) {
+    return getAnnotationsForRunFromDb(runId);
+  }
+  return getAnnotationsForRun(runId);
 }
 
 export function getAnnotationForPrompt(runId: string, promptNumber: number): Annotation | null {
@@ -54,11 +168,16 @@ export function getAnnotationForPrompt(runId: string, promptNumber: number): Ann
   return annotations.find(a => a.runId === runId && a.promptNumber === promptNumber) || null;
 }
 
-export function saveAnnotation(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'>): Annotation {
-  ensureDataFile();
-  const annotations = getAnnotations();
+export async function getAnnotationForPromptAsync(runId: string, promptNumber: number): Promise<Annotation | null> {
+  if (isDatabaseConfigured()) {
+    return getAnnotationForPromptFromDb(runId, promptNumber);
+  }
+  return getAnnotationForPrompt(runId, promptNumber);
+}
 
-  // Check if annotation already exists for this run+prompt
+export function saveAnnotation(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'>): Annotation {
+  // Sync version - file only
+  const annotations = getAnnotationsFromFile();
   const existingIdx = annotations.findIndex(
     a => a.runId === annotation.runId && a.promptNumber === annotation.promptNumber
   );
@@ -66,17 +185,15 @@ export function saveAnnotation(annotation: Omit<Annotation, 'id' | 'createdAt' |
   const now = new Date().toISOString();
 
   if (existingIdx >= 0) {
-    // Update existing
     const updated: Annotation = {
       ...annotations[existingIdx],
       ...annotation,
       updatedAt: now
     };
     annotations[existingIdx] = updated;
-    fs.writeFileSync(DATA_PATH, JSON.stringify({ annotations }, null, 2));
+    saveAnnotationsToFile(annotations);
     return updated;
   } else {
-    // Create new
     const newAnnotation: Annotation = {
       id: `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`,
       ...annotation,
@@ -84,22 +201,35 @@ export function saveAnnotation(annotation: Omit<Annotation, 'id' | 'createdAt' |
       updatedAt: now
     };
     annotations.push(newAnnotation);
-    fs.writeFileSync(DATA_PATH, JSON.stringify({ annotations }, null, 2));
+    saveAnnotationsToFile(annotations);
     return newAnnotation;
   }
 }
 
+export async function saveAnnotationAsync(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Annotation> {
+  if (isDatabaseConfigured()) {
+    return saveAnnotationToDb(annotation);
+  }
+  return saveAnnotation(annotation);
+}
+
 export function deleteAnnotation(runId: string, promptNumber: number): boolean {
-  ensureDataFile();
-  const annotations = getAnnotations();
+  const annotations = getAnnotationsFromFile();
   const filtered = annotations.filter(
     a => !(a.runId === runId && a.promptNumber === promptNumber)
   );
 
   if (filtered.length === annotations.length) return false;
 
-  fs.writeFileSync(DATA_PATH, JSON.stringify({ annotations: filtered }, null, 2));
+  saveAnnotationsToFile(filtered);
   return true;
+}
+
+export async function deleteAnnotationAsync(runId: string, promptNumber: number): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    return deleteAnnotationFromDb(runId, promptNumber);
+  }
+  return deleteAnnotation(runId, promptNumber);
 }
 
 // Get all annotations grouped by issue type for reporting

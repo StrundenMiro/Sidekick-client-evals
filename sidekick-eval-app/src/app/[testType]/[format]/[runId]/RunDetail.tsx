@@ -7,18 +7,7 @@ import Lightbox from '@/components/Lightbox';
 import RatingBadge from '@/components/RatingBadge';
 import PromptAnnotation from '@/components/PromptAnnotation';
 import type { Run, CaptureRun, ScoredRun, LegacyRun, CapturePrompt, ScoredPrompt, VisualEvaluation, Rating } from '@/lib/runs';
-
-// Annotation type for props
-interface Annotation {
-  id: string;
-  runId: string;
-  promptNumber: number;
-  issueType: string;
-  severity: 'high' | 'medium' | 'low';
-  note: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Annotation } from '@/lib/annotations';
 
 function getStatusClass(status: string): string {
   switch (status) {

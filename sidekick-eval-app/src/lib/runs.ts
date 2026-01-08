@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { query, queryOne, transaction, isDatabaseConfigured } from './db';
+import type { PoolClient } from 'pg';
 
 // Prompt during capture phase (before scoring)
 export interface CapturePrompt {
@@ -144,10 +146,205 @@ export interface RunsData {
 
 const DATA_PATH = path.join(process.cwd(), 'data', 'runs.json');
 
-export function getRuns(): Run[] {
+// ============================================
+// File-based storage (fallback)
+// ============================================
+
+function getRunsFromFile(): Run[] {
   const data = fs.readFileSync(DATA_PATH, 'utf-8');
   const parsed: RunsData = JSON.parse(data);
   return parsed.runs;
+}
+
+function saveRunsToFile(runs: Run[]): void {
+  fs.writeFileSync(DATA_PATH, JSON.stringify({ runs }, null, 2));
+}
+
+// ============================================
+// Database storage
+// ============================================
+
+interface DbRun {
+  id: string;
+  test_type: string;
+  format: string;
+  timestamp: Date;
+  state: string;
+  rating: string | null;
+  scores: { overall: number; promptAdherence: number; iterationQuality: number } | null;
+  good: string[];
+  bad: string[];
+  summary: string | null;
+  issues: { severity: string; text: string }[] | null;
+  iteration_analysis: IterationAnalysis | null;
+}
+
+interface DbPrompt {
+  id: number;
+  run_id: string;
+  number: number;
+  title: string;
+  text: string;
+  artifact: string | null;
+  observation: string | null;
+  captured_at: Date | null;
+  status: string | null;
+  note: string | null;
+  evaluation: VisualEvaluation | null;
+}
+
+function dbToRun(row: DbRun, prompts: DbPrompt[]): Run {
+  const sortedPrompts = prompts
+    .filter(p => p.run_id === row.id)
+    .sort((a, b) => a.number - b.number);
+
+  if (row.state === 'capturing' || row.state === 'captured') {
+    return {
+      id: row.id,
+      testType: row.test_type,
+      format: row.format,
+      timestamp: row.timestamp.toISOString(),
+      state: row.state as 'capturing' | 'captured',
+      prompts: sortedPrompts.map(p => ({
+        number: p.number,
+        title: p.title,
+        text: p.text,
+        artifact: p.artifact || '',
+        observation: p.observation || '',
+        capturedAt: p.captured_at?.toISOString() || ''
+      }))
+    };
+  }
+
+  // Scored run
+  const scoredRun: ScoredRun = {
+    id: row.id,
+    testType: row.test_type,
+    format: row.format,
+    timestamp: row.timestamp.toISOString(),
+    state: 'scored',
+    rating: (row.rating as Rating) || 'bad',
+    good: row.good || [],
+    bad: row.bad || [],
+    prompts: sortedPrompts.map(p => ({
+      number: p.number,
+      title: p.title,
+      text: p.text,
+      artifact: p.artifact || '',
+      status: (p.status as 'pass' | 'warning' | 'fail') || 'warning',
+      note: p.note || '',
+      evaluation: p.evaluation || undefined
+    }))
+  };
+
+  if (row.scores) scoredRun.scores = row.scores;
+  if (row.summary) scoredRun.summary = row.summary;
+  if (row.issues) scoredRun.issues = row.issues;
+  if (row.iteration_analysis) scoredRun.iterationAnalysis = row.iteration_analysis;
+
+  return scoredRun;
+}
+
+async function getRunsFromDb(): Promise<Run[]> {
+  const runs = await query<DbRun>('SELECT * FROM runs ORDER BY timestamp DESC');
+  const prompts = await query<DbPrompt>('SELECT * FROM prompts');
+  return runs.map(r => dbToRun(r, prompts));
+}
+
+async function getRunByIdFromDb(id: string): Promise<Run | undefined> {
+  const run = await queryOne<DbRun>('SELECT * FROM runs WHERE id = $1', [id]);
+  if (!run) return undefined;
+
+  const prompts = await query<DbPrompt>('SELECT * FROM prompts WHERE run_id = $1', [id]);
+  return dbToRun(run, prompts);
+}
+
+async function saveRunToDb(run: Run): Promise<void> {
+  await transaction(async (client: PoolClient) => {
+    const state = 'state' in run ? run.state : 'scored';
+    const rating = isScored(run) ? (('rating' in run ? run.rating : null) || getRunRating(run)) : null;
+    const scores = isScored(run) ? run.scores || null : null;
+    const good = isScored(run) ? run.good : [];
+    const bad = isScored(run) ? run.bad : [];
+    const summary = isScored(run) ? run.summary || null : null;
+    const issues = isScored(run) ? run.issues || null : null;
+    const iterationAnalysis = isScored(run) && 'iterationAnalysis' in run ? run.iterationAnalysis || null : null;
+
+    // Upsert run
+    await client.query(`
+      INSERT INTO runs (id, test_type, format, timestamp, state, rating, scores, good, bad, summary, issues, iteration_analysis, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        test_type = EXCLUDED.test_type,
+        format = EXCLUDED.format,
+        timestamp = EXCLUDED.timestamp,
+        state = EXCLUDED.state,
+        rating = EXCLUDED.rating,
+        scores = EXCLUDED.scores,
+        good = EXCLUDED.good,
+        bad = EXCLUDED.bad,
+        summary = EXCLUDED.summary,
+        issues = EXCLUDED.issues,
+        iteration_analysis = EXCLUDED.iteration_analysis,
+        updated_at = NOW()
+    `, [
+      run.id,
+      run.testType || 'ai-generated-iteration',
+      run.format,
+      run.timestamp,
+      state,
+      rating,
+      scores ? JSON.stringify(scores) : null,
+      good,
+      bad,
+      summary,
+      issues ? JSON.stringify(issues) : null,
+      iterationAnalysis ? JSON.stringify(iterationAnalysis) : null
+    ]);
+
+    // Delete existing prompts and re-insert
+    await client.query('DELETE FROM prompts WHERE run_id = $1', [run.id]);
+
+    for (const prompt of run.prompts) {
+      const isCapture = 'observation' in prompt;
+
+      await client.query(`
+        INSERT INTO prompts (run_id, number, title, text, artifact, observation, captured_at, status, note, evaluation)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `, [
+        run.id,
+        prompt.number,
+        prompt.title,
+        prompt.text,
+        prompt.artifact || null,
+        isCapture ? (prompt as CapturePrompt).observation : null,
+        isCapture ? (prompt as CapturePrompt).capturedAt : null,
+        !isCapture ? (prompt as ScoredPrompt).status : null,
+        !isCapture ? (prompt as ScoredPrompt).note : null,
+        !isCapture && (prompt as ScoredPrompt).evaluation ? JSON.stringify((prompt as ScoredPrompt).evaluation) : null
+      ]);
+    }
+  });
+}
+
+async function deleteRunFromDb(id: string): Promise<boolean> {
+  const result = await query('DELETE FROM runs WHERE id = $1 RETURNING id', [id]);
+  return result.length > 0;
+}
+
+// ============================================
+// Public API (supports both file and database)
+// ============================================
+
+export function getRuns(): Run[] {
+  return getRunsFromFile();
+}
+
+export async function getRunsAsync(): Promise<Run[]> {
+  if (isDatabaseConfigured()) {
+    return getRunsFromDb();
+  }
+  return getRunsFromFile();
 }
 
 export function getRunById(id: string): Run | undefined {
@@ -155,11 +352,26 @@ export function getRunById(id: string): Run | undefined {
   return runs.find(r => r.id === id);
 }
 
+export async function getRunByIdAsync(id: string): Promise<Run | undefined> {
+  if (isDatabaseConfigured()) {
+    return getRunByIdFromDb(id);
+  }
+  return getRunById(id);
+}
+
 export function getRunsByFormat(format: string): Run[] {
   const runs = getRuns();
   return runs.filter(r => r.format === format).sort((a, b) =>
     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
+}
+
+export async function getRunsByFormatAsync(format: string): Promise<Run[]> {
+  if (isDatabaseConfigured()) {
+    const runs = await getRunsFromDb();
+    return runs.filter(r => r.format === format);
+  }
+  return getRunsByFormat(format);
 }
 
 export function getFormats(): { [key: string]: { runs: Run[]; latest: Run } } {
@@ -177,6 +389,26 @@ export function getFormats(): { [key: string]: { runs: Run[]; latest: Run } } {
   });
 
   return formats;
+}
+
+export async function getFormatsAsync(): Promise<{ [key: string]: { runs: Run[]; latest: Run } }> {
+  if (isDatabaseConfigured()) {
+    const runs = await getRunsFromDb();
+    const formats: { [key: string]: { runs: Run[]; latest: Run } } = {};
+
+    runs.forEach(run => {
+      if (!formats[run.format]) {
+        formats[run.format] = { runs: [], latest: run };
+      }
+      formats[run.format].runs.push(run);
+      if (new Date(run.timestamp) > new Date(formats[run.format].latest.timestamp)) {
+        formats[run.format].latest = run;
+      }
+    });
+
+    return formats;
+  }
+  return getFormats();
 }
 
 // Get the test type for a run (defaults to 'ai-generated-iteration' for legacy runs)
@@ -200,6 +432,24 @@ export function getRunsByTestType(): { [testType: string]: Run[] } {
   return grouped;
 }
 
+export async function getRunsByTestTypeAsync(): Promise<{ [testType: string]: Run[] }> {
+  if (isDatabaseConfigured()) {
+    const runs = await getRunsFromDb();
+    const grouped: { [testType: string]: Run[] } = {};
+
+    runs.forEach(run => {
+      const testType = getRunTestType(run);
+      if (!grouped[testType]) {
+        grouped[testType] = [];
+      }
+      grouped[testType].push(run);
+    });
+
+    return grouped;
+  }
+  return getRunsByTestType();
+}
+
 // Get formats for a specific test type
 export function getFormatsByTestType(testType: string): { [format: string]: { runs: Run[]; latest: Run } } {
   const runs = getRuns().filter(r => getRunTestType(r) === testType);
@@ -218,11 +468,40 @@ export function getFormatsByTestType(testType: string): { [format: string]: { ru
   return formats;
 }
 
+export async function getFormatsByTestTypeAsync(testType: string): Promise<{ [format: string]: { runs: Run[]; latest: Run } }> {
+  if (isDatabaseConfigured()) {
+    const allRuns = await getRunsFromDb();
+    const runs = allRuns.filter(r => getRunTestType(r) === testType);
+    const formats: { [format: string]: { runs: Run[]; latest: Run } } = {};
+
+    runs.forEach(run => {
+      if (!formats[run.format]) {
+        formats[run.format] = { runs: [], latest: run };
+      }
+      formats[run.format].runs.push(run);
+      if (new Date(run.timestamp) > new Date(formats[run.format].latest.timestamp)) {
+        formats[run.format].latest = run;
+      }
+    });
+
+    return formats;
+  }
+  return getFormatsByTestType(testType);
+}
+
 // Get runs for a specific test type and format
 export function getRunsByTestTypeAndFormat(testType: string, format: string): Run[] {
   return getRuns()
     .filter(r => getRunTestType(r) === testType && r.format === format)
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+}
+
+export async function getRunsByTestTypeAndFormatAsync(testType: string, format: string): Promise<Run[]> {
+  if (isDatabaseConfigured()) {
+    const runs = await getRunsFromDb();
+    return runs.filter(r => getRunTestType(r) === testType && r.format === format);
+  }
+  return getRunsByTestTypeAndFormat(testType, format);
 }
 
 export function saveRun(run: Run): void {
@@ -235,7 +514,14 @@ export function saveRun(run: Run): void {
     runs.push(run);
   }
 
-  fs.writeFileSync(DATA_PATH, JSON.stringify({ runs }, null, 2));
+  saveRunsToFile(runs);
+}
+
+export async function saveRunAsync(run: Run): Promise<void> {
+  if (isDatabaseConfigured()) {
+    return saveRunToDb(run);
+  }
+  return saveRun(run);
 }
 
 export function deleteRun(id: string): boolean {
@@ -244,8 +530,15 @@ export function deleteRun(id: string): boolean {
 
   if (filtered.length === runs.length) return false;
 
-  fs.writeFileSync(DATA_PATH, JSON.stringify({ runs: filtered }, null, 2));
+  saveRunsToFile(filtered);
   return true;
+}
+
+export async function deleteRunAsync(id: string): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    return deleteRunFromDb(id);
+  }
+  return deleteRun(id);
 }
 
 // ============================================
@@ -269,7 +562,33 @@ export function startCapture(format: string, testType: string = 'ai-generated-it
 
   const runs = getRuns();
   runs.push(captureRun);
-  fs.writeFileSync(DATA_PATH, JSON.stringify({ runs }, null, 2));
+  saveRunsToFile(runs);
+
+  return captureRun;
+}
+
+export async function startCaptureAsync(format: string, testType: string = 'ai-generated-iteration'): Promise<CaptureRun> {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '-');
+  const timeStr = now.toTimeString().slice(0, 5).replace(':', '');
+  const id = `${format}-${dateStr}-${timeStr}`;
+
+  const captureRun: CaptureRun = {
+    id,
+    testType,
+    format,
+    timestamp: now.toISOString(),
+    state: 'capturing',
+    prompts: []
+  };
+
+  if (isDatabaseConfigured()) {
+    await saveRunToDb(captureRun);
+  } else {
+    const runs = getRuns();
+    runs.push(captureRun);
+    saveRunsToFile(runs);
+  }
 
   return captureRun;
 }
@@ -300,9 +619,35 @@ export function saveCapturePrompt(
   }
 
   runs[runIndex] = run;
-  fs.writeFileSync(DATA_PATH, JSON.stringify({ runs }, null, 2));
+  saveRunsToFile(runs);
 
   return run;
+}
+
+export async function saveCapturePromptAsync(
+  runId: string,
+  prompt: Omit<CapturePrompt, 'capturedAt'>
+): Promise<CaptureRun | null> {
+  if (isDatabaseConfigured()) {
+    const run = await getRunByIdFromDb(runId);
+    if (!run || !isCapturing(run)) return null;
+
+    const capturePrompt: CapturePrompt = {
+      ...prompt,
+      capturedAt: new Date().toISOString()
+    };
+
+    const existingIdx = run.prompts.findIndex(p => p.number === prompt.number);
+    if (existingIdx >= 0) {
+      run.prompts[existingIdx] = capturePrompt;
+    } else {
+      run.prompts.push(capturePrompt);
+    }
+
+    await saveRunToDb(run);
+    return run;
+  }
+  return saveCapturePrompt(runId, prompt);
 }
 
 export function completeCapture(runId: string): CaptureRun | null {
@@ -316,9 +661,21 @@ export function completeCapture(runId: string): CaptureRun | null {
 
   run.state = 'captured';
   runs[runIndex] = run;
-  fs.writeFileSync(DATA_PATH, JSON.stringify({ runs }, null, 2));
+  saveRunsToFile(runs);
 
   return run;
+}
+
+export async function completeCaptureAsync(runId: string): Promise<CaptureRun | null> {
+  if (isDatabaseConfigured()) {
+    const run = await getRunByIdFromDb(runId);
+    if (!run || !isCapturing(run)) return null;
+
+    run.state = 'captured';
+    await saveRunToDb(run);
+    return run;
+  }
+  return completeCapture(runId);
 }
 
 export function getPendingRuns(): CaptureRun[] {
@@ -328,11 +685,31 @@ export function getPendingRuns(): CaptureRun[] {
   );
 }
 
+export async function getPendingRunsAsync(): Promise<CaptureRun[]> {
+  if (isDatabaseConfigured()) {
+    const runs = await getRunsFromDb();
+    return runs.filter((r): r is CaptureRun =>
+      'state' in r && r.state === 'captured'
+    );
+  }
+  return getPendingRuns();
+}
+
 export function getCapturingRuns(): CaptureRun[] {
   const runs = getRuns();
   return runs.filter((r): r is CaptureRun =>
     'state' in r && r.state === 'capturing'
   );
+}
+
+export async function getCapturingRunsAsync(): Promise<CaptureRun[]> {
+  if (isDatabaseConfigured()) {
+    const runs = await getRunsFromDb();
+    return runs.filter((r): r is CaptureRun =>
+      'state' in r && r.state === 'capturing'
+    );
+  }
+  return getCapturingRuns();
 }
 
 // ============================================
@@ -359,6 +736,17 @@ export interface ScoreInput {
 // Issue Themes for Hit List (Deduplicated)
 // ============================================
 
+export interface IssueExample {
+  runId: string;
+  format: string;
+  testType: string;
+  beforeImage: string;  // artifact path for "before" state
+  afterImage: string;   // artifact path for "after" state
+  beforeLabel: string;  // e.g., "V2 - With error handling"
+  afterLabel: string;   // e.g., "V3 - Error handling lost"
+  caption: string;      // Brief explanation
+}
+
 export interface IssueTheme {
   id: string;
   severity: 'high' | 'medium' | 'low';
@@ -371,15 +759,29 @@ export interface IssueTheme {
   }[];
   affectedFormats: string[];
   count: number;
+  example?: IssueExample;  // Best example to illustrate the issue
 }
 
 export function getAllIssues(): IssueTheme[] {
   const runs = getRuns();
+  return computeIssueThemes(runs);
+}
 
+export async function getAllIssuesAsync(): Promise<IssueTheme[]> {
+  if (isDatabaseConfigured()) {
+    const runs = await getRunsFromDb();
+    return computeIssueThemes(runs);
+  }
+  return getAllIssues();
+}
+
+function computeIssueThemes(runs: Run[]): IssueTheme[] {
   // Track root causes and their manifestations
   const rootCauses: Map<string, {
     theme: IssueTheme;
     manifestations: Set<string>;
+    preferredExampleRunId?: string;
+    preferredExamplePromptIdx?: [number, number];
   }> = new Map();
 
   // Helper to add occurrence to a root cause
@@ -408,8 +810,6 @@ export function getAllIssues(): IssueTheme[] {
     }
     const cause = rootCauses.get(causeId)!;
 
-    // Only count unique run+format combinations
-    const key = `${runId}-${format}`;
     const alreadyCounted = cause.theme.occurrences.some(o => o.runId === runId && o.format === format);
 
     if (!alreadyCounted) {
@@ -427,132 +827,121 @@ export function getAllIssues(): IssueTheme[] {
   runs.forEach(run => {
     if (!isScored(run)) return;
 
-    // Analyze bad items for patterns
     run.bad.forEach(badItem => {
       const lower = badItem.toLowerCase();
 
-      // ============================================
       // ROOT CAUSE 1: No Context Passed Between Iterations
-      // This is THE core issue - Sidekick doesn't see/remember previous output
-      // ============================================
-
-      // Manifestation: Lost iteration continuity
-      if (lower.includes('iteration') || lower.includes('continuity') ||
-          lower.includes('fresh') || lower.includes('starting fresh') ||
-          lower.includes('each prompt') || lower.includes('state')) {
-        addToRootCause(
-          'no-iteration-context',
-          'high',
-          'No Context Passed Between Iterations',
-          'Sidekick does not receive or retain context from previous prompts in the same session. Each prompt is treated as independent, causing cascading failures in multi-step workflows.',
-          run.id, run.format,
-          'Treats each prompt as starting fresh'
-        );
-      }
-
-      // Manifestation: Destructive edits (doesn't know what exists)
-      if (lower.includes('deleted') || lower.includes('lost') || lower.includes('removed') ||
-          lower.includes('destructive')) {
-        addToRootCause(
-          'no-iteration-context',
-          'high',
-          'No Context Passed Between Iterations',
-          'Sidekick does not receive or retain context from previous prompts in the same session. Each prompt is treated as independent, causing cascading failures in multi-step workflows.',
-          run.id, run.format,
-          'Deletes existing content when editing (doesn\'t see what\'s there)'
-        );
-      }
-
-      // Manifestation: Creates template instead of editing (doesn't see the content)
       if (lower.includes('template') || lower.includes('placeholder') ||
           lower.includes('instruction') || lower.includes('generic')) {
-        addToRootCause(
-          'no-iteration-context',
-          'high',
+        addToRootCause('no-iteration-context', 'high',
           'No Context Passed Between Iterations',
-          'Sidekick does not receive or retain context from previous prompts in the same session. Each prompt is treated as independent, causing cascading failures in multi-step workflows.',
-          run.id, run.format,
-          'Creates template/instructions instead of editing actual content'
-        );
+          'Sidekick does not receive or retain context from previous prompts in the same session.',
+          run.id, run.format, 'Creates template/instructions instead of editing actual content');
       }
 
-      // Manifestation: Content regenerated (doesn't preserve original values)
-      if (lower.includes('regenerated') || lower.includes('different values') ||
-          lower.includes('different content')) {
-        addToRootCause(
-          'no-iteration-context',
-          'high',
+      if (lower.includes('iteration') || lower.includes('continuity') ||
+          lower.includes('fresh') || lower.includes('starting fresh')) {
+        addToRootCause('no-iteration-context', 'high',
           'No Context Passed Between Iterations',
-          'Sidekick does not receive or retain context from previous prompts in the same session. Each prompt is treated as independent, causing cascading failures in multi-step workflows.',
-          run.id, run.format,
-          'Regenerates content with different values instead of preserving'
-        );
+          'Sidekick does not receive or retain context from previous prompts in the same session.',
+          run.id, run.format, 'Treats each prompt as starting fresh');
       }
 
-      // Manifestation: Creates new artifact instead of editing existing
       if (lower.includes('new artifact') || lower.includes('standalone') ||
           lower.includes('separate') || lower.includes('instead of integrating')) {
-        addToRootCause(
-          'no-iteration-context',
-          'high',
+        addToRootCause('no-iteration-context', 'high',
           'No Context Passed Between Iterations',
-          'Sidekick does not receive or retain context from previous prompts in the same session. Each prompt is treated as independent, causing cascading failures in multi-step workflows.',
-          run.id, run.format,
-          'Creates new artifact instead of modifying existing one'
-        );
+          'Sidekick does not receive or retain context from previous prompts in the same session.',
+          run.id, run.format, 'Creates new artifact instead of modifying existing one');
       }
 
-      // ============================================
       // ROOT CAUSE 2: Visual Style Not Preserved
-      // Style/theme information not carried forward
-      // ============================================
-
-      if (lower.includes('style') && (lower.includes('changed') || lower.includes('different'))) {
-        addToRootCause(
-          'style-not-preserved',
-          'medium',
+      if ((lower.includes('style') || lower.includes('visual')) &&
+          (lower.includes('changed') || lower.includes('different') || lower.includes('drift'))) {
+        addToRootCause('style-not-preserved', 'high',
           'Visual Style Not Preserved Across Iterations',
-          'When iterating on visual artifacts, the original style/theme is not maintained. Colors, design language, and visual consistency drift between versions.',
-          run.id, run.format,
-          'Style changed unexpectedly between versions'
-        );
+          'When iterating on visual artifacts, the original style/theme is not maintained.',
+          run.id, run.format, 'Style changed unexpectedly between versions');
       }
 
-      if (lower.includes('color') && (lower.includes('lost') || lower.includes('uniform') ||
-          lower.includes('same') || lower.includes('changed'))) {
-        addToRootCause(
-          'style-not-preserved',
-          'medium',
+      if (lower.includes('color') && (lower.includes('palette') || lower.includes('scheme') ||
+          lower.includes('changed') || lower.includes('different'))) {
+        addToRootCause('style-not-preserved', 'high',
           'Visual Style Not Preserved Across Iterations',
-          'When iterating on visual artifacts, the original style/theme is not maintained. Colors, design language, and visual consistency drift between versions.',
-          run.id, run.format,
-          'Color coding/theming lost during iteration'
-        );
+          'When iterating on visual artifacts, the original style/theme is not maintained.',
+          run.id, run.format, 'Color palette changed without request');
       }
 
-      if (lower.includes('visual') && lower.includes('lost')) {
-        addToRootCause(
-          'style-not-preserved',
-          'medium',
-          'Visual Style Not Preserved Across Iterations',
-          'When iterating on visual artifacts, the original style/theme is not maintained. Colors, design language, and visual consistency drift between versions.',
-          run.id, run.format,
-          'Visual organization/groupings lost'
-        );
+      // ROOT CAUSE 3: Table Structure/Tags Lost
+      if (run.format === 'table') {
+        if (lower.includes('column') && (lower.includes('deleted') || lower.includes('lost') ||
+            lower.includes('removed') || lower.includes('replaced'))) {
+          addToRootCause('table-structure-loss', 'high',
+            'Table Structure Destroyed on Edit',
+            'When asked to add or modify a single column, Sidekick deletes other columns.',
+            run.id, run.format, 'Columns deleted when adding new column');
+        }
+
+        if (lower.includes('tag') || lower.includes('badge') ||
+            (lower.includes('color') && lower.includes('coded'))) {
+          addToRootCause('table-structure-loss', 'high',
+            'Table Structure Destroyed on Edit',
+            'When asked to add or modify a single column, Sidekick deletes other columns.',
+            run.id, run.format, 'Color-coded tags/badges lost during edit');
+        }
+      }
+
+      // ROOT CAUSE 4: Copy Rendering Issues
+      if (lower.includes('truncated') || lower.includes('garbled') || lower.includes('corrupted') ||
+          lower.includes('broken label') || lower.includes('random character')) {
+        addToRootCause('copy-rendering-issues', 'high',
+          'Text Rendering Breaks on Complex Artifacts',
+          'Text in generated artifacts often renders incorrectly - truncated names, garbled characters.',
+          run.id, run.format, 'Truncated or garbled text visible');
       }
     });
   });
 
-  // Build final themes with manifestation details in description
+  // Curated example mappings
+  const exampleMappings: Record<string, { runId: string; beforeIdx: number; afterIdx: number }> = {
+    'no-iteration-context': { runId: 'greenfield-document-2026-01-07-1455', beforeIdx: 0, afterIdx: 1 },
+    'style-not-preserved': { runId: 'slides-2026-01-06-1730', beforeIdx: 0, afterIdx: 1 },
+    'table-structure-loss': { runId: 'table-2026-01-06-1320', beforeIdx: 0, afterIdx: 1 },
+    'copy-rendering-issues': { runId: 'prototype-2026-01-06-1825', beforeIdx: 0, afterIdx: 1 }
+  };
+
+  // Build final themes
   const themes: IssueTheme[] = [];
 
-  rootCauses.forEach(({ theme, manifestations }) => {
+  rootCauses.forEach(({ theme, manifestations }, causeId) => {
     if (theme.count > 0) {
-      // Add manifestations to description
       const manifestationList = Array.from(manifestations);
       if (manifestationList.length > 0) {
         theme.description += '\n\nManifests as:\n• ' + manifestationList.join('\n• ');
       }
+
+      const mapping = exampleMappings[causeId];
+      if (mapping) {
+        const exampleRun = runs.find(r => r.id === mapping.runId);
+        if (exampleRun && isScored(exampleRun)) {
+          const beforePrompt = exampleRun.prompts[mapping.beforeIdx] as ScoredPrompt;
+          const afterPrompt = exampleRun.prompts[mapping.afterIdx] as ScoredPrompt;
+
+          if (beforePrompt?.artifact && afterPrompt?.artifact) {
+            theme.example = {
+              runId: exampleRun.id,
+              format: exampleRun.format,
+              testType: getRunTestType(exampleRun),
+              beforeImage: '/' + beforePrompt.artifact,
+              afterImage: '/' + afterPrompt.artifact,
+              beforeLabel: `V${beforePrompt.number} – ${beforePrompt.title}`,
+              afterLabel: `V${afterPrompt.number} – ${afterPrompt.title}`,
+              caption: afterPrompt.note || `${beforePrompt.title} → ${afterPrompt.title}`
+            };
+          }
+        }
+      }
+
       themes.push(theme);
     }
   });
@@ -575,10 +964,8 @@ export function scoreRun(input: ScoreInput): ScoredRun | null {
 
   const run = runs[runIndex];
 
-  // Can only score captured runs or re-score existing runs
   if (isCapturing(run) && run.state !== 'captured') return null;
 
-  // Build scored prompts from capture prompts + evaluations
   let scoredPrompts: ScoredPrompt[];
 
   if (isCapturing(run)) {
@@ -594,7 +981,6 @@ export function scoreRun(input: ScoreInput): ScoredRun | null {
       };
     });
   } else {
-    // Re-scoring an existing scored run
     scoredPrompts = (run as ScoredRun | LegacyRun).prompts.map(sp => {
       const evaluation = input.promptEvaluations.find(e => e.number === sp.number);
       return {
@@ -621,7 +1007,60 @@ export function scoreRun(input: ScoreInput): ScoredRun | null {
   };
 
   runs[runIndex] = scoredRun;
-  fs.writeFileSync(DATA_PATH, JSON.stringify({ runs }, null, 2));
+  saveRunsToFile(runs);
 
   return scoredRun;
+}
+
+export async function scoreRunAsync(input: ScoreInput): Promise<ScoredRun | null> {
+  if (isDatabaseConfigured()) {
+    const run = await getRunByIdFromDb(input.runId);
+    if (!run) return null;
+
+    if (isCapturing(run) && run.state !== 'captured') return null;
+
+    let scoredPrompts: ScoredPrompt[];
+
+    if (isCapturing(run)) {
+      scoredPrompts = run.prompts.map(cp => {
+        const evaluation = input.promptEvaluations.find(e => e.number === (cp as CapturePrompt).number);
+        return {
+          number: (cp as CapturePrompt).number,
+          title: cp.title,
+          text: cp.text,
+          artifact: cp.artifact,
+          status: evaluation?.status || 'warning',
+          note: evaluation?.note || (cp as CapturePrompt).observation
+        };
+      });
+    } else {
+      scoredPrompts = (run as ScoredRun | LegacyRun).prompts.map(sp => {
+        const evaluation = input.promptEvaluations.find(e => e.number === sp.number);
+        return {
+          ...sp,
+          status: evaluation?.status || sp.status,
+          note: evaluation?.note || sp.note
+        };
+      });
+    }
+
+    const rating: Rating = input.scores.overall >= 8 ? 'great' : input.scores.overall >= 5 ? 'good' : 'bad';
+
+    const scoredRun: ScoredRun = {
+      id: run.id,
+      testType: getRunTestType(run),
+      format: run.format,
+      timestamp: run.timestamp,
+      state: 'scored',
+      rating,
+      scores: input.scores,
+      good: input.good,
+      bad: input.bad,
+      prompts: scoredPrompts
+    };
+
+    await saveRunToDb(scoredRun);
+    return scoredRun;
+  }
+  return scoreRun(input);
 }

@@ -1,32 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  getAnnotations,
-  getAnnotationsForRun,
-  getAnnotationForPrompt,
-  saveAnnotation,
-  deleteAnnotation,
+  getAnnotationsAsync,
+  getAnnotationsForRunAsync,
+  getAnnotationForPromptAsync,
+  saveAnnotationAsync,
+  deleteAnnotationAsync,
   type IssueType,
   type Severity
 } from '@/lib/annotations';
 
 // GET /api/annotations?runId=xxx or /api/annotations?runId=xxx&promptNumber=1
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const runId = searchParams.get('runId');
-  const promptNumber = searchParams.get('promptNumber');
+  try {
+    const { searchParams } = new URL(request.url);
+    const runId = searchParams.get('runId');
+    const promptNumber = searchParams.get('promptNumber');
 
-  if (runId && promptNumber) {
-    const annotation = getAnnotationForPrompt(runId, parseInt(promptNumber, 10));
-    return NextResponse.json({ annotation });
-  }
+    if (runId && promptNumber) {
+      const annotation = await getAnnotationForPromptAsync(runId, parseInt(promptNumber, 10));
+      return NextResponse.json({ annotation });
+    }
 
-  if (runId) {
-    const annotations = getAnnotationsForRun(runId);
+    if (runId) {
+      const annotations = await getAnnotationsForRunAsync(runId);
+      return NextResponse.json({ annotations });
+    }
+
+    const annotations = await getAnnotationsAsync();
     return NextResponse.json({ annotations });
+  } catch (error) {
+    console.error('Failed to fetch annotations:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch annotations' },
+      { status: 500 }
+    );
   }
-
-  const annotations = getAnnotations();
-  return NextResponse.json({ annotations });
 }
 
 // POST /api/annotations
@@ -42,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const annotation = saveAnnotation({
+    const annotation = await saveAnnotationAsync({
       runId,
       promptNumber: parseInt(promptNumber, 10),
       issueType: issueType as IssueType,
@@ -52,6 +60,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ annotation });
   } catch (error) {
+    console.error('Failed to save annotation:', error);
     return NextResponse.json(
       { error: 'Failed to save annotation' },
       { status: 500 }
@@ -61,25 +70,33 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/annotations?runId=xxx&promptNumber=1
 export async function DELETE(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const runId = searchParams.get('runId');
-  const promptNumber = searchParams.get('promptNumber');
+  try {
+    const { searchParams } = new URL(request.url);
+    const runId = searchParams.get('runId');
+    const promptNumber = searchParams.get('promptNumber');
 
-  if (!runId || !promptNumber) {
+    if (!runId || !promptNumber) {
+      return NextResponse.json(
+        { error: 'Missing required params: runId, promptNumber' },
+        { status: 400 }
+      );
+    }
+
+    const deleted = await deleteAnnotationAsync(runId, parseInt(promptNumber, 10));
+
+    if (deleted) {
+      return NextResponse.json({ success: true });
+    } else {
+      return NextResponse.json(
+        { error: 'Annotation not found' },
+        { status: 404 }
+      );
+    }
+  } catch (error) {
+    console.error('Failed to delete annotation:', error);
     return NextResponse.json(
-      { error: 'Missing required params: runId, promptNumber' },
-      { status: 400 }
-    );
-  }
-
-  const deleted = deleteAnnotation(runId, parseInt(promptNumber, 10));
-
-  if (deleted) {
-    return NextResponse.json({ success: true });
-  } else {
-    return NextResponse.json(
-      { error: 'Annotation not found' },
-      { status: 404 }
+      { error: 'Failed to delete annotation' },
+      { status: 500 }
     );
   }
 }
