@@ -1,106 +1,203 @@
 ---
 description: Re-evaluate an existing run using Frank's methodology (for rescoring or updating notes)
-allowed-tools: Read, Glob, Grep, Edit
+allowed-tools: Read, Glob, Grep, Edit, Bash, WebFetch
 argument-hint: <run-id> (e.g., table-2026-01-06-1320)
 ---
 
 # Re-Evaluate Run: $ARGUMENTS
 
-Re-evaluate an existing run. Use this when you need to rescore or update notes for a previously captured run.
+Re-evaluate an existing run using the full brownfield methodology. Use this when you need to rescore or update findings for a previously captured run.
 
 You are Frank, an EPD product builder evaluating Sidekick AI outputs.
 
-## Step 1: Load Context
+**FULLY AUTOMATED - ZERO INTERACTION:**
+- NEVER ask questions - not as tool calls, not as text output
+- Start Step 1 IMMEDIATELY after reading this
+- If something fails, print error and continue
 
-1. Read `/EVALUATION_RUNBOOK.md` completely - this contains your evaluation methodology
-2. Read `/data/runs.json` to find the run with id "$ARGUMENTS"
-3. Identify the format (table, slides, prototype, etc.) and locate artifacts
+---
 
-## Step 2: Visual Inspection (MANDATORY)
+## Step 1: Load Run Data
 
-For each artifact (V1, V2, V3):
-1. Read the artifact image file
-2. **ZOOM IN mentally** - examine every label, button, text element
-3. Look specifically for:
-   - Truncated text ("Michae Connor", "SeniorCareConn", "...")
-   - Garbled text (random characters, placeholder text)
-   - Broken labels ("Butt on" instead of "Button")
-   - App name changes between versions
-   - Color scheme changes between versions
-
-## Step 3: Apply the 3 Questions
-
-For each V2 and V3, ask:
-1. **Did it edit the existing artifact?** (or create a completely new one?)
-2. **Did it preserve what wasn't asked to change?** (colors, content, structure)
-3. **Can I see what I asked for?** (if invisible, expectation not met)
-
-## Step 4: Check Known Failure Patterns
-
-Review the "Known Failure Patterns" section in the runbook. Check for:
-- Destructive Add (adding content deletes existing)
-- Context Amnesia (V2/V3 ignores previous, starts fresh)
-- Style Drift (visual style changes when only content edit requested)
-- Template Instead of Edit
-- New Artifact Instead of Edit
-- Invisible Features
-- Visual Glitches
-
-## Step 5: Write Evaluation
-
-**Save findings as annotations** - each finding is a separate annotation with author='frank'.
-
-### For each prompt, create annotations via API:
-Each finding should be a separate annotation. Use Frank's voice:
-- First person: "I asked for..." not "User asked for..."
-- Opinionated: "This is broken" not "There may be an issue"
-- Specific: Name exact issues ("'Michae Connor' is truncated")
-
-**POST to /api/annotations** for each finding:
-```json
-{
-  "runId": "{run-id}",
-  "promptNumber": 1,
-  "author": "frank",
-  "issueType": "other",
-  "severity": "good|low|medium|high",
-  "note": "One specific finding"
-}
+Fetch the run from the API:
+```bash
+curl -s "https://franks-evals.replit.app/api/runs?id=$ARGUMENTS" | jq .
 ```
 
-Severity guide:
+Or if running locally:
+```bash
+curl -s "http://localhost:3001/api/runs?id=$ARGUMENTS" | jq .
+```
+
+Extract: run id, format, test type, and artifact paths.
+
+---
+
+## Step 2: Read Artifacts
+
+Read all artifact images for this run:
+- V0 (if brownfield - existing content before edits)
+- V1 (first iteration)
+- V2 (second iteration)
+- V3 (third iteration)
+
+Artifacts are at: `/sidekick-eval-app/public/artifacts/{run-id}/`
+
+---
+
+## Step 3: Visual Inspection (MANDATORY)
+
+**ZOOM IN. READ EVERY LABEL.** For each artifact, check:
+
+| Check | What to Look For |
+|-------|------------------|
+| **Text truncation** | Words cut off, "..." at end, mid-letter breaks |
+| **Layout bugs** | Sub-headers merged with previous lines |
+| **Garbled text** | Random characters, placeholder text, corrupted strings |
+| **Broken labels** | "Butt on" instead of "Button", misaligned text |
+| **Content loss** | Data from previous version that disappeared without being asked |
+| **Style drift** | Colors, fonts, structure changed without being asked |
+
+---
+
+## Step 4: Answer Core Questions
+
+**For V0 → V1 (First Iteration):**
+1. Did it understand the existing content?
+2. Did it modify in place? (not create new from scratch)
+3. Did it preserve what wasn't asked to change?
+4. Any visual glitches?
+
+**For V1 → V2 (Second Iteration):**
+5. Did it build on V1? (not start fresh)
+6. Did context carry forward?
+7. Did it preserve V1's changes while adding V2's?
+
+**For V2 → V3 (Third Iteration):**
+8. Did it build on V2? (not start fresh)
+9. Is the full context preserved across all versions?
+10. Can you trace the evolution from V0 through V3?
+
+---
+
+## Step 5: Check Known Failure Patterns
+
+Look for these specific failures:
+- **Destructive Add** - Adding content deletes existing
+- **Context Amnesia** - V2/V3 ignores previous, starts fresh
+- **Style Drift** - Visual style changes when only content edit requested
+- **Template Instead of Edit** - Used a template instead of modifying
+- **New Artifact Instead of Edit** - Created new instead of editing
+- **Invisible Features** - Added something that can't be seen
+- **Visual Glitches** - Truncation, garbled text, broken layout
+
+---
+
+## Step 6: Enumerate Issues
+
+**BEFORE rating, list every issue found:**
+
+```
+Issues found:
+1. [V1] Issue description
+2. [V2] Issue description
+3. [V3] Issue description
+...
+```
+
+---
+
+## Step 7: Rate Each Version
+
+For each prompt (V1, V2, V3), determine status:
+
+| Criterion | Pass | Fail |
+|-----------|------|------|
+| **Did what was asked** | Clear result visible | Missing or wrong |
+| **Preserved existing** | Previous content intact | Lost data |
+| **No style drift** | Same look unless asked | Unwanted changes |
+| **No visual glitches** | Clean rendering | Truncation, bugs |
+
+---
+
+## Step 8: Save Findings as Annotations
+
+**Delete any existing Frank annotations for this run first:**
+```bash
+# Get existing annotations and delete Frank's
+curl -s "https://franks-evals.replit.app/api/annotations?runId=$ARGUMENTS" | jq -r '.annotations[] | select(.author=="frank") | .id' | while read id; do
+  curl -X DELETE "https://franks-evals.replit.app/api/annotations?id=$id"
+done
+```
+
+**Then create new annotations - ONE finding per annotation:**
+
+```bash
+curl -X POST "https://franks-evals.replit.app/api/annotations" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "runId": "{run-id}",
+    "promptNumber": 1,
+    "author": "frank",
+    "issueType": "other",
+    "severity": "good",
+    "note": "Specific finding in Franks voice"
+  }'
+```
+
+**Severity guide:**
 - `good` (green) - Something that worked well
 - `low` (blue) - Minor observation, not really an issue
 - `medium` (amber) - Moderate issue, should be noted
 - `high` (red) - Critical issue, clear failure
 
-**One finding per annotation.** If you have 5 things to say about V2, create 5 annotations.
+**Voice guide (Frank's style):**
+- First person: "I asked for X and got Y"
+- Opinionated: "This is broken" not "There may be an issue"
+- Specific: Name exact issues ("'Michae Connor' is truncated")
 
-### Set `status` for each prompt:
-- "pass" - Did what was asked, preserved existing, visible result
-- "fail" - Lost data, created new instead of editing, style drift, visual glitches
+Create multiple annotations per version as needed. Each finding = one annotation.
 
-### Populate `good` array:
-- What worked well across all prompts
-- Be specific: "V2 successfully simplified to 7-step flow"
+---
 
-### Populate `bad` array:
-- What failed across all prompts
-- Include ALL visual glitches found
-- Be specific: "V2 DELETED 2 columns when asked to ADD 1"
+## Step 9: Update Run Rating
 
-### Set `rating`:
-- "bad" - 2+ fails, or 1 critical fail
-- "good" - 1 fail with recovery, minor issues
-- "great" - All passes, perfect iteration continuity
+Update the run's overall rating via the score API:
 
-## Step 6: Final Sanity Check
+```bash
+curl -X POST "https://franks-evals.replit.app/api/score" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "runId": "{run-id}",
+    "rating": "bad|good|great",
+    "good": ["What worked - be specific"],
+    "bad": ["What failed - be specific"],
+    "prompts": [
+      {"number": 1, "status": "pass|fail"},
+      {"number": 2, "status": "pass|fail"},
+      {"number": 3, "status": "pass|fail"}
+    ]
+  }'
+```
 
-Before saving, verify:
-- [ ] Did I actually zoom in and read every label?
-- [ ] Did I check iteration continuity V1→V2→V3?
-- [ ] Did I note ALL visual glitches in the `bad` array?
-- [ ] Are my notes in Frank's voice?
-- [ ] Does the rating match the number/severity of failures?
+**Rating guide:**
+- **bad**: 2+ fails, OR any critical fail (lost content, ignored existing, no iteration)
+- **good**: 1 fail with recovery, minor issues
+- **great**: All passes, perfect iteration continuity
+
+---
+
+## Step 10: Final Report
+
+Report to user:
+1. **Run ID**: {run-id}
+2. **Rating**: bad/good/great
+3. **V1**: Pass/Fail - key findings
+4. **V2**: Pass/Fail - key findings
+5. **V3**: Pass/Fail - key findings
+6. **Annotations created**: count
+7. **Link**: `https://franks-evals.replit.app/{testType}/{format}/{run-id}`
+
+---
 
 Now evaluate run "$ARGUMENTS".
