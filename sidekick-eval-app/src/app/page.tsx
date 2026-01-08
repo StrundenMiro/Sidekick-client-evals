@@ -118,21 +118,25 @@ export default async function Dashboard() {
               <li key={format.name}>
                 <Link
                   href={`/format/${format.name}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                  className="flex items-center px-4 py-2.5 hover:bg-gray-50 transition-colors group"
                 >
-                  <FormatIcon format={format.name} size={20} />
-                  <span className="font-medium text-gray-900 capitalize">{format.name}</span>
-                  <span className="text-xs text-gray-400">{format.runCount} runs</span>
-                  {format.criticalCount > 0 && (
-                    <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
-                      {format.criticalCount} critical
-                    </span>
-                  )}
-                  {format.majorCount > 0 && (
-                    <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
-                      {format.majorCount} major
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2 w-32">
+                    <FormatIcon format={format.name} size={18} />
+                    <span className="font-medium text-gray-900 capitalize">{format.name}</span>
+                  </div>
+                  <span className="text-xs text-gray-400 w-16">{format.runCount} runs</span>
+                  <div className="flex items-center gap-2">
+                    {format.criticalCount > 0 && (
+                      <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-red-100 group-hover:text-red-700 transition-colors">
+                        {format.criticalCount} critical
+                      </span>
+                    )}
+                    {format.majorCount > 0 && (
+                      <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-orange-100 group-hover:text-orange-700 transition-colors">
+                        {format.majorCount} major
+                      </span>
+                    )}
+                  </div>
                 </Link>
               </li>
             ))}
