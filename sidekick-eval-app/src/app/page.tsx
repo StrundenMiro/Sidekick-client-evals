@@ -125,7 +125,7 @@ export default async function Dashboard() {
               </div>
               <div className="flex items-center gap-3">
                 {unassignedCount > 0 && (
-                  <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-amber-100 text-amber-700">
+                  <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-amber-100 group-hover:text-amber-700 transition-colors">
                     {unassignedCount} need triage
                   </span>
                 )}
@@ -163,7 +163,7 @@ export default async function Dashboard() {
                   </div>
                   <div className="flex items-center gap-3">
                     {format.needTriageCount > 0 && (
-                      <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-amber-100 text-amber-700">
+                      <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-amber-100 group-hover:text-amber-700 transition-colors">
                         {format.needTriageCount} need triage
                       </span>
                     )}
