@@ -1,12 +1,18 @@
 import Link from 'next/link';
 import { getRunsByTestTypeAsync, isScored, getRunRating, getAllIssuesAsync } from '@/lib/runs';
 import { getAllTestTypes } from '@/lib/test-types';
+import { getAnnotationsAsync } from '@/lib/annotations';
 
 export default async function Dashboard() {
   const runsByTestType = await getRunsByTestTypeAsync();
   const testTypes = getAllTestTypes();
   const issues = await getAllIssuesAsync();
+  const annotations = await getAnnotationsAsync();
   const criticalIssues = issues.filter(t => t.severity === 'high');
+
+  // Count annotations by severity
+  const highSeverityCount = annotations.filter(a => a.severity === 'high').length;
+  const mediumSeverityCount = annotations.filter(a => a.severity === 'medium').length;
 
   // Calculate stats for each test type
   const stats = testTypes.map(tt => {
@@ -123,28 +129,32 @@ export default async function Dashboard() {
           </div>
         )}
 
-        {/* Health Summary Strip */}
-        <div className="flex items-center gap-6 mb-6 py-3 px-4 bg-white rounded-lg border border-gray-200 text-sm">
-          <div>
-            <span className="text-gray-500">Runs:</span>{' '}
-            <span className="font-medium text-gray-900">{totalRuns}</span>
-          </div>
-          <div>
-            <span className="text-gray-500">Pass:</span>{' '}
-            <span className="font-medium text-green-600">{totalPasses}</span>
-          </div>
-          <div>
-            <span className="text-gray-500">Fail:</span>{' '}
-            <span className="font-medium text-red-600">{totalFails}</span>
-          </div>
-          {totalRuns > 0 && (
-            <div className="ml-auto">
-              <span className={`font-medium ${totalFails === 0 ? 'text-green-600' : totalFails > totalPasses ? 'text-red-600' : 'text-yellow-600'}`}>
-                {Math.round((totalPasses / totalRuns) * 100)}% pass rate
+        {/* Issues Summary Link */}
+        {annotations.length > 0 && (
+          <Link
+            href="/issues"
+            className="flex items-center justify-between mb-6 py-3 px-4 bg-white rounded-lg border border-gray-200 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors group"
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-gray-500">
+                <strong className="text-gray-900">{annotations.length}</strong> annotations across <strong className="text-gray-900">{totalRuns}</strong> runs
               </span>
+              {highSeverityCount > 0 && (
+                <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
+                  {highSeverityCount} high
+                </span>
+              )}
+              {mediumSeverityCount > 0 && (
+                <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
+                  {mediumSeverityCount} medium
+                </span>
+              )}
             </div>
-          )}
-        </div>
+            <span className="text-gray-400 group-hover:text-gray-600">
+              View all issues →
+            </span>
+          </Link>
+        )}
 
         {/* Test Types (sorted by urgency) */}
         {activeTests.length > 0 && (
