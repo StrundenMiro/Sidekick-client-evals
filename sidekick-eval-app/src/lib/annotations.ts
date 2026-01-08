@@ -16,6 +16,14 @@ export type IssueType = typeof ISSUE_TYPES[number]['id'];
 export type Severity = 'high' | 'medium' | 'low' | 'good';
 export type Author = 'frank' | 'human';
 
+// Severity display configuration (maps internal values to user-facing labels)
+export const SEVERITY_CONFIG: Record<Severity, { label: string; color: string; bg: string; order: number }> = {
+  high: { label: 'Critical', color: 'text-red-700', bg: 'bg-red-100', order: 0 },
+  medium: { label: 'Major', color: 'text-orange-700', bg: 'bg-orange-100', order: 1 },
+  low: { label: 'Minor', color: 'text-blue-700', bg: 'bg-blue-100', order: 2 },
+  good: { label: 'Good', color: 'text-green-700', bg: 'bg-green-100', order: 3 }
+};
+
 export interface Annotation {
   id: string;
   runId: string;

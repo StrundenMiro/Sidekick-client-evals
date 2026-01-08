@@ -5,6 +5,13 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 type Severity = 'high' | 'medium' | 'low' | 'good';
 type Author = 'frank' | 'human';
 
+const severityLabels: Record<Severity, string> = {
+  high: 'Critical',
+  medium: 'Major',
+  low: 'Minor',
+  good: 'Good'
+};
+
 interface Annotation {
   id: string;
   runId: string;
@@ -157,8 +164,8 @@ function AnnotationEditor({
                 style={{ opacity: severity === s ? 1 : 0.4 }}
               />
             ))}
-            <span className="text-xs text-gray-400 ml-1 capitalize">
-              {isSaving ? 'Saving...' : (hoveredSeverity || severity)}
+            <span className="text-xs text-gray-400 ml-1">
+              {isSaving ? 'Saving...' : severityLabels[hoveredSeverity || severity]}
             </span>
           </div>
         </div>

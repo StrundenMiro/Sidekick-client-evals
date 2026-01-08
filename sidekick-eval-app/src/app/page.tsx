@@ -1,48 +1,72 @@
 import Link from 'next/link';
-import { getRunsByTestTypeAsync, isScored, getRunRating } from '@/lib/runs';
-import { getAllTestTypes } from '@/lib/test-types';
-import { getAnnotationsAsync } from '@/lib/annotations';
+import { getRunsAsync, getRunTestType } from '@/lib/runs';
+import { getAnnotationsAsync, SEVERITY_CONFIG } from '@/lib/annotations';
+
+export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  const runsByTestType = await getRunsByTestTypeAsync();
-  const testTypes = getAllTestTypes();
-  const annotations = await getAnnotationsAsync();
+  const [runs, annotations] = await Promise.all([
+    getRunsAsync(),
+    getAnnotationsAsync()
+  ]);
 
-  // Count annotations by severity
-  const highSeverityCount = annotations.filter(a => a.severity === 'high').length;
-  const mediumSeverityCount = annotations.filter(a => a.severity === 'medium').length;
+  // Get unique formats and their stats
+  const formatStats = new Map<string, {
+    name: string;
+    criticalCount: number;
+    majorCount: number;
+    runCount: number;
+    useCases: Set<string>;
+  }>();
 
-  // Calculate stats for each test type
-  const stats = testTypes.map(tt => {
-    const runs = runsByTestType[tt.id] || [];
-    const scoredRuns = runs.filter(isScored);
-    const formats = new Set(runs.map(r => r.format)).size;
+  // Initialize formats from runs
+  runs.forEach(run => {
+    if (!formatStats.has(run.format)) {
+      formatStats.set(run.format, {
+        name: run.format,
+        criticalCount: 0,
+        majorCount: 0,
+        runCount: 0,
+        useCases: new Set()
+      });
+    }
+    const stats = formatStats.get(run.format)!;
+    stats.runCount++;
 
-    const ratings = scoredRuns.map(r => getRunRating(r));
-    const passCount = ratings.filter(r => r === 'great').length;
-    const failCount = ratings.filter(r => r === 'bad').length;
-
-    return {
-      ...tt,
-      runCount: runs.length,
-      formatCount: formats,
-      passCount,
-      failCount,
-      passRate: scoredRuns.length > 0 ? Math.round((passCount / scoredRuns.length) * 100) : 0
-    };
+    // Determine use-case (greenfield vs brownfield)
+    const testType = getRunTestType(run);
+    const useCase = testType === 'existing-content-iteration' ? 'brownfield' : 'greenfield';
+    stats.useCases.add(useCase);
   });
 
-  // Sort by urgency: failures first, then by fail count
-  const activeTests = stats
-    .filter(tt => tt.runCount > 0)
-    .sort((a, b) => b.failCount - a.failCount);
+  // Count issues per format from annotations
+  annotations.forEach(annotation => {
+    const run = runs.find(r => r.id === annotation.runId);
+    if (!run) return;
 
-  const comingSoon = stats.filter(tt => tt.runCount === 0);
+    const stats = formatStats.get(run.format);
+    if (!stats) return;
 
-  // Calculate totals
-  const totalRuns = activeTests.reduce((sum, tt) => sum + tt.runCount, 0);
-  const totalFails = activeTests.reduce((sum, tt) => sum + tt.failCount, 0);
-  const totalPasses = activeTests.reduce((sum, tt) => sum + tt.passCount, 0);
+    if (annotation.severity === 'high') {
+      stats.criticalCount++;
+    } else if (annotation.severity === 'medium') {
+      stats.majorCount++;
+    }
+  });
+
+  // Convert to sorted array
+  const formats = Array.from(formatStats.values())
+    .sort((a, b) => {
+      // Sort by critical count first, then major, then alphabetically
+      if (a.criticalCount !== b.criticalCount) return b.criticalCount - a.criticalCount;
+      if (a.majorCount !== b.majorCount) return b.majorCount - a.majorCount;
+      return a.name.localeCompare(b.name);
+    });
+
+  // Total counts
+  const totalCritical = formats.reduce((sum, f) => sum + f.criticalCount, 0);
+  const totalMajor = formats.reduce((sum, f) => sum + f.majorCount, 0);
+  const totalAnnotations = annotations.length;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -54,97 +78,75 @@ export default async function Dashboard() {
             🤖
           </div>
           <p className="text-sm text-gray-500">
-            <strong className="text-gray-700">Frank&apos;s Evals</strong> — I test Sidekick the way a product builder (EPD) would. Plain prompts, real expectations.
+            <strong className="text-gray-700">Frank&apos;s Evals</strong> — I test AI Workflows the way a product builder (EPD) would. Plain prompts, real expectations.
           </p>
         </header>
 
-        {/* Issues Summary Link */}
-        {annotations.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-              All Issues
-            </h2>
+        {/* Summary Stats */}
+        {totalAnnotations > 0 && (
+          <div className="mb-6 flex items-center gap-4 text-sm">
+            <span className="text-gray-500">
+              <strong className="text-gray-900">{totalAnnotations}</strong> issues found
+            </span>
+            {totalCritical > 0 && (
+              <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
+                {totalCritical} critical
+              </span>
+            )}
+            {totalMajor > 0 && (
+              <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
+                {totalMajor} major
+              </span>
+            )}
             <Link
               href="/issues"
-              className="flex items-center justify-between py-3 px-4 bg-white rounded-lg border border-gray-200 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors group"
+              className="ml-auto text-gray-400 hover:text-gray-600 text-xs"
             >
-            <div className="flex items-center gap-4">
-              <span className="text-gray-500">
-                <strong className="text-gray-900">{annotations.length}</strong> annotations across <strong className="text-gray-900">{totalRuns}</strong> runs
-              </span>
-              {highSeverityCount > 0 && (
-                <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
-                  {highSeverityCount} high
-                </span>
-              )}
-              {mediumSeverityCount > 0 && (
-                <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
-                  {mediumSeverityCount} medium
-                </span>
-              )}
-            </div>
-            <span className="text-gray-400 group-hover:text-gray-600">
-              View all issues →
-            </span>
+              View all →
             </Link>
-          </section>
+          </div>
         )}
 
-        {/* Test Types (sorted by urgency) */}
-        {activeTests.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-              Frank&apos;s Test Runs
-            </h2>
-            <ul className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
-              {activeTests.map(tt => (
-                <li key={tt.id}>
-                  <Link
-                    href={`/${tt.id}`}
-                    className="block px-4 py-4 hover:bg-gray-50 transition-colors group"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-medium text-gray-900">{tt.name}</h3>
-                          {tt.failCount > 0 && (
-                            <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
-                              {tt.failCount} fail{tt.failCount !== 1 ? 's' : ''}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                          {tt.formatCount} format{tt.formatCount !== 1 ? 's' : ''} • {tt.runCount} run{tt.runCount !== 1 ? 's' : ''}
-                        </p>
+        {/* Formats List */}
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+            Formats
+          </h2>
+          <ul className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
+            {formats.map(format => (
+              <li key={format.name}>
+                <Link
+                  href={`/format/${format.name}`}
+                  className="block px-4 py-4 hover:bg-gray-50 transition-colors group"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-gray-900 capitalize">{format.name}</h3>
+                        {format.criticalCount > 0 && (
+                          <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">
+                            {format.criticalCount} critical
+                          </span>
+                        )}
+                        {format.majorCount > 0 && (
+                          <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
+                            {format.majorCount} major
+                          </span>
+                        )}
                       </div>
-                      <span className="ml-4 px-3 py-1 text-sm text-gray-500 group-hover:text-gray-900 group-hover:bg-gray-100 rounded transition-colors">
-                        Open →
-                      </span>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        {format.runCount} run{format.runCount !== 1 ? 's' : ''} · {format.useCases.size} use-case{format.useCases.size !== 1 ? 's' : ''}
+                      </p>
                     </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* Coming Soon - Collapsed */}
-        {comingSoon.length > 0 && (
-          <details className="mb-8 group">
-            <summary className="text-xs font-semibold text-gray-400 uppercase tracking-wide cursor-pointer hover:text-gray-500 list-none flex items-center gap-2">
-              <span className="text-gray-300 group-open:rotate-90 transition-transform">▶</span>
-              Coming Soon ({comingSoon.length})
-            </summary>
-            <ul className="mt-3 space-y-2">
-              {comingSoon.map(tt => (
-                <li key={tt.id} className="px-4 py-3 bg-gray-50 rounded-lg text-gray-400">
-                  <span className="font-medium">{tt.name}</span>
-                  <span className="text-sm ml-2">— {tt.description}</span>
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
+                    <span className="ml-4 px-3 py-1 text-sm text-gray-500 group-hover:text-gray-900 group-hover:bg-gray-100 rounded transition-colors">
+                      Open →
+                    </span>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* Footer */}
         <footer className="pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
