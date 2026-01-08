@@ -1,245 +1,407 @@
 ---
-description: Run a Brownfield test - evaluate how Sidekick understands and improves existing board content
+description: Strict Brownfield flow test - iterates on existing board content (project)
 allowed-tools: Read, Write, Edit, Bash, mcp__playwright__*
-argument-hint: <format> (e.g., table, document, slides)
+argument-hint: <format>
 ---
 
-# Brownfield Test: $ARGUMENTS
+# Brownfield Test
 
-Run a Brownfield iteration test on existing board content.
+**CRITICAL: Follow these steps EXACTLY. No deviation. No skipping. No improvisation.**
 
-**Test type**: Brownfield Iteration
-Tests how well Sidekick works with and improves existing content on the board. Evaluates understanding of context and appropriate modifications.
+**FULLY AUTOMATED - ZERO INTERACTION:**
+- NEVER ask questions - not as tool calls, not as text output
+- NEVER ask about MCP configuration - assume Playwright MCP is ready
+- NEVER ask for confirmation before any step
+- Start Step 1 IMMEDIATELY after reading this
+- If something fails, print error and exit - don't ask what to do
+- If element ID is TBD, print "ERROR: Element ID not configured for this format" and exit
+
+Arguments format: `<format>`
+
+Supported formats: `document`, `table`, `stickies`, `flowchart`, `slides`, `prototype`, `mindmap`
+
+---
+
+## Element IDs by Format
+
+Each format has a pre-existing element on the board. Look up the element ID:
+
+| Format | Element ID | Description |
+|--------|------------|-------------|
+| document | 3458764654555098315 | Product brief document |
+| table | 3458764654561958376 | Feature table |
+| stickies | TBD | Grouped sticky notes |
+| flowchart | 3458764654561958750 | Booking flow diagram |
+| slides | TBD | Pitch deck |
+| prototype | TBD | Mobile app screens |
+| mindmap | TBD | App concept mindmap |
+
+---
+
+## Iteration Prompts by Format
+
+### document
+- **prompt1**: Make this document more concise. Cut any fluffy language and keep only the essential points.
+- **prompt2**: Add a section called "Why Us" after Problem that explains how this beats traditional care agencies.
+- **prompt3**: Rewrite the Success Metrics to be more specific and measurable.
+- **title1**: Tighten Content
+- **title2**: Add Competitive Section
+- **title3**: Improve Metrics
+
+### table
+- **prompt1**: Add a column called "Risk Level" (Low/Medium/High) and fill it in for each feature.
+- **prompt2**: Sort the rows by Risk Level, highest first.
+- **prompt3**: Add a "Dependencies" column showing which features depend on others.
+- **title1**: Add Risk Column
+- **title2**: Sort by Risk
+- **title3**: Add Dependencies
+
+### stickies
+- **prompt1**: Consolidate duplicate stickies and remove any that are too vague.
+- **prompt2**: Add priority labels (P0, P1, P2) to each sticky based on user impact.
+- **prompt3**: Create a new group called "Quick Wins" with stickies that are high impact + low effort.
+- **title1**: Consolidate
+- **title2**: Add Priorities
+- **title3**: Quick Wins Group
+
+### flowchart
+- **prompt1**: Add error handling paths for: invalid input, timeout, and user cancellation.
+- **prompt2**: Simplify by combining any steps that always happen together.
+- **prompt3**: Add swimlanes to show which actor (User, System, Caregiver) owns each step.
+- **title1**: Add Error Paths
+- **title2**: Simplify Steps
+- **title3**: Add Swimlanes
+
+### slides
+- **prompt1**: Make the headlines punchier - each should be a complete thought, not a label.
+- **prompt2**: Reduce text on each slide by 50% - move details to speaker notes.
+- **prompt3**: Add a "Competitive Landscape" slide after the Problem slide.
+- **title1**: Punch Up Headlines
+- **title2**: Reduce Text
+- **title3**: Add Competition Slide
+
+### prototype
+- **prompt1**: Increase all font sizes by 20% and add more whitespace between elements.
+- **prompt2**: Add a confirmation dialog before any destructive action (cancel, delete, end session).
+- **prompt3**: Add an accessibility mode toggle that enables high contrast and larger touch targets.
+- **title1**: Improve Readability
+- **title2**: Add Confirmations
+- **title3**: Accessibility Mode
+
+### mindmap
+- **prompt1**: Expand the "Risks" branch with more specific risk categories and mitigations.
+- **prompt2**: Collapse less important branches and highlight the 5 most critical nodes.
+- **prompt3**: Add a "Metrics" branch showing how we'll measure success for each major feature.
+- **title1**: Expand Risks
+- **title2**: Highlight Critical
+- **title3**: Add Metrics
 
 ---
 
 ## Part 1: Setup
 
-1. Read `/test-prompts.json` and find:
-   - `greenfield.$ARGUMENTS.prompts[0]` (seed prompt - to create initial content)
-   - `brownfield.$ARGUMENTS.prompts` (2 edit prompts)
-2. Generate run ID: `brownfield-$ARGUMENTS-{YYYY-MM-DD}-{HHMM}`
-3. Create directory: `/public/artifacts/{run-id}/`
+### Step 1: Setup Run
 
-**Reference**: `/EVALUATION_RUNBOOK.md` has additional context on Frank's voice and format-specific patterns if needed.
+Parse the argument to get the format, then look up element ID and prompts from the tables above.
 
----
+Generate run ID: `brownfield-{format}-{YYYY-MM-DD}-{HHMM}`
 
-## Part 2: Seed the Board with Content
-
-Navigate to Miro board: `https://miro.com/app/board/uXjVGUAcwUE=/`
-
-First, create the content that we'll later edit:
-
-1. **Resize browser** to known dimensions: `browser_resize` width=1512, height=982
-2. **Open Sidekick** by clicking the sparkle button (✨) at the top of the left toolbar (ref usually contains "Formats and Flows" or look for the sparkle icon button)
-3. **Click "Sidekick"** in the Sidekick selector panel to open the main Sidekick chat
-4. **Enter the seed prompt** from `greenfield.$ARGUMENTS.prompts[0]` in the chat input
-5. **Wait for generation** - look for loading indicators to disappear and content to appear in the preview
-6. **Click "Add to canvas"** - this is a blue button rendered on WebGL canvas (never in DOM):
-   - Take a screenshot to see the button location
-   - Look for blue button with "Add to canvas" text above the staged content preview
-   - Click at the button's coordinates (use CSS pixels - Playwright handles retina automatically)
-7. **Document is now selected on canvas** - after adding, the document is automatically selected
-8. **Capture with Cmd+Shift+C** (copies selected content as image to clipboard)
-9. **Save clipboard to file** using osascript:
-   ```bash
-   osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/absolute/path/to/public/artifacts/{run-id}/v0-seed.png" with write permission)'
-   ```
-   **Note**: The path must be absolute (e.g., `/Users/.../sidekick-eval-app/public/artifacts/...`)
-
-This created content is now our "existing content" for the brownfield test.
+Create artifacts directory:
+```bash
+mkdir -p /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app/public/artifacts/{run-id}/
+```
 
 ---
 
-## Part 3: Prepare for Edit Flow
+### Step 2: Open board
 
-After adding content to canvas, the document is **automatically selected**. Sidekick should still be open with the document in context.
+Navigate to: `https://miro.com/app/board/uXjVGUAcwUE=/`
 
-1. **Verify Sidekick is open** with the document selected (should show "1 object selected" or similar)
-2. **Enable Edit Document mode** - click the "Edit Document" toggle in the Sidekick panel if not already enabled
-3. **Ready for edit prompts** - the chat input should now say "Ask for changes"
-
-**If Sidekick closed or lost context:**
-- Click on the document on canvas to select it
-- The context menu toolbar will appear - click the sparkle button (✨) to open "Edit with AI"
-- This opens Sidekick with the document as context
+Wait 3 seconds for board to load.
 
 ---
 
-## Part 4: Execute Edit Flow
+### Step 3: Select existing element
 
-### Prompt 1: First Edit
+Select the existing element by ID:
+```javascript
+await miro.board.select({ id: '{element-id}' });
+```
 
-1. **Enter first prompt** from `brownfield.$ARGUMENTS.prompts[0]` in the chat input
-2. **Submit** by pressing Enter or clicking send
-3. **Wait for generation** - watch for loading indicators to complete (wait for "Generating" to disappear)
-4. **Click "Add to canvas"** (blue button on WebGL canvas) to accept the edit
-5. **Capture with Cmd+Shift+C** (document is auto-selected after adding)
-6. **Save clipboard to file**:
-   ```bash
-   osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/absolute/path/to/public/artifacts/{run-id}/v1-edit.png" with write permission)'
-   ```
-
-**Observe**:
-- Did it understand the existing content?
-- Did it modify in place or create something new?
-- Is the style preserved?
-
-### Prompt 2: Second Edit (Context Test)
-
-1. **Continue in the same Sidekick conversation** (do NOT close and reopen)
-2. **Enter second prompt** from `brownfield.$ARGUMENTS.prompts[1]`
-3. **Submit** by pressing Enter or clicking send
-4. **Wait for generation**
-5. **Click "Add to canvas"** to accept the edit
-6. **Capture with Cmd+Shift+C** (document is auto-selected after adding)
-7. **Save clipboard to file**:
-   ```bash
-   osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/absolute/path/to/public/artifacts/{run-id}/v2-edit.png" with write permission)'
-   ```
-
-**Observe**:
-- Did it remember the first edit? (Should show "Version 2 of 2" or similar)
-- Did it build on V1 or start fresh?
-- Is context being carried forward?
+Wait 1 second.
 
 ---
 
-## Part 5: Evaluate
+### Step 4: Capture existing content (V0)
 
-**CRITICAL: Follow these steps IN ORDER. Do not skip steps or rate early.**
+**Capture V0 BEFORE opening Sidekick** - this avoids needing to re-select after Sidekick steals focus.
 
-### Step 1: Prepare for Inspection
-- Open all 3 artifacts side by side: v0-seed.png, v1-edit.png, v2-edit.png
-- Zoom to 100%+ so you can read ALL text
+1. Press `Meta+Shift+c` to copy the selected element as image
+2. Wait for "Copied to clipboard" confirmation in the UI
+3. Wait 1 second
+4. Save clipboard:
+```bash
+osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v0-existing.png" with write permission)'
+```
 
-### Step 2: Visual Inspection (DO NOT SKIP)
+---
 
-**ZOOM IN. READ EVERY LABEL.** Go through each artifact and look for:
+### Step 5: Open Sidekick via keyboard
+
+1. Press `Meta+Enter` (CMD+Enter) to open context menu
+2. Wait 500ms
+3. Press `ArrowRight` once to navigate to AI option
+4. Wait 500ms
+5. Press `Enter` to open Sidekick
+
+Wait 2 seconds for Sidekick to fully open.
+
+---
+
+## Part 2: Execute Iteration Prompts
+
+### Step 6: V1 - First Iteration
+
+1. Take snapshot, find chat input
+2. Type **prompt1**
+3. Press Enter to submit
+4. Wait for generation (poll until "Generating" disappears, max 60s)
+5. Click on the result element in chat to select it on canvas
+6. Press `Meta+Shift+c` to copy
+7. Wait 1 second
+8. Save clipboard:
+```bash
+osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v1.png" with write permission)'
+```
+
+---
+
+### Step 7: V2 - Second Iteration
+
+1. Take snapshot, find chat input
+2. Type **prompt2**
+3. Press Enter to submit
+4. Wait for generation (poll until complete, max 60s)
+5. Click on the result element in chat to select it on canvas
+6. Press `Meta+Shift+c` to copy
+7. Wait 1 second
+8. Save clipboard:
+```bash
+osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v2.png" with write permission)'
+```
+
+---
+
+### Step 8: V3 - Third Iteration
+
+1. Take snapshot, find chat input
+2. Type **prompt3**
+3. Press Enter to submit
+4. Wait for generation (poll until complete, max 60s)
+5. Click on the result element in chat to select it on canvas
+6. Press `Meta+Shift+c` to copy
+7. Wait 1 second
+8. Save clipboard:
+```bash
+osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v3.png" with write permission)'
+```
+
+---
+
+### Step 9: Verify Artifacts
+
+List the artifacts directory:
+```bash
+ls -la /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app/public/artifacts/{run-id}/
+```
+
+Expected: v0-existing.png, v1.png, v2.png, v3.png with non-zero sizes.
+
+---
+
+## Part 3: Evaluate
+
+### Step 10: Read Artifacts
+
+Read all four saved artifacts:
+- v0-existing.png (original content before any edits)
+- v1.png (first iteration)
+- v2.png (second iteration)
+- v3.png (third iteration)
+
+---
+
+### Step 11: Visual Inspection
+
+**ZOOM IN. READ EVERY LABEL.** Check for:
 
 | Check | What to Look For |
 |-------|------------------|
 | **Text truncation** | Words cut off, "..." at end, mid-letter breaks |
-| **Layout bugs** | Sub-headers merged with previous lines instead of own line |
+| **Layout bugs** | Sub-headers merged with previous lines |
 | **Garbled text** | Random characters, placeholder text, corrupted strings |
 | **Broken labels** | "Butt on" instead of "Button", misaligned text |
-
-**Format-Specific Checks for Documents:**
-- [ ] Each heading/sub-heading on its own line (not merged with previous bullet)
-- [ ] Bold formatting preserved on headings
-- [ ] Bullet lists properly indented and aligned
-- [ ] No orphaned colons or broken formatting
-
-### Step 3: Answer The Core Questions
-
-For V0 → V1:
-1. **Did it understand the existing content?**
-2. **Did it modify in place?** (not create new)
-3. **Did it preserve what wasn't asked to change?** (style, structure, data)
-
-For V1 → V2:
-4. **Did context carry forward?** (V2 should build on V1)
-5. **Same questions as above for V2**
-
-### Step 4: Enumerate ALL Issues Found
-
-**BEFORE rating, list every issue found. Be exhaustive:**
-
-```
-Issues found:
-1. [Issue description - which artifact, what's wrong]
-2. [Issue description]
-...
-```
-
-This list becomes your `bad` array in runs.json.
-
-### Step 5: Apply Brownfield Criteria
-
-| Criterion | Pass | Fail |
-|-----------|------|------|
-| **Context Understanding** | Correctly understood existing content | Misunderstood or ignored it |
-| **In-Place Editing** | Modified the actual content | Created new artifact instead |
-| **Style Preservation** | Kept colors, fonts, structure | Changed style without asking |
-| **Data Preservation** | Kept content not asked to change | Lost or regenerated data |
-| **Cross-Prompt Context** | V2 built on V1 | V2 ignored V1, started fresh |
-| **Layout Quality** | All text properly formatted | Any layout bugs (merged lines, broken formatting) |
-
-### Step 6: Rate Based on Issues
-
-Count your enumerated issues:
-- **bad**: 2+ fails, OR any critical fail (lost data, completely wrong output)
-- **good**: 1 fail with recovery, OR layout/formatting issues that don't break usability
-- **great**: All passes, perfect iteration, no layout issues
-
-**Do NOT rate "great" if there are any layout bugs.**
+| **Content loss** | Data from V0 that disappeared without being asked to remove |
+| **Style drift** | Colors, fonts, structure changed without being asked |
 
 ---
 
-## Part 6: Write Results
+### Step 12: Answer Core Questions
 
-**Save via script** (do NOT edit runs.json directly):
+**For V0 → V1 (First Iteration):**
+1. Did it understand the existing content?
+2. Did it modify in place? (not create new from scratch)
+3. Did it preserve what wasn't asked to change?
+4. Any visual glitches?
+
+**For V1 → V2 (Second Iteration):**
+5. Did it build on V1? (not start fresh)
+6. Did context carry forward?
+7. Did it preserve V1's changes while adding V2's?
+
+**For V2 → V3 (Third Iteration):**
+8. Did it build on V2? (not start fresh)
+9. Is the full context preserved across all versions?
+10. Can you trace the evolution from V0 through V3?
+
+---
+
+### Step 13: Enumerate Issues
+
+**BEFORE rating, list every issue:**
+
+```
+Issues found:
+1. [Issue - which version, what's wrong]
+2. [Issue]
+...
+```
+
+---
+
+### Step 14: Rate
+
+| Criterion | Pass | Fail |
+|-----------|------|------|
+| **Context Understanding** | Understood existing content | Ignored or misunderstood V0 |
+| **In-Place Editing** | Modified existing content | Created new from scratch |
+| **Content Preservation** | Kept what wasn't asked to change | Lost data unexpectedly |
+| **Style Preservation** | Maintained style unless asked | Unwanted style drift |
+| **Iteration Continuity** | V1→V2→V3 builds progressively | Any version ignores previous |
+| **Visual Quality** | Clean layout, readable | Layout bugs, truncation |
+
+**Rating:**
+- **bad**: 2+ fails, OR any critical fail (lost content, ignored existing, no iteration)
+- **good**: 1 fail with recovery, minor layout issues
+- **great**: All passes, perfect iteration on existing content across all 3 versions
+
+---
+
+## Part 4: Write Results
+
+### Step 15: Save Run and Findings
+
+**Save run via script** (do NOT edit runs.json directly):
 
 ```bash
 cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-run.ts '{
   "id": "{run-id}",
   "testType": "existing-content-iteration",
-  "format": "$ARGUMENTS",
+  "format": "{format}",
   "timestamp": "{ISO timestamp}",
   "state": "scored",
   "rating": "bad|good|great",
-  "good": ["What worked - context understanding, style preservation"],
-  "bad": ["Where it failed - ignored content, lost data, broke style"],
+  "summary": "{One sentence summary of how well it iterated on existing content}",
+  "good": ["What worked"],
+  "bad": ["Issues found"],
   "prompts": [
     {
       "number": 0,
-      "title": "Seed Content",
-      "text": "{greenfield seed prompt used to create initial content}",
-      "artifact": "artifacts/{run-id}/v0-seed.png"
+      "title": "Existing Content",
+      "text": "Pre-existing {format} on board",
+      "artifact": "artifacts/{run-id}/v0-existing.png"
     },
     {
       "number": 1,
-      "title": "{title from brownfield.$ARGUMENTS.prompts[0]}",
-      "text": "{text from brownfield.$ARGUMENTS.prompts[0]}",
+      "title": "{title1}",
+      "text": "{prompt1}",
       "status": "pass|fail",
-      "note": "{Franks voice: What did you find? Include any layout bugs here.}",
-      "artifact": "artifacts/{run-id}/v1-edit.png"
+      "artifact": "artifacts/{run-id}/v1.png"
     },
     {
       "number": 2,
-      "title": "{title from brownfield.$ARGUMENTS.prompts[1]}",
-      "text": "{text from brownfield.$ARGUMENTS.prompts[1]}",
+      "title": "{title2}",
+      "text": "{prompt2}",
       "status": "pass|fail",
-      "note": "{Franks voice: What did you find? Did context carry forward?}",
-      "artifact": "artifacts/{run-id}/v2-edit.png"
+      "artifact": "artifacts/{run-id}/v2.png"
+    },
+    {
+      "number": 3,
+      "title": "{title3}",
+      "text": "{prompt3}",
+      "status": "pass|fail",
+      "artifact": "artifacts/{run-id}/v3.png"
     }
   ]
 }'
 ```
 
+**Then save findings as annotations** - one POST per finding:
+
+```bash
+curl -X POST http://localhost:3001/api/annotations \
+  -H "Content-Type: application/json" \
+  -d '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"good|low|medium|high","note":"One specific finding in Franks voice"}'
+```
+
+**Severity guide:**
+- `good` (green) - Something that worked well
+- `low` (blue) - Minor observation
+- `medium` (amber) - Moderate issue
+- `high` (red) - Critical failure
+
+**Multiple findings per version are fine, but don't split a single finding across annotations:**
+
+BAD (one finding split into 2):
+- "I asked to ADD a column and it DELETED three columns"
+- "Lost 'Who it helps', 'Why it matters', 'MVP or Later'"
+
+GOOD (one complete finding):
+- "I asked to ADD a column and it DELETED three columns (Who it helps, Why it matters, MVP or Later)"
+
+Each annotation should be self-contained: **Issue + specifics together**.
+
 **Note**: The script reads DATABASE_URL from .env.local automatically, so it works both locally and on Replit.
-
-### Frank's Voice Examples
-- "I clicked Edit with AI on my table. It understood the structure and made the edit I asked for."
-- "Asked for a second edit and it forgot everything from the first one. Started from scratch."
-- "My purple headers became green. I didn't ask to change the style."
-- "Good - it added the column without destroying my existing data."
-
-### Rating
-- **bad**: Ignored existing content, lost data, no context between edits
-- **good**: Understood content but some unwanted changes or context issues
-- **great**: Perfect understanding, in-place edits, context carried forward
 
 ---
 
-## Part 7: Report
+### Step 16: Verify Format Navigation
 
-Tell the user:
-1. Run ID
-2. Rating (bad/good/great)
-3. Did it work WITH existing content?
-4. Did context carry between prompts?
-5. Key findings from good/bad arrays
+Check that the format is in the `FORMAT_ORDER` array in `/src/app/[testType]/page.tsx`:
 
-Now run the "$ARGUMENTS" Brownfield test.
+```typescript
+const FORMAT_ORDER = ['table', 'stickies', 'document', 'prototype', 'flowchart', 'slides', 'image', 'mindmap', 'erd', 'sequence', 'class'];
+```
+
+**If the format is not in the list, add it.** Otherwise the run will not appear in the test type navigation.
+
+---
+
+## Part 5: Report
+
+### Step 17: Final Report
+
+Report to user:
+1. **Run ID**: {run-id}
+2. **Rating**: bad/good/great
+3. **V0→V1**: Did it understand and edit existing content?
+4. **V1→V2**: Did iteration work?
+5. **V2→V3**: Did third iteration work? Full context preserved?
+6. **Key Findings**: good/bad summary
+7. **Link**: `http://localhost:3001/existing-content-iteration/{format}/{run-id}`
+
+---
+
+## End
+
+Flow complete. Run visible in eval app.
