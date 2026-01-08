@@ -244,59 +244,52 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
     <>
       {/* Header */}
       <header className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-2xl font-bold text-gray-900">{run.id}</h1>
-          {'state' in run && (
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-              run.state === 'capturing' ? 'bg-blue-100 text-blue-700' :
-              run.state === 'captured' ? 'bg-yellow-100 text-yellow-700' :
-              'bg-green-100 text-green-700'
-            }`}>
-              {run.state === 'capturing' ? 'Capturing' :
-               run.state === 'captured' ? 'Pending Score' : 'Scored'}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-gray-500">{new Date(run.timestamp).toISOString().split('T')[0]}</p>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900">{run.id}</h1>
+            {scored && <RatingBadge rating={getRunRating(run)} size="lg" />}
+            {capturing && (
+              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                (run as CaptureRun).state === 'capturing' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
+              }`}>
+                {(run as CaptureRun).state === 'capturing' ? 'Capturing' : 'Pending Score'}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3 text-sm text-gray-400">
+            <span>{new Date(run.timestamp).toISOString().split('T')[0]}</span>
             <button
               onClick={() => copyShareLink()}
-              className="text-gray-400 hover:text-gray-600 text-sm transition-colors"
+              className="hover:text-gray-600 transition-colors"
               title="Copy link to clipboard"
             >
-              {copied === 'report' ? '✓ Copied' : 'Share'}
+              {copied === 'report' ? '✓' : 'Share'}
             </button>
+            {scored && (
+              <div className="inline-flex gap-0.5">
+                <button
+                  onClick={() => setLayout('vertical')}
+                  className={`px-1 py-0.5 rounded transition-colors ${
+                    layout === 'vertical' ? 'text-gray-600' : 'hover:text-gray-500'
+                  }`}
+                  title="Vertical layout"
+                >
+                  ↕
+                </button>
+                <button
+                  onClick={() => setLayout('horizontal')}
+                  className={`px-1 py-0.5 rounded transition-colors ${
+                    layout === 'horizontal' ? 'text-gray-600' : 'hover:text-gray-500'
+                  }`}
+                  title="Horizontal layout"
+                >
+                  ↔
+                </button>
+              </div>
+            )}
             <RunNav />
           </div>
         </div>
-
-        {/* Rating + Layout Toggle */}
-        {scored && (
-          <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
-            <RatingBadge rating={getRunRating(run)} size="lg" />
-            <div className="inline-flex gap-1 text-gray-400 text-sm">
-              <button
-                onClick={() => setLayout('vertical')}
-                className={`px-1.5 py-0.5 rounded transition-colors ${
-                  layout === 'vertical' ? 'text-gray-700 bg-gray-100' : 'hover:text-gray-600'
-                }`}
-                title="Vertical layout"
-              >
-                ↕
-              </button>
-              <button
-                onClick={() => setLayout('horizontal')}
-                className={`px-1.5 py-0.5 rounded transition-colors ${
-                  layout === 'horizontal' ? 'text-gray-700 bg-gray-100' : 'hover:text-gray-600'
-                }`}
-                title="Horizontal layout"
-              >
-                ↔
-              </button>
-            </div>
-          </div>
-        )}
         {capturing && (
           <p className="text-gray-400 text-sm mt-2">
             {run.prompts.length}/3 prompts captured
