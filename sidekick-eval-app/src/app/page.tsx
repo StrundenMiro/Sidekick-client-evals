@@ -50,7 +50,7 @@ export default async function Dashboard() {
             🤖
           </div>
           <p className="text-sm text-gray-500">
-            <strong className="text-gray-700">Frank</strong> — I test Sidekick the way a product builder (EPD) would. Plain prompts, real expectations.
+            <strong className="text-gray-700">Frank&apos;s Evals</strong> — I test Sidekick the way a product builder (EPD) would. Plain prompts, real expectations.
           </p>
         </header>
 
