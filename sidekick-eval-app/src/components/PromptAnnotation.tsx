@@ -142,7 +142,7 @@ function AnnotationEditor({
           autoFocus={autoFocus}
         />
         <div className="flex items-center gap-2 mt-2">
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 group/severity">
             {(['good', 'low', 'medium', 'high'] as const).map((s) => (
               <button
                 key={s}
@@ -150,10 +150,14 @@ function AnnotationEditor({
                 onClick={() => setSeverity(s)}
                 className={`w-3 h-3 rounded-full ${getSeverityColor(s, 'dot')} ${
                   severity === s ? 'ring-2 ring-offset-1 ring-gray-400' : 'hover:opacity-70'
-                }`}
+                } peer/${s}`}
                 style={{ opacity: severity === s ? 1 : 0.4 }}
+                title={s}
               />
             ))}
+            <span className="text-xs text-gray-400 ml-1 capitalize hidden group-hover/severity:inline">
+              {severity}
+            </span>
           </div>
           <span className="text-xs text-gray-400">
             {isSaving ? 'Saving...' : ''}
