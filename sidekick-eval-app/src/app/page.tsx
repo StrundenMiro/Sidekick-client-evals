@@ -60,10 +60,14 @@ export default async function Dashboard() {
 
         {/* Issues Summary Link */}
         {annotations.length > 0 && (
-          <Link
-            href="/issues"
-            className="flex items-center justify-between mb-6 py-3 px-4 bg-white rounded-lg border border-gray-200 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors group"
-          >
+          <section className="mb-8">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+              All Issues
+            </h2>
+            <Link
+              href="/issues"
+              className="flex items-center justify-between py-3 px-4 bg-white rounded-lg border border-gray-200 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors group"
+            >
             <div className="flex items-center gap-4">
               <span className="text-gray-500">
                 <strong className="text-gray-900">{annotations.length}</strong> annotations across <strong className="text-gray-900">{totalRuns}</strong> runs
@@ -82,7 +86,8 @@ export default async function Dashboard() {
             <span className="text-gray-400 group-hover:text-gray-600">
               View all issues →
             </span>
-          </Link>
+            </Link>
+          </section>
         )}
 
         {/* Test Types (sorted by urgency) */}
