@@ -1,14 +1,12 @@
 import Link from 'next/link';
-import { getRunsByTestTypeAsync, isScored, getRunRating, getAllIssuesAsync } from '@/lib/runs';
+import { getRunsByTestTypeAsync, isScored, getRunRating } from '@/lib/runs';
 import { getAllTestTypes } from '@/lib/test-types';
 import { getAnnotationsAsync } from '@/lib/annotations';
 
 export default async function Dashboard() {
   const runsByTestType = await getRunsByTestTypeAsync();
   const testTypes = getAllTestTypes();
-  const issues = await getAllIssuesAsync();
   const annotations = await getAnnotationsAsync();
-  const criticalIssues = issues.filter(t => t.severity === 'high');
 
   // Count annotations by severity
   const highSeverityCount = annotations.filter(a => a.severity === 'high').length;
@@ -59,75 +57,6 @@ export default async function Dashboard() {
             <strong className="text-gray-700">Frank&apos;s Evals</strong> — I test Sidekick the way a product builder (EPD) would. Plain prompts, real expectations.
           </p>
         </header>
-
-        {/* Critical Issues Hero */}
-        {criticalIssues.length > 0 ? (
-          <Link
-            href="/hit-list"
-            className="block mb-8 bg-red-50 border-2 border-red-200 rounded-xl p-5 hover:bg-red-100 hover:border-red-300 transition-all group"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded uppercase">
-                    {criticalIssues.length} Critical
-                  </span>
-                  {issues.length > criticalIssues.length && (
-                    <span className="text-sm text-gray-500">
-                      + {issues.length - criticalIssues.length} other issue{issues.length - criticalIssues.length !== 1 ? 's' : ''}
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  {criticalIssues.slice(0, 2).map(issue => (
-                    <div key={issue.id}>
-                      <h3 className="font-semibold text-gray-900">{issue.title}</h3>
-                      <p className="text-sm text-gray-600">
-                        Affects {issue.affectedFormats.length} format{issue.affectedFormats.length !== 1 ? 's' : ''}: {issue.affectedFormats.join(', ')}
-                      </p>
-                    </div>
-                  ))}
-                  {criticalIssues.length > 2 && (
-                    <p className="text-sm text-red-600">+ {criticalIssues.length - 2} more critical</p>
-                  )}
-                </div>
-              </div>
-
-              <span className="ml-4 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg group-hover:bg-red-700 transition-colors">
-                Review →
-              </span>
-            </div>
-          </Link>
-        ) : issues.length > 0 ? (
-          <Link
-            href="/hit-list"
-            className="block mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-4 hover:bg-yellow-100 transition-colors group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">⚠️</span>
-                <div>
-                  <h2 className="font-semibold text-gray-900">{issues.length} Issue{issues.length !== 1 ? 's' : ''} Found</h2>
-                  <p className="text-sm text-gray-600">No critical issues, but worth reviewing</p>
-                </div>
-              </div>
-              <span className="px-3 py-1.5 bg-yellow-600 text-white text-sm font-medium rounded-lg group-hover:bg-yellow-700 transition-colors">
-                View all →
-              </span>
-            </div>
-          </Link>
-        ) : (
-          <div className="mb-8 bg-green-50 border border-green-200 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <span className="text-xl">✅</span>
-              <div>
-                <h2 className="font-semibold text-gray-900">No Issues</h2>
-                <p className="text-sm text-gray-600">All tests passing</p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Issues Summary Link */}
         {annotations.length > 0 && (
