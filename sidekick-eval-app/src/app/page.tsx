@@ -1,15 +1,20 @@
 import Link from 'next/link';
 import { getRunsAsync, getRunTestType } from '@/lib/runs';
 import { getAnnotationsAsync } from '@/lib/annotations';
+import { getPlannedFixesAsync } from '@/lib/plannedFixes';
 import FormatIcon from '@/components/FormatIcon';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  const [runs, annotations] = await Promise.all([
+  const [runs, annotations, plannedFixes] = await Promise.all([
     getRunsAsync(),
-    getAnnotationsAsync()
+    getAnnotationsAsync(),
+    getPlannedFixesAsync()
   ]);
+
+  // Get resolved fix IDs
+  const resolvedFixIds = new Set(plannedFixes.filter(f => f.resolved).map(f => f.id));
 
   // Get unique formats and their stats
   const formatStats = new Map<string, {
@@ -73,6 +78,14 @@ export default async function Dashboard() {
   const totalMajor = allFormats.reduce((sum, f) => sum + f.majorCount, 0);
   const totalAnnotations = annotations.length;
 
+  // Count unassigned issues (not praise, not assigned to a fix, or assigned to unresolved fix)
+  const unassignedCount = annotations.filter(a => {
+    // Skip praise (good severity)
+    if (a.severity === 'good') return false;
+    // Count if no fix assigned, or fix is not resolved
+    return !a.plannedFixId || !resolvedFixIds.has(a.plannedFixId);
+  }).length;
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto p-6">
@@ -102,6 +115,11 @@ export default async function Dashboard() {
                 <span className="font-medium text-gray-900">Issues Overview</span>
               </div>
               <div className="flex items-center gap-3">
+                {unassignedCount > 0 && (
+                  <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-amber-100 text-amber-700">
+                    {unassignedCount} need triage
+                  </span>
+                )}
                 {totalCritical > 0 && (
                   <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-red-100 group-hover:text-red-700 transition-colors">
                     {totalCritical} critical
