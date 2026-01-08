@@ -71,7 +71,7 @@ function AnnotationItem({
           </button>
         </div>
         <p className="text-gray-700">
-          <span className={`rounded px-1.5 py-0.5 ${getSeverityColor(annotation.severity)}`}>
+          <span className={`rounded px-1.5 py-0.5 whitespace-pre-wrap ${getSeverityColor(annotation.severity)}`}>
             {annotation.note}
           </span>
         </p>
@@ -114,17 +114,20 @@ function AnnotationEditor({
         👤
       </div>
       <div className="flex-1">
-        <input
-          type="text"
+        <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSave();
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSave();
+            }
             if (e.key === 'Escape') onCancel();
           }}
           onBlur={handleSave}
-          placeholder="Add your thoughts..."
-          className={`w-full text-gray-700 border-none focus:outline-none rounded px-1.5 py-0.5 ${getSeverityColor(severity)}`}
+          placeholder="Add your thoughts... (Shift+Enter for new line)"
+          rows={2}
+          className={`w-full text-gray-700 border-none focus:outline-none rounded px-1.5 py-0.5 resize-none ${getSeverityColor(severity)}`}
           autoFocus={autoFocus}
         />
         <div className="flex items-center gap-2 mt-2">
