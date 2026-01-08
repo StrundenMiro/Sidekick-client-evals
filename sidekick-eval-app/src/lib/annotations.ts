@@ -109,19 +109,28 @@ async function getAnnotationForPromptFromDb(runId: string, promptNumber: number)
   return row ? dbToAnnotation(row) : null;
 }
 
-async function saveAnnotationToDb(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Annotation> {
-  const id = `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`;
+async function saveAnnotationToDb(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Promise<Annotation> {
   const now = new Date();
 
+  // If we have an ID, update existing annotation
+  if (annotation.id) {
+    const row = await queryOne<DbAnnotation>(`
+      UPDATE annotations SET
+        issue_type = $1,
+        severity = $2,
+        note = $3,
+        updated_at = $4
+      WHERE id = $5
+      RETURNING *
+    `, [annotation.issueType, annotation.severity, annotation.note, now, annotation.id]);
+    return dbToAnnotation(row!);
+  }
+
+  // Otherwise create new annotation
+  const id = `${annotation.runId}-v${annotation.promptNumber}-${Date.now()}`;
   const row = await queryOne<DbAnnotation>(`
     INSERT INTO annotations (id, run_id, prompt_number, issue_type, severity, note, created_at, updated_at)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
-    ON CONFLICT (run_id, prompt_number)
-    DO UPDATE SET
-      issue_type = EXCLUDED.issue_type,
-      severity = EXCLUDED.severity,
-      note = EXCLUDED.note,
-      updated_at = EXCLUDED.updated_at
     RETURNING *
   `, [id, annotation.runId, annotation.promptNumber, annotation.issueType, annotation.severity, annotation.note, now]);
 
@@ -134,6 +143,22 @@ async function deleteAnnotationFromDb(runId: string, promptNumber: number): Prom
     [runId, promptNumber]
   );
   return result.length > 0;
+}
+
+async function deleteAnnotationByIdFromDb(annotationId: string): Promise<boolean> {
+  const result = await query(
+    'DELETE FROM annotations WHERE id = $1 RETURNING id',
+    [annotationId]
+  );
+  return result.length > 0;
+}
+
+async function getAnnotationsForPromptFromDb(runId: string, promptNumber: number): Promise<Annotation[]> {
+  const rows = await query<DbAnnotation>(
+    'SELECT * FROM annotations WHERE run_id = $1 AND prompt_number = $2 ORDER BY created_at',
+    [runId, promptNumber]
+  );
+  return rows.map(dbToAnnotation);
 }
 
 // ============================================
@@ -206,9 +231,26 @@ export function saveAnnotation(annotation: Omit<Annotation, 'id' | 'createdAt' |
   }
 }
 
-export async function saveAnnotationAsync(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'>): Promise<Annotation> {
+export async function saveAnnotationAsync(annotation: Omit<Annotation, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Promise<Annotation> {
   if (isDatabaseConfigured()) {
     return saveAnnotationToDb(annotation);
+  }
+  // For file-based, if id provided, find and update
+  if (annotation.id) {
+    const annotations = getAnnotationsFromFile();
+    const idx = annotations.findIndex(a => a.id === annotation.id);
+    if (idx >= 0) {
+      const updated: Annotation = {
+        ...annotations[idx],
+        issueType: annotation.issueType,
+        severity: annotation.severity,
+        note: annotation.note,
+        updatedAt: new Date().toISOString()
+      };
+      annotations[idx] = updated;
+      saveAnnotationsToFile(annotations);
+      return updated;
+    }
   }
   return saveAnnotation(annotation);
 }
@@ -230,6 +272,29 @@ export async function deleteAnnotationAsync(runId: string, promptNumber: number)
     return deleteAnnotationFromDb(runId, promptNumber);
   }
   return deleteAnnotation(runId, promptNumber);
+}
+
+export async function deleteAnnotationByIdAsync(annotationId: string): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    return deleteAnnotationByIdFromDb(annotationId);
+  }
+  // File-based fallback
+  const annotations = getAnnotationsFromFile();
+  const filtered = annotations.filter(a => a.id !== annotationId);
+  if (filtered.length === annotations.length) return false;
+  saveAnnotationsToFile(filtered);
+  return true;
+}
+
+export function getAnnotationsForPrompt(runId: string, promptNumber: number): Annotation[] {
+  return getAnnotations().filter(a => a.runId === runId && a.promptNumber === promptNumber);
+}
+
+export async function getAnnotationsForPromptAsync(runId: string, promptNumber: number): Promise<Annotation[]> {
+  if (isDatabaseConfigured()) {
+    return getAnnotationsForPromptFromDb(runId, promptNumber);
+  }
+  return getAnnotationsForPrompt(runId, promptNumber);
 }
 
 // Get all annotations grouped by issue type for reporting

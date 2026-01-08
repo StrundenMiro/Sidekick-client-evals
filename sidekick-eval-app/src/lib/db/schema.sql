@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS prompts (
   UNIQUE(run_id, number)
 );
 
--- Annotations table
+-- Annotations table (supports multiple annotations per prompt)
 CREATE TABLE IF NOT EXISTS annotations (
   id TEXT PRIMARY KEY,
   run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS annotations (
   severity TEXT NOT NULL, -- 'high', 'medium', 'low'
   note TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(run_id, prompt_number)
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+  -- Note: No unique constraint - allows multiple annotations per prompt
 );
 
 -- Indexes for common queries

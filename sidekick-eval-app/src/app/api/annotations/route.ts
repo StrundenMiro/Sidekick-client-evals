@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   getAnnotationsAsync,
   getAnnotationsForRunAsync,
-  getAnnotationForPromptAsync,
+  getAnnotationsForPromptAsync,
   saveAnnotationAsync,
   deleteAnnotationAsync,
+  deleteAnnotationByIdAsync,
   type IssueType,
   type Severity
 } from '@/lib/annotations';
@@ -17,8 +18,9 @@ export async function GET(request: NextRequest) {
     const promptNumber = searchParams.get('promptNumber');
 
     if (runId && promptNumber) {
-      const annotation = await getAnnotationForPromptAsync(runId, parseInt(promptNumber, 10));
-      return NextResponse.json({ annotation });
+      // Return array of annotations for this prompt
+      const annotations = await getAnnotationsForPromptAsync(runId, parseInt(promptNumber, 10));
+      return NextResponse.json({ annotations });
     }
 
     if (runId) {
@@ -37,11 +39,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/annotations
+// POST /api/annotations - create new or update existing (if id provided)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { runId, promptNumber, issueType, severity, note } = body;
+    const { id, runId, promptNumber, issueType, severity, note } = body;
 
     if (!runId || promptNumber === undefined || !issueType || !severity) {
       return NextResponse.json(
@@ -51,6 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     const annotation = await saveAnnotationAsync({
+      id, // Optional - if provided, updates existing
       runId,
       promptNumber: parseInt(promptNumber, 10),
       issueType: issueType as IssueType,
@@ -68,21 +71,28 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE /api/annotations?runId=xxx&promptNumber=1
+// DELETE /api/annotations?id=xxx or /api/annotations?runId=xxx&promptNumber=1
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const annotationId = searchParams.get('id');
     const runId = searchParams.get('runId');
     const promptNumber = searchParams.get('promptNumber');
 
-    if (!runId || !promptNumber) {
+    let deleted = false;
+
+    if (annotationId) {
+      // Delete by ID
+      deleted = await deleteAnnotationByIdAsync(annotationId);
+    } else if (runId && promptNumber) {
+      // Delete all for prompt (legacy)
+      deleted = await deleteAnnotationAsync(runId, parseInt(promptNumber, 10));
+    } else {
       return NextResponse.json(
-        { error: 'Missing required params: runId, promptNumber' },
+        { error: 'Missing required params: id or (runId and promptNumber)' },
         { status: 400 }
       );
     }
-
-    const deleted = await deleteAnnotationAsync(runId, parseInt(promptNumber, 10));
 
     if (deleted) {
       return NextResponse.json({ success: true });

@@ -7,9 +7,15 @@ interface LightboxProps {
   src: string;
   alt: string;
   onClose: () => void;
+  images?: string[];
+  currentIndex?: number;
+  onNavigate?: (index: number) => void;
 }
 
-export default function Lightbox({ src, alt, onClose }: LightboxProps) {
+export default function Lightbox({ src, alt, onClose, images, currentIndex = 0, onNavigate }: LightboxProps) {
+  const canNavigate = images && images.length > 1 && onNavigate;
+  const hasPrev = canNavigate && currentIndex > 0;
+  const hasNext = canNavigate && currentIndex < images.length - 1;
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -50,10 +56,15 @@ export default function Lightbox({ src, alt, onClose }: LightboxProps) {
     setPosition({ x: 0, y: 0 });
   };
 
+  // Reset position when navigating to new image
+  useEffect(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, [src]);
+
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const panAmount = 100;
       if (e.key === 'Escape') onClose();
       if (e.key === '+' || e.key === '=') setScale(prev => Math.min(prev * 1.2, 5));
       if (e.key === '-') setScale(prev => Math.max(prev * 0.8, 0.5));
@@ -61,15 +72,17 @@ export default function Lightbox({ src, alt, onClose }: LightboxProps) {
         setScale(1);
         setPosition({ x: 0, y: 0 });
       }
-      // Arrow keys for panning
-      if (e.key === 'ArrowLeft') setPosition(prev => ({ ...prev, x: prev.x + panAmount }));
-      if (e.key === 'ArrowRight') setPosition(prev => ({ ...prev, x: prev.x - panAmount }));
-      if (e.key === 'ArrowUp') setPosition(prev => ({ ...prev, y: prev.y + panAmount }));
-      if (e.key === 'ArrowDown') setPosition(prev => ({ ...prev, y: prev.y - panAmount }));
+      // Arrow keys for navigation between images
+      if (e.key === 'ArrowLeft' && hasPrev) {
+        onNavigate!(currentIndex - 1);
+      }
+      if (e.key === 'ArrowRight' && hasNext) {
+        onNavigate!(currentIndex + 1);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, hasPrev, hasNext, currentIndex, onNavigate]);
 
   // Prevent body scroll when lightbox is open
   useEffect(() => {
@@ -112,9 +125,27 @@ export default function Lightbox({ src, alt, onClose }: LightboxProps) {
         </button>
       </div>
 
+      {/* Navigation arrows */}
+      {hasPrev && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onNavigate!(currentIndex - 1); }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full text-white text-2xl flex items-center justify-center z-10"
+        >
+          ←
+        </button>
+      )}
+      {hasNext && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onNavigate!(currentIndex + 1); }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full text-white text-2xl flex items-center justify-center z-10"
+        >
+          →
+        </button>
+      )}
+
       {/* Controls hint */}
       <div className="absolute bottom-4 left-4 text-white/60 text-sm">
-        {Math.round(scale * 100)}% &middot; Drag or arrow keys to pan &middot; Scroll to zoom &middot; 0 to reset
+        {canNavigate && `${currentIndex + 1}/${images.length} · `}{Math.round(scale * 100)}% · Drag to pan · Scroll to zoom · {canNavigate ? '← → to navigate · ' : ''}0 to reset
       </div>
 
       {/* Image container */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Lightbox from '@/components/Lightbox';
@@ -119,13 +119,95 @@ interface Props {
   testType: string;
   format: string;
   nav?: RunNavInfo;
-  annotationsByPrompt?: Record<number, Annotation>;
+  annotationsByPrompt?: Record<number, Annotation[]>;
 }
 
 export default function RunDetail({ run, testType, format, nav, annotationsByPrompt = {} }: Props) {
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [promptStatuses, setPromptStatuses] = useState<Record<number, string>>({});
+  const [layout, setLayout] = useState<'vertical' | 'horizontal'>('vertical');
+  const [imageTopOffset, setImageTopOffset] = useState<number>(0);
+  const [copied, setCopied] = useState<string | null>(null); // null or the id that was copied
+  const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Scroll to anchor on mount
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const element = document.querySelector(hash);
+      if (element) {
+        setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
+    }
+  }, []);
+
+  const copyShareLink = async (anchor?: string) => {
+    try {
+      const url = anchor
+        ? `${window.location.origin}${window.location.pathname}#${anchor}`
+        : window.location.href.split('#')[0]; // Remove any existing hash for report-level share
+      await navigator.clipboard.writeText(url);
+      setCopied(anchor || 'report');
+      setTimeout(() => setCopied(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  // Measure content heights and find the max for image alignment
+  useEffect(() => {
+    if (layout === 'horizontal') {
+      // Use requestAnimationFrame to ensure DOM is rendered
+      const measure = () => {
+        const heights = contentRefs.current
+          .filter(ref => ref !== null)
+          .map(ref => ref!.scrollHeight); // Use scrollHeight to get natural height
+        if (heights.length > 0) {
+          const maxHeight = Math.max(...heights);
+          setImageTopOffset(prev => prev !== maxHeight ? maxHeight : prev);
+        }
+      };
+      // Measure after a brief delay to let content render
+      const timeout = setTimeout(measure, 100);
+      return () => clearTimeout(timeout);
+    } else {
+      setImageTopOffset(0);
+    }
+  }, [layout]);
+
+  // Collect all artifact images
+  const allImages = run.prompts
+    .filter(p => p.artifact)
+    .map(p => `/${p.artifact}`);
   const scored = isScored(run);
   const capturing = isCapturing(run);
+
+  const togglePromptStatus = async (promptNumber: number, currentStatus: string) => {
+    const newStatus = currentStatus === 'pass' ? 'fail' : 'pass';
+
+    // Optimistic update
+    setPromptStatuses(prev => ({ ...prev, [promptNumber]: newStatus }));
+
+    try {
+      const res = await fetch('/api/prompt-status', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          runId: run.id,
+          promptNumber,
+          status: newStatus
+        })
+      });
+
+      if (!res.ok) {
+        // Revert on failure
+        setPromptStatuses(prev => ({ ...prev, [promptNumber]: currentStatus }));
+      }
+    } catch {
+      // Revert on error
+      setPromptStatuses(prev => ({ ...prev, [promptNumber]: currentStatus }));
+    }
+  };
 
   const RunNav = () => {
     if (!nav || nav.totalRuns <= 1) return null;
@@ -177,13 +259,42 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
         </div>
         <div className="flex items-center justify-between">
           <p className="text-gray-500">{new Date(run.timestamp).toISOString().split('T')[0]}</p>
-          <RunNav />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => copyShareLink()}
+              className="text-gray-400 hover:text-gray-600 text-sm transition-colors"
+              title="Copy link to clipboard"
+            >
+              {copied === 'report' ? '✓ Copied' : 'Share'}
+            </button>
+            <RunNav />
+          </div>
         </div>
 
-        {/* Rating */}
+        {/* Rating + Layout Toggle */}
         {scored && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
             <RatingBadge rating={getRunRating(run)} size="lg" />
+            <div className="inline-flex gap-1 text-gray-400 text-sm">
+              <button
+                onClick={() => setLayout('vertical')}
+                className={`px-1.5 py-0.5 rounded transition-colors ${
+                  layout === 'vertical' ? 'text-gray-700 bg-gray-100' : 'hover:text-gray-600'
+                }`}
+                title="Vertical layout"
+              >
+                ↕
+              </button>
+              <button
+                onClick={() => setLayout('horizontal')}
+                className={`px-1.5 py-0.5 rounded transition-colors ${
+                  layout === 'horizontal' ? 'text-gray-700 bg-gray-100' : 'hover:text-gray-600'
+                }`}
+                title="Horizontal layout"
+              >
+                ↔
+              </button>
+            </div>
           </div>
         )}
         {capturing && (
@@ -193,8 +304,8 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
         )}
       </header>
 
-      {/* Good/Bad Summary (only for scored runs) */}
-      {scored && (
+      {/* Good/Bad Summary (only for scored runs, hide in horizontal mode) */}
+      {scored && layout === 'vertical' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <h3 className="font-semibold text-green-600 mb-3 flex items-center gap-2">
@@ -262,22 +373,97 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
         )}
 
         {/* Prompts */}
-        <div className="space-y-4">
+        <div className={layout === 'horizontal'
+          ? 'flex gap-4 overflow-x-auto pb-4 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-6'
+          : 'space-y-4'
+        }
+        style={layout === 'horizontal' ? { scrollbarWidth: 'thin' } : undefined}
+        >
+          {/* Summary card as first item in horizontal mode */}
+          {layout === 'horizontal' && scored && (
+            <div className="flex-shrink-0 w-[600px] bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="px-4 py-3 bg-gray-100 border-b border-gray-200">
+                <h3 className="font-semibold text-gray-900">Summary</h3>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2 text-sm">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    What worked
+                  </h4>
+                  {run.good.length > 0 ? (
+                    <ul className="space-y-1 text-sm text-gray-700">
+                      {run.good.map((item, i) => (
+                        <li key={i} className="flex gap-2">
+                          <span className="text-green-500">+</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-400 text-sm italic">No items</p>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-red-600 mb-2 flex items-center gap-2 text-sm">
+                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    What didn&apos;t work
+                  </h4>
+                  {run.bad.length > 0 ? (
+                    <ul className="space-y-1 text-sm text-gray-700">
+                      {run.bad.map((item, i) => (
+                        <li key={i} className="flex gap-2">
+                          <span className="text-red-500">-</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-400 text-sm italic">No issues</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           {run.prompts.map((prompt) => {
             const promptScored = isScoredPrompt(prompt);
+            const currentStatus = promptStatuses[prompt.number] ?? (promptScored ? prompt.status : null);
+            const hasValidStatus = currentStatus === 'pass' || currentStatus === 'fail';
 
             return (
-              <div key={prompt.number} id={`v${prompt.number}`} className="bg-white rounded-lg shadow-sm overflow-hidden scroll-mt-6">
+              <div
+                key={prompt.number}
+                id={`v${prompt.number}`}
+                className={`bg-white rounded-lg shadow-sm overflow-hidden scroll-mt-6 ${
+                  layout === 'horizontal' ? 'flex-shrink-0 w-[600px] flex flex-col' : ''
+                }`}
+              >
                 {/* Prompt Header */}
                 <div className="flex justify-between items-center px-4 py-3 bg-gray-100 border-b border-gray-200">
-                  <h3 className="font-semibold text-gray-900">
-                    V{prompt.number}: {prompt.title}
-                  </h3>
-                  {promptScored ? (
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium uppercase ${getStatusClass(prompt.status)}`}>
-                      {prompt.status}
-                    </span>
-                  ) : (
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-gray-900">
+                      V{prompt.number}: {prompt.title}
+                    </h3>
+                    <button
+                      onClick={() => copyShareLink(`v${prompt.number}`)}
+                      className="text-gray-300 hover:text-gray-500 text-xs transition-colors"
+                      title="Copy link to this version"
+                    >
+                      {copied === `v${prompt.number}` ? '✓' : '#'}
+                    </button>
+                  </div>
+                  {promptScored && hasValidStatus ? (
+                    <button
+                      onClick={() => togglePromptStatus(prompt.number, currentStatus)}
+                      className={`group relative px-2 py-0.5 rounded text-xs font-medium uppercase cursor-pointer transition-all ${getStatusClass(currentStatus)}`}
+                      title="Click to toggle pass/fail"
+                    >
+                      <span className="group-hover:opacity-0 transition-opacity">{currentStatus}</span>
+                      <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-gray-500">
+                        → {currentStatus === 'pass' ? 'FAIL' : 'PASS'}?
+                      </span>
+                    </button>
+                  ) : promptScored ? null : (
                     <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
                       Captured
                     </span>
@@ -285,7 +471,11 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                 </div>
 
                 {/* Prompt Content */}
-                <div className="p-4">
+                <div
+                  className="p-4"
+                  ref={el => { contentRefs.current[prompt.number] = el; }}
+                  style={layout === 'horizontal' && imageTopOffset > 0 ? { minHeight: imageTopOffset } : undefined}
+                >
                   <div className="mb-4">
                     <p className="text-sm text-gray-500 mb-1">Prompt:</p>
                     <p className="text-gray-800 bg-gray-50 p-3 rounded border border-gray-100">
@@ -296,28 +486,30 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                   <div className="mb-4">
                     {promptScored ? (
                       <>
-                        {/* Frank's AI take */}
-                        <div className="flex gap-3 items-start">
-                          <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                            🤖
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-400 mb-1">Frank&apos;s take</p>
-                            <p className="text-gray-700">{prompt.note}</p>
+                        {/* Frank's AI take - only show if note exists */}
+                        {prompt.note && prompt.note.trim() && (
+                          <div className="flex gap-3 items-start">
+                            <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                              🤖
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 mb-1">Frank&apos;s take</p>
+                              <p className="text-gray-700">{prompt.note}</p>
 
-                            {/* Show evaluation issues only when present */}
-                            {prompt.evaluation && hasEvaluationIssues(prompt.evaluation) && (
-                              <EvaluationIssues evaluation={prompt.evaluation} />
-                            )}
+                              {/* Show evaluation issues only when present */}
+                              {prompt.evaluation && hasEvaluationIssues(prompt.evaluation) && (
+                                <EvaluationIssues evaluation={prompt.evaluation} />
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        )}
 
                         {/* Human take */}
-                        <div className="mt-3 pt-3 border-t border-dashed border-gray-200">
+                        <div className={prompt.note && prompt.note.trim() ? "mt-3 pt-3 border-t border-dashed border-gray-200" : ""}>
                           <PromptAnnotation
                             runId={run.id}
                             promptNumber={prompt.number}
-                            initialAnnotation={annotationsByPrompt[prompt.number] || null}
+                            initialAnnotations={annotationsByPrompt[prompt.number] || []}
                             minimal
                           />
                         </div>
@@ -331,40 +523,46 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                       </>
                     )}
                   </div>
-
-                  {/* Artifact Image */}
-                  {prompt.artifact && (
-                    <div
-                      className="relative cursor-pointer group"
-                      onClick={() => setLightboxImage(`/${prompt.artifact}`)}
-                    >
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg flex items-center justify-center">
-                        <span className="opacity-0 group-hover:opacity-100 text-white bg-black/50 px-3 py-1 rounded text-sm transition-opacity">
-                          Click to zoom
-                        </span>
-                      </div>
-                      <Image
-                        src={`/${prompt.artifact}`}
-                        alt={`V${prompt.number} artifact`}
-                        width={800}
-                        height={400}
-                        className="rounded-lg border border-gray-200 w-full"
-                        unoptimized
-                      />
-                    </div>
-                  )}
                 </div>
+
+                {/* Artifact Image */}
+                {prompt.artifact && (
+                  <div
+                    className="relative cursor-pointer group px-4 pb-4"
+                    onClick={() => {
+                      const imageIndex = allImages.indexOf(`/${prompt.artifact}`);
+                      setLightboxIndex(imageIndex >= 0 ? imageIndex : 0);
+                    }}
+                  >
+                    <div className="absolute inset-4 top-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 text-white bg-black/50 px-3 py-1 rounded text-sm transition-opacity">
+                        Click to zoom
+                      </span>
+                    </div>
+                    <Image
+                      src={`/${prompt.artifact}`}
+                      alt={`V${prompt.number} artifact`}
+                      width={800}
+                      height={400}
+                      className="rounded-lg border border-gray-200 w-full"
+                      unoptimized
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
 
       {/* Lightbox */}
-      {lightboxImage && (
+      {lightboxIndex !== null && allImages[lightboxIndex] && (
         <Lightbox
-          src={lightboxImage}
+          src={allImages[lightboxIndex]}
           alt="Artifact"
-          onClose={() => setLightboxImage(null)}
+          onClose={() => setLightboxIndex(null)}
+          images={allImages}
+          currentIndex={lightboxIndex}
+          onNavigate={setLightboxIndex}
         />
       )}
     </>

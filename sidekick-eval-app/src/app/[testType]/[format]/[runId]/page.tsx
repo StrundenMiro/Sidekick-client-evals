@@ -14,11 +14,14 @@ export default async function RunPage({ params }: { params: Promise<{ testType: 
     notFound();
   }
 
-  // Get annotations for this run
+  // Get annotations for this run (grouped by prompt as arrays)
   const annotations = await getAnnotationsForRunAsync(runId);
-  const annotationsByPrompt: Record<number, Annotation> = {};
+  const annotationsByPrompt: Record<number, Annotation[]> = {};
   annotations.forEach(a => {
-    annotationsByPrompt[a.promptNumber] = a;
+    if (!annotationsByPrompt[a.promptNumber]) {
+      annotationsByPrompt[a.promptNumber] = [];
+    }
+    annotationsByPrompt[a.promptNumber].push(a);
   });
 
   // Get all runs for this format to enable prev/next navigation
