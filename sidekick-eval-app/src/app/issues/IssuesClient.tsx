@@ -181,13 +181,21 @@ export default function IssuesClient({ issues, totalRuns }: IssuesClientProps) {
                     {issueTypeLabels[issue.issueType] || issue.issueType}
                   </td>
                   <td className="px-3 py-2 text-sm text-gray-900 max-w-md">
-                    <Link
-                      href={issue.link}
-                      className="hover:text-blue-600 hover:underline line-clamp-2"
-                      title={issue.note}
-                    >
-                      {issue.note}
-                    </Link>
+                    <div className="flex items-start gap-2">
+                      <span
+                        className="flex-shrink-0 text-sm"
+                        title={issue.author === 'frank' ? 'Found by Frank' : 'Found by human'}
+                      >
+                        {issue.author === 'frank' ? '🤖' : '👤'}
+                      </span>
+                      <Link
+                        href={issue.link}
+                        className="hover:text-blue-600 hover:underline line-clamp-2"
+                        title={issue.note}
+                      >
+                        {issue.note}
+                      </Link>
+                    </div>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600 capitalize">
                     {issue.format}
@@ -228,9 +236,11 @@ export default function IssuesClient({ issues, totalRuns }: IssuesClientProps) {
       </div>
 
       {/* Legend */}
-      <div className="text-xs text-gray-500 flex gap-4">
-        <span><strong>GF</strong> = Greenfield (generate from scratch)</span>
-        <span><strong>BF</strong> = Brownfield (iterate on existing)</span>
+      <div className="text-xs text-gray-500 flex gap-4 flex-wrap">
+        <span>🤖 = Frank</span>
+        <span>👤 = Human</span>
+        <span><strong>GF</strong> = Greenfield</span>
+        <span><strong>BF</strong> = Brownfield</span>
       </div>
     </div>
   );
