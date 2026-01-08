@@ -304,9 +304,9 @@ Issues found:
 
 ## Part 4: Write Results
 
-### Step 13: Save via script
+### Step 13: Save Run and Findings
 
-**Save via script** (do NOT edit runs.json directly):
+**Save run via script** (do NOT edit runs.json directly):
 
 ```bash
 cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-run.ts '{
@@ -325,7 +325,6 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
       "title": "{title1}",
       "text": "{prompt1}",
       "status": "pass|fail",
-      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v1.png"
     },
     {
@@ -333,7 +332,6 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
       "title": "{title2}",
       "text": "{prompt2}",
       "status": "pass|fail",
-      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v2.png"
     },
     {
@@ -341,14 +339,38 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
       "title": "{title3}",
       "text": "{prompt3}",
       "status": "pass|fail",
-      "note": "{Franks voice}",
       "artifact": "artifacts/{run-id}/v3.png"
     }
   ]
 }'
 ```
 
-**Note**: The script reads DATABASE_URL from .env.local automatically, so it works both locally and on Replit.
+**Then save findings as annotations** - one POST per finding:
+
+```bash
+curl -X POST http://localhost:3001/api/annotations \
+  -H "Content-Type: application/json" \
+  -d '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"good|low|medium|high","note":"One specific finding in Franks voice"}'
+```
+
+**Severity guide:**
+- `good` (green) - Something that worked well
+- `low` (blue) - Minor observation
+- `medium` (amber) - Moderate issue
+- `high` (red) - Critical failure
+
+**Multiple findings per version are fine, but don't split a single finding across annotations:**
+
+BAD (one finding split into 2):
+- "I asked to ADD a column and it DELETED three columns"
+- "Lost 'Who it helps', 'Why it matters', 'MVP or Later'"
+
+GOOD (one complete finding):
+- "I asked to ADD a column and it DELETED three columns (Who it helps, Why it matters, MVP or Later)"
+
+Each annotation should be self-contained: **Issue + specifics together**.
+
+**Note**: The script reads DATABASE_URL from .env.local automatically.
 
 ---
 

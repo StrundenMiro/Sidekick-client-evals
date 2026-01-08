@@ -179,16 +179,16 @@ curl -X POST "https://franks-evals.replit.app/api/annotations" \
 - Opinionated: "This is broken" not "There may be an issue"
 - Specific: Name exact issues ("'Michae Connor' is truncated")
 
-**ONE finding = ONE annotation. Consolidate related points:**
+**Multiple findings per version are fine, but don't split a single finding across annotations:**
 
-BAD (split into 2):
+BAD (one finding split into 2):
 - "I asked to ADD a column and it DELETED three columns"
 - "Lost 'Who it helps', 'Why it matters', 'MVP or Later'"
 
-GOOD (consolidated):
+GOOD (one complete finding):
 - "I asked to ADD a column and it DELETED three columns (Who it helps, Why it matters, MVP or Later)"
 
-Pattern: **Issue + specifics in parentheses**. Don't split the "what happened" from the "what was affected".
+Each annotation should be self-contained: **Issue + specifics together**.
 
 ---
 

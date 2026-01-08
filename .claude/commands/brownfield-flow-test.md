@@ -354,13 +354,22 @@ curl -X POST http://localhost:3001/api/annotations \
   -d '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"good|low|medium|high","note":"One specific finding in Franks voice"}'
 ```
 
-Severity guide:
+**Severity guide:**
 - `good` (green) - Something that worked well
 - `low` (blue) - Minor observation
 - `medium` (amber) - Moderate issue
 - `high` (red) - Critical failure
 
-**One finding per annotation.** Create multiple annotations for each version as needed.
+**Multiple findings per version are fine, but don't split a single finding across annotations:**
+
+BAD (one finding split into 2):
+- "I asked to ADD a column and it DELETED three columns"
+- "Lost 'Who it helps', 'Why it matters', 'MVP or Later'"
+
+GOOD (one complete finding):
+- "I asked to ADD a column and it DELETED three columns (Who it helps, Why it matters, MVP or Later)"
+
+Each annotation should be self-contained: **Issue + specifics together**.
 
 **Note**: The script reads DATABASE_URL from .env.local automatically, so it works both locally and on Replit.
 
