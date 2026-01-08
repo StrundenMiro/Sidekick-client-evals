@@ -148,7 +148,7 @@ export default async function Dashboard() {
         {/* Formats List */}
         <section className="mb-8">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-            Formats
+            Issues by Format
           </h2>
           <ul className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
             {allFormats.map(format => (
