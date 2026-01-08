@@ -244,9 +244,9 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
     <>
       {/* Header */}
       <header className="mb-6">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between">
+          {/* Left: Rating */}
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{run.id}</h1>
             {scored && <RatingBadge rating={getRunRating(run)} size="lg" />}
             {capturing && (
               <span className={`px-2 py-0.5 rounded text-xs font-medium ${
@@ -256,15 +256,14 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
               </span>
             )}
           </div>
+
+          {/* Center: Navigation */}
+          <div className="flex items-center">
+            <RunNav />
+          </div>
+
+          {/* Right: Layout toggle */}
           <div className="flex items-center gap-3 text-sm text-gray-400">
-            <span>{new Date(run.timestamp).toISOString().split('T')[0]}</span>
-            <button
-              onClick={() => copyShareLink()}
-              className="hover:text-gray-600 transition-colors"
-              title="Copy link to clipboard"
-            >
-              {copied === 'report' ? '✓' : 'Share'}
-            </button>
             {scored && (
               <div className="inline-flex gap-0.5">
                 <button
@@ -287,7 +286,6 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                 </button>
               </div>
             )}
-            <RunNav />
           </div>
         </div>
         {capturing && (

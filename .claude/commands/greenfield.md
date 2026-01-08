@@ -169,6 +169,10 @@ Wait 1 second.
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/path/to/artifacts/{run-id}/v1.png" with write permission)'
 ```
+9. Resize if needed (Claude API limits images to 2000px for multi-image requests):
+```bash
+sips --resampleHeightWidthMax 2000 "/path/to/artifacts/{run-id}/v1.png"
+```
 
 ---
 
@@ -185,6 +189,10 @@ osascript -e 'tell application "System Events" to write (the clipboard as «clas
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/path/to/artifacts/{run-id}/v2.png" with write permission)'
 ```
+9. Resize if needed:
+```bash
+sips --resampleHeightWidthMax 2000 "/path/to/artifacts/{run-id}/v2.png"
+```
 
 ---
 
@@ -200,6 +208,10 @@ osascript -e 'tell application "System Events" to write (the clipboard as «clas
 8. Save clipboard:
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/path/to/artifacts/{run-id}/v3.png" with write permission)'
+```
+9. Resize if needed:
+```bash
+sips --resampleHeightWidthMax 2000 "/path/to/artifacts/{run-id}/v3.png"
 ```
 
 ---

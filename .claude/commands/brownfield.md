@@ -143,6 +143,10 @@ Wait 1 second.
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v0-existing.png" with write permission)'
 ```
+5. Resize if needed (Claude API limits images to 2000px for multi-image requests):
+```bash
+sips --resampleHeightWidthMax 2000 "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v0-existing.png"
+```
 
 ---
 
@@ -173,6 +177,10 @@ Wait 2 seconds for Sidekick to fully open.
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v1.png" with write permission)'
 ```
+9. Resize if needed:
+```bash
+sips --resampleHeightWidthMax 2000 "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v1.png"
+```
 
 ---
 
@@ -189,6 +197,10 @@ osascript -e 'tell application "System Events" to write (the clipboard as «clas
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v2.png" with write permission)'
 ```
+9. Resize if needed:
+```bash
+sips --resampleHeightWidthMax 2000 "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v2.png"
+```
 
 ---
 
@@ -204,6 +216,10 @@ osascript -e 'tell application "System Events" to write (the clipboard as «clas
 8. Save clipboard:
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v3.png" with write permission)'
+```
+9. Resize if needed:
+```bash
+sips --resampleHeightWidthMax 2000 "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v3.png"
 ```
 
 ---

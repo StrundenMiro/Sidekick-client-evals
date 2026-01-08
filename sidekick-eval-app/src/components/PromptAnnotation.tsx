@@ -57,22 +57,18 @@ function AnnotationItem({
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <p className="text-xs text-gray-400">{isFrank ? "Frank's take" : 'Human take'}</p>
-          {!isFrank && (
-            <>
-              <button
-                onClick={onEdit}
-                className="text-xs text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                Edit
-              </button>
-              <button
-                onClick={onDelete}
-                className="text-xs text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                ×
-              </button>
-            </>
-          )}
+          <button
+            onClick={onEdit}
+            className="text-xs text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            Edit
+          </button>
+          <button
+            onClick={onDelete}
+            className="text-xs text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            ×
+          </button>
         </div>
         <p className="text-gray-700">
           <span className={`rounded px-1.5 py-0.5 ${getSeverityColor(annotation.severity)}`}>
@@ -166,7 +162,7 @@ export default function PromptAnnotation({ runId, promptNumber, initialAnnotatio
   const [isAdding, setIsAdding] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const saveAnnotation = useCallback(async (note: string, severity: Severity, existingId?: string) => {
+  const saveAnnotation = useCallback(async (note: string, severity: Severity, existingId?: string, existingAuthor?: Author) => {
     try {
       const response = await fetch('/api/annotations', {
         method: 'POST',
@@ -175,7 +171,7 @@ export default function PromptAnnotation({ runId, promptNumber, initialAnnotatio
           id: existingId,
           runId,
           promptNumber,
-          author: 'human',
+          author: existingAuthor || 'human',
           issueType: 'other',
           severity,
           note
@@ -228,7 +224,7 @@ export default function PromptAnnotation({ runId, promptNumber, initialAnnotatio
             key={annotation.id}
             initialNote={annotation.note}
             initialSeverity={annotation.severity}
-            onSave={(note, severity) => saveAnnotation(note, severity, annotation.id)}
+            onSave={(note, severity) => saveAnnotation(note, severity, annotation.id, annotation.author)}
             onCancel={() => setEditingId(null)}
           />
         ) : (
