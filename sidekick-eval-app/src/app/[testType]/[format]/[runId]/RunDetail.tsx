@@ -8,6 +8,7 @@ import Lightbox from '@/components/Lightbox';
 import PromptAnnotation from '@/components/PromptAnnotation';
 import type { Run, CaptureRun, ScoredRun, LegacyRun, CapturePrompt, ScoredPrompt, VisualEvaluation } from '@/lib/runs';
 import type { Annotation } from '@/lib/annotations';
+import { getArtifactUrl } from '@/lib/artifact-url';
 
 function isScored(run: Run): run is ScoredRun | LegacyRun {
   return !('state' in run) || run.state === 'scored';
@@ -211,7 +212,7 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
   // Collect all artifact images
   const allImages = run.prompts
     .filter(p => p.artifact)
-    .map(p => `/${p.artifact}`);
+    .map(p => getArtifactUrl(p.artifact));
   const scored = isScored(run);
   const capturing = isCapturing(run);
 
@@ -423,7 +424,7 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                   <div
                     className="relative cursor-pointer group px-4 pb-4"
                     onClick={() => {
-                      const imageIndex = allImages.indexOf(`/${prompt.artifact}`);
+                      const imageIndex = allImages.indexOf(getArtifactUrl(prompt.artifact));
                       setLightboxIndex(imageIndex >= 0 ? imageIndex : 0);
                     }}
                   >
@@ -433,7 +434,7 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                       </span>
                     </div>
                     <Image
-                      src={`/${prompt.artifact}`}
+                      src={getArtifactUrl(prompt.artifact)}
                       alt={`V${prompt.number} artifact`}
                       width={800}
                       height={400}

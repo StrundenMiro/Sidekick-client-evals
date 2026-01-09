@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,34 +13,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create directory for artifacts
-    const artifactsDir = path.join(process.cwd(), 'public', 'artifacts', runId);
-    if (!fs.existsSync(artifactsDir)) {
-      fs.mkdirSync(artifactsDir, { recursive: true });
+    // Check if Cloudinary is configured (CLOUDINARY_URL is auto-detected by the SDK)
+    if (!process.env.CLOUDINARY_URL) {
+      return NextResponse.json(
+        { error: 'Cloudinary is not configured. Set CLOUDINARY_URL environment variable.' },
+        { status: 500 }
+      );
     }
 
-    // Remove data URL prefix if present
-    let base64Data = imageData;
-    if (imageData.includes(',')) {
-      base64Data = imageData.split(',')[1];
+    // Ensure we have a proper data URL for Cloudinary
+    let dataUrl = imageData;
+    if (!imageData.startsWith('data:')) {
+      dataUrl = `data:image/${format};base64,${imageData}`;
     }
 
-    // Save the image
-    const filename = `v${promptNumber}.${format}`;
-    const filepath = path.join(artifactsDir, filename);
-    fs.writeFileSync(filepath, Buffer.from(base64Data, 'base64'));
-
-    // Return the relative path for use in the run data
-    const relativePath = `artifacts/${runId}/${filename}`;
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(dataUrl, {
+      folder: `sidekick-eval/${runId}`,
+      public_id: `v${promptNumber}`,
+      format: format,
+      overwrite: true,
+    });
 
     return NextResponse.json({
       success: true,
-      path: relativePath
+      path: result.secure_url
     });
   } catch (error) {
-    console.error('Error saving artifact:', error);
+    console.error('Error uploading artifact to Cloudinary:', error);
     return NextResponse.json(
-      { error: 'Failed to save artifact' },
+      { error: 'Failed to upload artifact' },
       { status: 500 }
     );
   }

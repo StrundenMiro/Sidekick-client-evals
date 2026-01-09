@@ -4,6 +4,7 @@ import { getRunsAsync, getRunTestType } from '@/lib/runs';
 import { getPlannedFixesAsync } from '@/lib/plannedFixes';
 import { getTestCategory, TestCategory } from '@/lib/test-types';
 import IssuesClient, { EnrichedIssue } from './IssuesClient';
+import { getArtifactUrl } from '@/lib/artifact-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +27,10 @@ export default async function IssuesPage() {
       const testTypeRaw = getRunTestType(run);
       const testType: TestCategory = getTestCategory(testTypeRaw);
 
+      // Get the actual artifact path from the run's prompts
+      const prompt = run.prompts.find(p => p.number === annotation.promptNumber);
+      const artifactPath = prompt?.artifact ? getArtifactUrl(prompt.artifact) : '';
+
       return {
         id: annotation.id,
         runId: annotation.runId,
@@ -36,7 +41,7 @@ export default async function IssuesPage() {
         author: annotation.author,
         testType,
         format: run.format,
-        artifactPath: `/artifacts/${annotation.runId}/v${annotation.promptNumber}.png`,
+        artifactPath,
         link: `/${testTypeRaw}/${run.format}/${annotation.runId}#v${annotation.promptNumber}`,
         createdAt: annotation.createdAt,
         plannedFixId: annotation.plannedFixId || null,
