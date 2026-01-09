@@ -9,14 +9,6 @@ import PromptAnnotation from '@/components/PromptAnnotation';
 import type { Run, CaptureRun, ScoredRun, LegacyRun, CapturePrompt, ScoredPrompt, VisualEvaluation } from '@/lib/runs';
 import type { Annotation } from '@/lib/annotations';
 
-function getStatusClass(status: string): string {
-  switch (status) {
-    case 'pass': return 'bg-green-100 text-green-700';
-    case 'fail': return 'bg-red-100 text-red-700';
-    default: return 'bg-gray-100 text-gray-700';
-  }
-}
-
 function isScored(run: Run): run is ScoredRun | LegacyRun {
   return !('state' in run) || run.state === 'scored';
 }
@@ -116,7 +108,6 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
   const pathname = usePathname();
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [promptStatuses, setPromptStatuses] = useState<Record<number, string>>({});
   const [layout, setLayout] = useState<'vertical' | 'horizontal'>(() => {
     // Initialize from URL param
     const layoutParam = searchParams.get('layout');
@@ -223,33 +214,6 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
     .map(p => `/${p.artifact}`);
   const scored = isScored(run);
   const capturing = isCapturing(run);
-
-  const togglePromptStatus = async (promptNumber: number, currentStatus: string) => {
-    const newStatus = currentStatus === 'pass' ? 'fail' : 'pass';
-
-    // Optimistic update
-    setPromptStatuses(prev => ({ ...prev, [promptNumber]: newStatus }));
-
-    try {
-      const res = await fetch('/api/prompt-status', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          runId: run.id,
-          promptNumber,
-          status: newStatus
-        })
-      });
-
-      if (!res.ok) {
-        // Revert on failure
-        setPromptStatuses(prev => ({ ...prev, [promptNumber]: currentStatus }));
-      }
-    } catch {
-      // Revert on error
-      setPromptStatuses(prev => ({ ...prev, [promptNumber]: currentStatus }));
-    }
-  };
 
   const RunNav = () => {
     if (!nav || nav.totalRuns <= 1) return null;
@@ -396,8 +360,6 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
         >
           {run.prompts.map((prompt) => {
             const promptScored = isScoredPrompt(prompt);
-            const currentStatus = promptStatuses[prompt.number] ?? (promptScored ? prompt.status : null);
-            const hasValidStatus = currentStatus === 'pass' || currentStatus === 'fail';
 
             return (
               <div
@@ -408,35 +370,17 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                 }`}
               >
                 {/* Prompt Header */}
-                <div className="flex justify-between items-center px-4 py-3 bg-gray-100 border-b border-gray-200">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900">
-                      V{prompt.number}: {prompt.title}
-                    </h3>
-                    <button
-                      onClick={() => copyShareLink(`v${prompt.number}`)}
-                      className="text-gray-300 hover:text-gray-500 text-xs transition-colors"
-                      title="Copy link to this version"
-                    >
-                      {copied === `v${prompt.number}` ? '✓' : '#'}
-                    </button>
-                  </div>
-                  {promptScored && hasValidStatus ? (
-                    <button
-                      onClick={() => togglePromptStatus(prompt.number, currentStatus)}
-                      className={`group relative px-2 py-0.5 rounded text-xs font-medium uppercase cursor-pointer transition-all ${getStatusClass(currentStatus)}`}
-                      title="Click to toggle pass/fail"
-                    >
-                      <span className="group-hover:opacity-0 transition-opacity">{currentStatus}</span>
-                      <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-gray-500">
-                        → {currentStatus === 'pass' ? 'FAIL' : 'PASS'}?
-                      </span>
-                    </button>
-                  ) : promptScored ? null : (
-                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                      Captured
-                    </span>
-                  )}
+                <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 border-b border-gray-200">
+                  <h3 className="font-semibold text-gray-900">
+                    V{prompt.number}: {prompt.title}
+                  </h3>
+                  <button
+                    onClick={() => copyShareLink(`v${prompt.number}`)}
+                    className="text-gray-300 hover:text-gray-500 text-xs transition-colors"
+                    title="Copy link to this version"
+                  >
+                    {copied === `v${prompt.number}` ? '✓' : '#'}
+                  </button>
                 </div>
 
                 {/* Prompt Content */}
