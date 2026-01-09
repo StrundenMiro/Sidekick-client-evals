@@ -106,6 +106,7 @@ function AnnotationEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [hoveredSeverity, setHoveredSeverity] = useState<Severity | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const hasSavedRef = useRef(false);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -117,10 +118,14 @@ function AnnotationEditor({
   }, [note]);
 
   const handleSave = async () => {
+    // Prevent double-save (Enter key + blur can both fire)
+    if (hasSavedRef.current || isSaving) return;
+
     if (!note.trim()) {
       onCancel();
       return;
     }
+    hasSavedRef.current = true;
     setIsSaving(true);
     await onSave(note, severity);
     setIsSaving(false);
