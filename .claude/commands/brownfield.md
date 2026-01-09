@@ -368,33 +368,18 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
 }'
 ```
 
-**Save annotations for ISSUES ONLY** (no positive feedback) - one call per issue:
+**Save annotations for ISSUES ONLY** - one call per issue:
 
 ```bash
-cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"text|layout|missing|wrong","severity":"medium|high","note":"Short explicit issue"}'
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"medium","note":"Short explicit issue"}'
 ```
 
 **Annotation rules:**
-- **NO positive feedback** - Don't annotate what worked
 - **Only issues** - Where expectation ≠ reality
 - **Concise** - "Lost 3 columns: Who, Why, MVP" not "The table lost several columns..."
 - **Accurate** - If unsure, don't annotate
-
-**Severity (issues only):**
-- `medium` - Noticeable issue, usable but flawed
-- `high` - Critical failure, unusable or wrong output
-
-**Issue types:**
-- `text` - Truncation, garbled text, wrong labels
-- `layout` - Broken structure, misalignment
-- `missing` - Expected element not present, content lost
-- `wrong` - Output doesn't match prompt, didn't iterate
-
-**Self-contained**: Each annotation = issue + specifics together
-- BAD: "Lost columns" then "Who, Why, MVP"
-- GOOD: "Lost 3 columns: Who, Why, MVP"
-
-**Note**: The script reads DATABASE_URL from .env.local automatically.
+- **No severity scoring** - Use `medium` as default, prioritize later
+- **Self-contained** - Each annotation = issue + specifics together
 
 ---
 

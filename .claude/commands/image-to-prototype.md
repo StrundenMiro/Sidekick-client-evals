@@ -292,29 +292,19 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
 }'
 ```
 
-**Save annotations for ISSUES ONLY** (no positive feedback):
+**Save annotations for ISSUES ONLY:**
 
 Only create annotations when expectations were NOT met. Be concise and explicit.
 
 ```bash
-cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"text|layout|missing|wrong","severity":"medium|high","note":"Short explicit issue statement"}'
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"medium","note":"Short explicit issue"}'
 ```
 
 **Annotation rules:**
-- **NO positive feedback** - Don't annotate what worked
 - **Only issues** - Where expectation ≠ reality
-- **Concise** - "Button text truncated: Bu tto" not "The submit button shows truncated text..."
+- **Concise** - "Button truncated: Bu tto" not "The submit button shows..."
 - **Accurate** - If unsure, don't annotate
-
-**Severity (issues only):**
-- `medium` - Noticeable issue, usable but flawed
-- `high` - Critical failure, unusable or wrong output
-
-**Issue types:**
-- `text` - Truncation, garbled text, wrong labels
-- `layout` - Broken structure, misalignment, overflow
-- `missing` - Expected element not present
-- `wrong` - Output doesn't match prompt/source
+- **No severity scoring** - Use `medium` as default, prioritize later
 
 ---
 
