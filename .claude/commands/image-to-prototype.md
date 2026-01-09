@@ -1,6 +1,7 @@
 ---
 description: Test converting an image to a prototype via Sidekick (project)
 allowed-tools: Read, Write, Edit, Bash, mcp__playwright__*
+argument-hint: <test-index>
 ---
 
 # Image to Prototype Test
@@ -11,59 +12,50 @@ allowed-tools: Read, Write, Edit, Bash, mcp__playwright__*
 - NEVER ask questions - not as tool calls, not as text output
 - NEVER ask about MCP configuration - assume Playwright MCP is ready
 - NEVER ask for confirmation before any step
-- Start Step 0 (pre-flight check) IMMEDIATELY after reading this
+- Start Step 0 IMMEDIATELY after reading this
 - If something fails, print error and exit - don't ask what to do
 
-**EXCEPTION: Server check in Step 0 requires user confirmation if server won't start**
+---
 
-## Test Cases
+## Arguments
 
-**Load test cases from:** `/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/data/image-to-prototype-tests.json`
+**Required:** `<test-index>` - The index (0-7) of the test case to run
 
-Read the JSON file and process ALL test cases. Each test case has:
-- `imageElementId`: The Miro element ID to select
-- `prompt`: The prompt to send to Sidekick
-- `description`: What the source image shows
+**Usage:** `/image-to-prototype 0` runs test case 0, `/image-to-prototype 3` runs test case 3
 
-For each test case, generate a unique run ID: `image-to-prototype-{YYYY-MM-DD}-{HHMM}-{index}`
-
-**Example test case structure:**
-```json
-{
-  "imageElementId": "3458764654762459808",
-  "prompt": "Add a warning alert highlighting that all flights are canceled due to poor weather.",
-  "description": "Ryanair booking confirmation page"
-}
+**To run all tests:** Use the batch script or run each index separately:
+```bash
+for i in {0..7}; do claude -p "/image-to-prototype $i"; sleep 2; done
 ```
 
 ---
 
-## Part 0: Pre-flight Check
+## Part 0: Load Test Case
 
-### Step 0: Detect Server Port (Optional)
+### Step 0: Load and Validate Test Case
 
-**Note:** Runs and annotations save directly to the database via scripts, so the server is NOT required for saving results. However, detecting the port is useful for viewing results later.
+1. Read test cases from: `/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/data/image-to-prototype-tests.json`
 
-1. Detect the configured port from package.json:
-```bash
-grep -o '"dev":[^,]*' /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app/package.json | grep -o '\-p [0-9]*' | grep -o '[0-9]*'
-```
+2. Parse the argument to get the test index
 
-2. Store the port (usually 5000) for the final report link.
+3. **Validate index:**
+   - If no argument provided: Print "ERROR: Test index required (0-7)" and EXIT
+   - If index out of bounds: Print "ERROR: Invalid index. Must be 0-7" and EXIT
 
-**If server is not running, that's OK** - the test will still complete and save to the database. User can start the server later to view results.
+4. Extract the test case at that index:
+   - `imageElementId`: The Miro element ID to select
+   - `prompt`: The prompt to send to Sidekick
+   - `description`: What the source image shows
+
+5. Generate run ID: `image-to-prototype-{YYYY-MM-DD}-{HHMM}-{index}`
+
+6. Print: "RUNNING TEST {index}: {description}"
 
 ---
 
 ## Part 1: Setup
 
-### Step 1: Parse Arguments and Setup Run
-
-Parse arguments:
-- **image-element-id**: The Miro element ID of the image to convert
-- **prompt**: The prompt to send to Sidekick
-
-Generate run ID: `image-to-prototype-{YYYY-MM-DD}-{HHMM}`
+### Step 1: Create Artifacts Directory
 
 Create artifacts directory:
 ```bash
@@ -82,15 +74,23 @@ Wait 2 seconds for board to load.
 
 ### Step 3: Select the image element
 
-First, clear any existing selection:
+1. First, clear any existing selection:
 ```javascript
 await miro.board.deselect();
 ```
 
-Then select the image by ID:
+2. Wait 500ms
+
+3. Select the image by ID from test case:
 ```javascript
-await miro.board.select({ id: '{image-element-id}' });
+await miro.board.select({ id: '{imageElementId}' });
 ```
+
+4. Wait 500ms
+
+5. **VERIFY SELECTION**: Take a snapshot and confirm an element is selected
+   - If nothing selected: Print "ERROR: Failed to select element {imageElementId}" and EXIT
+   - Print: "VERIFIED: Element {imageElementId} selected"
 
 ---
 
@@ -113,14 +113,20 @@ sips --resampleHeightWidthMax 2000 "/Users/strunden/Sites/Sidekick Eval/sidekick
 
 ## Part 2: Generate Prototype
 
-### Step 5: Open Sidekick
+### Step 5: Open Sidekick and Reset Chat
 
-Open Sidekick via console command:
+1. Open Sidekick via console command:
 ```javascript
 cmd.ai.panel.openSidekick('21692b14-e1e3-4c69-9f6d-d93595eb9f95')
 ```
 
-Wait 2 seconds for Sidekick panel to fully open.
+2. Wait 2 seconds for Sidekick panel to fully open.
+
+3. Take snapshot and look for "New chat" button (aria-label="New chat")
+
+4. Click the "New chat" button to ensure fresh conversation state
+
+5. Wait 1 second for chat to reset
 
 ---
 
