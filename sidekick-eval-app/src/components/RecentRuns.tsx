@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import FormatIcon from './FormatIcon';
+import { getRelativeDate, formatFullDate } from '@/lib/dateUtils';
 
 interface Run {
   id: string;
@@ -17,11 +18,10 @@ interface RecentRunsProps {
 }
 
 function getRunDisplayName(run: Run): string {
-  const prefix = run.testType === 'existing-content-iteration' ? 'BF' : 'GF';
+  const useCase = run.testType === 'existing-content-iteration' ? 'Brownfield' : 'Greenfield';
   const date = new Date(run.timestamp);
   const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-  const day = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return `${prefix} · ${day} · ${time}`;
+  return `${useCase} · ${time}`;
 }
 
 export default function RecentRuns({ runs }: RecentRunsProps) {
@@ -52,6 +52,12 @@ export default function RecentRuns({ runs }: RecentRunsProps) {
                     {run.issueCount} issue{run.issueCount !== 1 ? 's' : ''}
                   </span>
                 )}
+                <span
+                  className="text-xs text-gray-400 cursor-default"
+                  title={formatFullDate(run.timestamp)}
+                >
+                  {getRelativeDate(run.timestamp)}
+                </span>
               </div>
             </Link>
           </li>
