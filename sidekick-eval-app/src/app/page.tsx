@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getRunsAsync, getRunTestType } from '@/lib/runs';
 import { getAnnotationsAsync } from '@/lib/annotations';
 import { getPlannedFixesAsync } from '@/lib/plannedFixes';
+import { getTestCategory } from '@/lib/test-types';
 import FormatIcon from '@/components/FormatIcon';
 import RecentRuns from '@/components/RecentRuns';
 
@@ -42,9 +43,9 @@ export default async function Dashboard() {
     const stats = formatStats.get(run.format)!;
     stats.runCount++;
 
-    // Determine use-case (greenfield vs brownfield)
+    // Determine use-case category
     const testType = getRunTestType(run);
-    const useCase = testType === 'existing-content-iteration' ? 'brownfield' : 'greenfield';
+    const useCase = getTestCategory(testType);
     stats.useCases.add(useCase);
   });
 

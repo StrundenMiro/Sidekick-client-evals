@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getRunsAsync, getRunTestType, Run } from '@/lib/runs';
 import { getAnnotationsAsync, Annotation, SEVERITY_CONFIG } from '@/lib/annotations';
 import { getPlannedFixesAsync, PlannedFix } from '@/lib/plannedFixes';
+import { TestCategory, getTestCategory, getTestCategoryLabel } from '@/lib/test-types';
 import FormatClient from './FormatClient';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +19,7 @@ export interface EnrichedIssue {
   severity: 'high' | 'medium' | 'low' | 'good';
   issueType: string;
   author: 'frank' | 'human';
-  useCase: 'greenfield' | 'brownfield';
+  useCase: TestCategory;
   artifactPath: string;
   link: string;
   createdAt: string;
@@ -59,8 +60,7 @@ export default async function FormatPage({ params }: Props) {
     .map(annotation => {
       const run = formatRuns.find(r => r.id === annotation.runId)!;
       const testType = getRunTestType(run);
-      const useCase: 'greenfield' | 'brownfield' =
-        testType === 'existing-content-iteration' ? 'brownfield' : 'greenfield';
+      const useCase = getTestCategory(testType);
 
       return {
         id: annotation.id,
@@ -84,8 +84,8 @@ export default async function FormatPage({ params }: Props) {
 
   formatRuns.forEach(run => {
     const testType = getRunTestType(run);
-    const useCaseId = testType === 'existing-content-iteration' ? 'brownfield' : 'greenfield';
-    const useCaseName = useCaseId === 'brownfield' ? 'Brownfield' : 'Greenfield';
+    const useCaseId = getTestCategory(testType);
+    const useCaseName = getTestCategoryLabel(useCaseId);
 
     if (!useCaseMap.has(useCaseId)) {
       useCaseMap.set(useCaseId, {

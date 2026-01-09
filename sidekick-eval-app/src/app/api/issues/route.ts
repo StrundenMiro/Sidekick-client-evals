@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAnnotationsAsync, Annotation, Severity, IssueType } from '@/lib/annotations';
 import { getRunsAsync, Run, getRunTestType } from '@/lib/runs';
+import { TestCategory, getTestCategory } from '@/lib/test-types';
 
 export interface EnrichedIssue {
   id: string;
@@ -10,7 +11,7 @@ export interface EnrichedIssue {
   severity: Severity;
   issueType: IssueType;
   author: 'frank' | 'human';
-  testType: 'greenfield' | 'brownfield';
+  testType: TestCategory;
   format: string;
   artifactPath: string;
   link: string;
@@ -35,8 +36,7 @@ export async function GET() {
         if (!run) return null;
 
         const testTypeRaw = getRunTestType(run);
-        const testType: 'greenfield' | 'brownfield' =
-          testTypeRaw === 'existing-content-iteration' ? 'brownfield' : 'greenfield';
+        const testType = getTestCategory(testTypeRaw);
 
         return {
           id: annotation.id,

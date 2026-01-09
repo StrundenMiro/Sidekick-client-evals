@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getAnnotationsAsync } from '@/lib/annotations';
 import { getRunsAsync, getRunTestType } from '@/lib/runs';
 import { getPlannedFixesAsync } from '@/lib/plannedFixes';
+import { getTestCategory, TestCategory } from '@/lib/test-types';
 import IssuesClient, { EnrichedIssue } from './IssuesClient';
 
 export const dynamic = 'force-dynamic';
@@ -23,8 +24,7 @@ export default async function IssuesPage() {
       if (!run) return null;
 
       const testTypeRaw = getRunTestType(run);
-      const testType: 'greenfield' | 'brownfield' =
-        testTypeRaw === 'existing-content-iteration' ? 'brownfield' : 'greenfield';
+      const testType: TestCategory = getTestCategory(testTypeRaw);
 
       return {
         id: annotation.id,

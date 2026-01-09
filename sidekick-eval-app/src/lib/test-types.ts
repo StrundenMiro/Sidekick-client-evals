@@ -94,3 +94,41 @@ export function getTestType(id: string): TestType | undefined {
 export function getAllTestTypes(): TestType[] {
   return TEST_TYPE_ORDER.map(id => TEST_TYPES[id]);
 }
+
+/**
+ * Maps a test type ID to a display category for grouping
+ */
+export type TestCategory = 'greenfield' | 'brownfield' | 'image-to-prototype';
+
+export function getTestCategory(testTypeId: string): TestCategory {
+  switch (testTypeId) {
+    case 'existing-content-iteration':
+      return 'brownfield';
+    case 'image-to-prototype':
+      return 'image-to-prototype';
+    default:
+      return 'greenfield';
+  }
+}
+
+export function getTestCategoryLabel(category: TestCategory): string {
+  switch (category) {
+    case 'greenfield':
+      return 'Greenfield';
+    case 'brownfield':
+      return 'Brownfield';
+    case 'image-to-prototype':
+      return 'Image → Prototype';
+  }
+}
+
+export function getTestCategoryShort(category: TestCategory): string {
+  switch (category) {
+    case 'greenfield':
+      return 'GF';
+    case 'brownfield':
+      return 'BF';
+    case 'image-to-prototype':
+      return 'I2P';
+  }
+}

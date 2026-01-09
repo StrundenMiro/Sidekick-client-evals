@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import FormatIcon from '@/components/FormatIcon';
 import { PlannedFix } from '@/lib/plannedFixes';
 import { getRelativeDate, formatFullDate } from '@/lib/dateUtils';
+import { TestCategory, getTestCategoryShort } from '@/lib/test-types';
 
 type Severity = 'high' | 'medium' | 'low' | 'good';
 type Tab = 'open' | 'fixed' | 'praise';
@@ -19,7 +20,7 @@ export interface EnrichedIssue {
   severity: Severity;
   issueType: string;
   author: 'frank' | 'human';
-  testType: 'greenfield' | 'brownfield';
+  testType: TestCategory;
   format: string;
   artifactPath: string;
   link: string;
@@ -740,9 +741,11 @@ export default function IssuesClient({ issues, totalRuns, plannedFixes: initialF
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                       issue.testType === 'greenfield'
                         ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-amber-100 text-amber-700'
+                        : issue.testType === 'brownfield'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-purple-100 text-purple-700'
                     }`}>
-                      {issue.testType === 'greenfield' ? 'GF' : 'BF'}
+                      {getTestCategoryShort(issue.testType)}
                     </span>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
