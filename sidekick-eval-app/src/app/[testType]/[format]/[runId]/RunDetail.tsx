@@ -5,9 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Lightbox from '@/components/Lightbox';
-import RatingBadge from '@/components/RatingBadge';
 import PromptAnnotation from '@/components/PromptAnnotation';
-import type { Run, CaptureRun, ScoredRun, LegacyRun, CapturePrompt, ScoredPrompt, VisualEvaluation, Rating } from '@/lib/runs';
+import type { Run, CaptureRun, ScoredRun, LegacyRun, CapturePrompt, ScoredPrompt, VisualEvaluation } from '@/lib/runs';
 import type { Annotation } from '@/lib/annotations';
 
 function getStatusClass(status: string): string {
@@ -16,18 +15,6 @@ function getStatusClass(status: string): string {
     case 'fail': return 'bg-red-100 text-red-700';
     default: return 'bg-gray-100 text-gray-700';
   }
-}
-
-function getRunRating(run: Run): Rating | null {
-  if (!isScored(run)) return null;
-  if ('rating' in run && run.rating) return run.rating;
-  if (run.scores) {
-    const score = run.scores.overall;
-    if (score >= 8) return 'great';
-    if (score >= 5) return 'good';
-    return 'bad';
-  }
-  return null;
 }
 
 function isScored(run: Run): run is ScoredRun | LegacyRun {
@@ -294,9 +281,8 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
       {/* Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between">
-          {/* Left: Rating */}
+          {/* Left: Status */}
           <div className="flex items-center gap-3">
-            {scored && <RatingBadge rating={getRunRating(run)} size="lg" />}
             {capturing && (
               <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                 (run as CaptureRun).state === 'capturing' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
