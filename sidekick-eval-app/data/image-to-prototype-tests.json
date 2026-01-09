@@ -40,7 +40,7 @@
     },
     {
       "imageElementId": "3458764654771241914",
-      "prompt": "Add inline validation for required fields and a progress indicator showing form completion status.",
+      "prompt": "Add a form progress bar at the top showing 3 of 5 fields completed, and show a red asterisk next to Business Purpose with a helper text 'Required field'.",
       "sourceImage": "artifacts/image-catalog/image-6.png",
       "description": "Expense report creation form with company, date, and cost center fields"
     },

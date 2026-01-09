@@ -142,6 +142,16 @@ cmd.ai.panel.openSidekick('21692b14-e1e3-4c69-9f6d-d93595eb9f95')
    - Max wait: 90 seconds (prototypes take longer)
    - If error message appears, log it and continue
 
+**IMPORTANT - Handle Follow-up Questions:**
+
+If Sidekick asks a follow-up question instead of generating:
+1. **Log the question** - Save the exact question text for the report
+2. **Answer briefly** - Type a short, reasonable answer (e.g., "Yes", "Use the default style", "Keep it simple")
+3. **Press Enter** to submit
+4. **Continue polling** for generation
+
+Store any follow-up questions for Step 15 (they indicate prompt ambiguity).
+
 ---
 
 ### Step 7: Select and commit result to board
@@ -257,7 +267,7 @@ Read both saved artifacts:
 ```bash
 cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-run.ts '{
   "id": "{run-id}",
-  "name": "Image to prototype",
+  "name": "Image to prototype: {description}",
   "testType": "image-to-prototype",
   "format": "prototype",
   "timestamp": "{ISO timestamp}",
@@ -266,11 +276,12 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
   "summary": "{One sentence summary}",
   "good": ["What worked"],
   "bad": ["Issues found"],
+  "followUpQuestions": ["Any questions Sidekick asked before generating (empty array if none)"],
   "prompts": [
     {
       "number": 0,
       "title": "Source Image",
-      "text": "Source image selected from board",
+      "text": "{description}",
       "artifact": "artifacts/{run-id}/v0-source.png"
     },
     {
@@ -282,6 +293,12 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
     }
   ]
 }'
+```
+
+**If Sidekick asked follow-up questions**, also save an annotation documenting them:
+
+```bash
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"low","note":"Sidekick asked: {question} - this suggests the prompt was ambiguous"}'
 ```
 
 **Then save findings as annotations** (saves directly to database, no server needed):

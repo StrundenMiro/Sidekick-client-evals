@@ -74,7 +74,8 @@ export const TEST_TYPES: Record<string, TestType> = {
       'Visual Quality — Clean layout, readable text, professional appearance',
       'Style Fidelity — Does the prototype match the style/vibe of the source?',
       'Completeness — All expected screens/components present',
-      'Usability — Is the generated prototype functional and usable?'
+      'Usability — Is the generated prototype functional and usable?',
+      'Follow-up Questions — Did Sidekick ask clarifying questions? (indicates prompt ambiguity)'
     ]
   }
 };
