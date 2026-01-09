@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveRunAsync, getRunsAsync, type Run } from '@/lib/runs';
+import { saveRunAsync, getRunsAsync, deleteRunAsync, type Run } from '@/lib/runs';
 
 // GET all runs
 export async function GET() {
@@ -33,6 +33,37 @@ export async function POST(request: NextRequest) {
     console.error('Failed to save run:', error);
     return NextResponse.json(
       { error: 'Failed to save run' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE a run by id
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'id is required' },
+        { status: 400 }
+      );
+    }
+
+    const deleted = await deleteRunAsync(id);
+    if (deleted) {
+      return NextResponse.json({ success: true });
+    } else {
+      return NextResponse.json(
+        { error: 'Run not found' },
+        { status: 404 }
+      );
+    }
+  } catch (error) {
+    console.error('Failed to delete run:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete run' },
       { status: 500 }
     );
   }

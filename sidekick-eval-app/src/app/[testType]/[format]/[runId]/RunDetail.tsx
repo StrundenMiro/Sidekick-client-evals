@@ -137,7 +137,24 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
   });
   const [imageTopOffset, setImageTopOffset] = useState<number>(0);
   const [copied, setCopied] = useState<string | null>(null); // null or the id that was copied
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/runs?id=${run.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        // Navigate back to format page
+        router.push(`/format/${format}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete run:', error);
+    }
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
+  };
 
   // Update URL when layout changes (without full navigation)
   const updateLayout = (newLayout: 'vertical' | 'horizontal') => {
@@ -294,7 +311,7 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
             <RunNav />
           </div>
 
-          {/* Right: Layout toggle */}
+          {/* Right: Layout toggle + Delete */}
           <div className="flex items-center gap-3 text-sm text-gray-400">
             {scored && (
               <div className="inline-flex gap-0.5">
@@ -317,6 +334,31 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                   ↔
                 </button>
               </div>
+            )}
+            {showDeleteConfirm ? (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="px-2 py-0.5 rounded text-xs bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                >
+                  {isDeleting ? '...' : 'Confirm'}
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-2 py-0.5 rounded text-xs text-gray-500 hover:text-gray-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-gray-300 hover:text-red-500 transition-colors"
+                title="Delete run"
+              >
+                ×
+              </button>
             )}
           </div>
         </div>
