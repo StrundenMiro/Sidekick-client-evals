@@ -128,13 +128,29 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Helper to build nav links with layout preserved
+  const getNavLink = (runId: string) => {
+    const params = new URLSearchParams();
+    if (layout === 'horizontal') {
+      params.set('layout', 'horizontal');
+    }
+    const queryString = params.toString();
+    return queryString ? `/${testType}/${format}/${runId}?${queryString}` : `/${testType}/${format}/${runId}`;
+  };
+
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       const res = await fetch(`/api/runs?id=${run.id}`, { method: 'DELETE' });
       if (res.ok) {
-        // Navigate back to format page
-        router.push(`/format/${format}`);
+        // Navigate to next run, or previous, or back to format page
+        if (nav?.nextRunId) {
+          router.push(getNavLink(nav.nextRunId));
+        } else if (nav?.prevRunId) {
+          router.push(getNavLink(nav.prevRunId));
+        } else {
+          router.push(`/format/${format}`);
+        }
       }
     } catch (error) {
       console.error('Failed to delete run:', error);
@@ -154,16 +170,6 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
     }
     const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     router.replace(newUrl, { scroll: false });
-  };
-
-  // Helper to build nav links with layout preserved
-  const getNavLink = (runId: string) => {
-    const params = new URLSearchParams();
-    if (layout === 'horizontal') {
-      params.set('layout', 'horizontal');
-    }
-    const queryString = params.toString();
-    return queryString ? `/${testType}/${format}/${runId}?${queryString}` : `/${testType}/${format}/${runId}`;
   };
 
   // Scroll to anchor on mount
