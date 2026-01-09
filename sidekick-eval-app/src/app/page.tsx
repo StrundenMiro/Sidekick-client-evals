@@ -107,11 +107,9 @@ export default async function Dashboard() {
   // Prepare recent runs sorted by timestamp (newest first)
   const recentRuns = runs
     .map(run => {
-      // Get description from summary or first prompt title
+      // Get description from first prompt title (the goal of the test)
       let description = '';
-      if ('summary' in run && run.summary) {
-        description = run.summary;
-      } else if ('prompts' in run && run.prompts.length > 0) {
+      if ('prompts' in run && run.prompts.length > 0) {
         description = run.prompts[0].title;
       }
 
