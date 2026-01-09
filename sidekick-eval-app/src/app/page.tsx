@@ -177,6 +177,59 @@ export default async function Dashboard() {
           </section>
         )}
 
+        {/* Planned Fixes */}
+        {(() => {
+          // Count issues per fix
+          const fixIssueCounts = new Map<string, number>();
+          annotations.forEach(a => {
+            if (a.plannedFixId && a.severity !== 'good') {
+              fixIssueCounts.set(a.plannedFixId, (fixIssueCounts.get(a.plannedFixId) || 0) + 1);
+            }
+          });
+
+          // Get unresolved fixes with issue counts, sorted by issue count
+          const unresolvedFixes = plannedFixes
+            .filter(f => !f.resolved)
+            .map(f => ({ ...f, issueCount: fixIssueCounts.get(f.id) || 0 }))
+            .sort((a, b) => b.issueCount - a.issueCount);
+
+          if (unresolvedFixes.length === 0) return null;
+
+          return (
+            <section className="mb-6">
+              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                Planned Fixes
+              </h2>
+              <ul className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
+                {unresolvedFixes.map(fix => (
+                  <li key={fix.id}>
+                    <Link
+                      href={`/fixes/${fix.id}`}
+                      className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-purple-500">🔧</span>
+                        <span className="font-medium text-gray-900">{fix.name}</span>
+                        {fix.jiraTicket && (
+                          <span className="text-xs text-gray-400">{fix.jiraTicket}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {fix.owner && (
+                          <span className="text-xs text-gray-500">@{fix.owner}</span>
+                        )}
+                        <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-purple-100 group-hover:text-purple-700 transition-colors">
+                          {fix.issueCount} {fix.issueCount === 1 ? 'issue' : 'issues'}
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })()}
+
         {/* Formats List */}
         <section className="mb-8">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
