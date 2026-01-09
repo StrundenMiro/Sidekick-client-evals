@@ -3,6 +3,7 @@ import { getRunsAsync, getRunTestType } from '@/lib/runs';
 import { getAnnotationsAsync } from '@/lib/annotations';
 import { getPlannedFixesAsync } from '@/lib/plannedFixes';
 import FormatIcon from '@/components/FormatIcon';
+import RecentRuns from '@/components/RecentRuns';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,6 +96,17 @@ export default async function Dashboard() {
     return !a.plannedFixId || !resolvedFixIds.has(a.plannedFixId);
   }).length;
 
+  // Prepare recent runs sorted by timestamp (newest first)
+  const recentRuns = runs
+    .map(run => ({
+      id: run.id,
+      format: run.format,
+      timestamp: run.timestamp,
+      rating: 'rating' in run ? run.rating : undefined,
+      testType: getRunTestType(run)
+    }))
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto p-6">
@@ -184,6 +196,11 @@ export default async function Dashboard() {
             ))}
           </ul>
         </section>
+
+        {/* Recent Runs */}
+        {recentRuns.length > 0 && (
+          <RecentRuns runs={recentRuns} />
+        )}
 
         {/* Footer */}
         <footer className="pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
