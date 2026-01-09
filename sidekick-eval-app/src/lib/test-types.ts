@@ -60,13 +60,30 @@ export const TEST_TYPES: Record<string, TestType> = {
       'Natural conversation flow',
       'Helpful responses to follow-ups'
     ]
+  },
+
+  'image-to-prototype': {
+    id: 'image-to-prototype',
+    name: 'Image to Prototype Conversion',
+    shortName: 'Image to Prototype',
+    description: 'Tests how well Sidekick converts a source image into an interactive prototype with additional features.',
+    promptStructure: 'V0: Source image | V1: Generated prototype with requested additions',
+    evaluationFocus: [
+      'Source Understanding — Did it capture the key elements from the source image?',
+      'Prompt Adherence — Did it add what was requested in the prompt?',
+      'Visual Quality — Clean layout, readable text, professional appearance',
+      'Style Fidelity — Does the prototype match the style/vibe of the source?',
+      'Completeness — All expected screens/components present',
+      'Usability — Is the generated prototype functional and usable?'
+    ]
   }
 };
 
 export const TEST_TYPE_ORDER = [
   'ai-generated-iteration',
   'existing-content-iteration',
-  'conversational-flow'
+  'conversational-flow',
+  'image-to-prototype'
 ];
 
 export function getTestType(id: string): TestType | undefined {

@@ -1,0 +1,54 @@
+{
+  "catalogDate": "2026-01-09T14:25:00.000Z",
+  "totalImages": 8,
+  "testCases": [
+    {
+      "imageElementId": "3458764654770420406",
+      "prompt": "Add a video testimonial section below the customer quote with a play button overlay.",
+      "sourceImage": "artifacts/image-catalog/image-0.png",
+      "description": "Case study page from Proof about BuildFire with testimonial and stats"
+    },
+    {
+      "imageElementId": "3458764654771014539",
+      "prompt": "Add social login options (Google, Microsoft, Apple) below the email input field.",
+      "sourceImage": "artifacts/image-catalog/image-1.png",
+      "description": "Slite sign-in page with email and team URL inputs"
+    },
+    {
+      "imageElementId": "3458764654762459801",
+      "prompt": "Add a Q&A panel on the right side where participants can submit questions during the presentation.",
+      "sourceImage": "artifacts/image-catalog/image-2.png",
+      "description": "Miro presentation view with video call participants"
+    },
+    {
+      "imageElementId": "3458764654770638020",
+      "prompt": "Add a weekly summary card at the top showing total hours tracked and earnings.",
+      "sourceImage": "artifacts/image-catalog/image-3.png",
+      "description": "Time tracking mobile app with timer, invoices, and expenses screens"
+    },
+    {
+      "imageElementId": "3458764654771241838",
+      "prompt": "Add a pricing calculator widget that lets users input their contact list size and see estimated costs.",
+      "sourceImage": "artifacts/image-catalog/image-4.png",
+      "description": "Sendinblue vs Mailchimp comparison landing page with pricing tables"
+    },
+    {
+      "imageElementId": "3458764654771241759",
+      "prompt": "Add a search bar at the top to quickly find employees and a 'Report to' filter dropdown.",
+      "sourceImage": "artifacts/image-catalog/image-5.png",
+      "description": "Mobile org chart app showing employee hierarchy with profile photos"
+    },
+    {
+      "imageElementId": "3458764654771241914",
+      "prompt": "Add inline validation for required fields and a progress indicator showing form completion status.",
+      "sourceImage": "artifacts/image-catalog/image-6.png",
+      "description": "Expense report creation form with company, date, and cost center fields"
+    },
+    {
+      "imageElementId": "3458764654771241392",
+      "prompt": "Add a pay history chart showing the last 6 months of earnings and a tax withholding summary.",
+      "sourceImage": "artifacts/image-catalog/image-7.png",
+      "description": "Benefits and Pay dashboard showing paycheck details and benefit costs"
+    }
+  ]
+}

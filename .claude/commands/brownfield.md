@@ -370,12 +370,10 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
 }'
 ```
 
-**Then save findings as annotations** - one POST per finding:
+**Then save findings as annotations** (saves directly to database, no server needed) - one call per finding:
 
 ```bash
-curl -X POST http://localhost:3001/api/annotations \
-  -H "Content-Type: application/json" \
-  -d '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"good|low|medium|high","note":"One specific finding in Franks voice"}'
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"good|low|medium|high","note":"One specific finding in Franks voice"}'
 ```
 
 **Severity guide:**
