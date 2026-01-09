@@ -4,6 +4,7 @@
 -- Runs table
 CREATE TABLE IF NOT EXISTS runs (
   id TEXT PRIMARY KEY,
+  name TEXT, -- Human-readable name/description of the test goal
   test_type TEXT NOT NULL DEFAULT 'ai-generated-iteration',
   format TEXT NOT NULL,
   timestamp TIMESTAMPTZ NOT NULL,
@@ -91,3 +92,6 @@ CREATE INDEX IF NOT EXISTS idx_annotations_planned_fix_id ON annotations(planned
 -- Migration: Add owner and resolved columns to planned_fixes
 -- ALTER TABLE planned_fixes ADD COLUMN IF NOT EXISTS owner TEXT;
 -- ALTER TABLE planned_fixes ADD COLUMN IF NOT EXISTS resolved BOOLEAN DEFAULT FALSE;
+--
+-- Migration: Add name column to runs
+-- ALTER TABLE runs ADD COLUMN IF NOT EXISTS name TEXT;

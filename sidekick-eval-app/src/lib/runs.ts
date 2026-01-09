@@ -51,6 +51,7 @@ export type Prompt = ScoredPrompt;
 // Run in capture phase (not yet scored)
 export interface CaptureRun {
   id: string;
+  name?: string;  // Human-readable title describing the test goal
   testType: string;  // e.g., 'ai-generated-iteration'
   format: string;
   timestamp: string;
@@ -71,6 +72,7 @@ export type Rating = 'bad' | 'good' | 'great';
 // Run after scoring (complete)
 export interface ScoredRun {
   id: string;
+  name?: string;  // Human-readable title describing the test goal
   testType: string;  // e.g., 'ai-generated-iteration'
   format: string;
   timestamp: string;
@@ -92,6 +94,7 @@ export interface ScoredRun {
 // Legacy Run type (scored runs without explicit state, defaults to ai-generated-iteration)
 export interface LegacyRun {
   id: string;
+  name?: string;  // Human-readable title describing the test goal
   testType?: string;  // Optional for backward compatibility, defaults to 'ai-generated-iteration'
   format: string;
   timestamp: string;
@@ -166,6 +169,7 @@ function saveRunsToFile(runs: Run[]): void {
 
 interface DbRun {
   id: string;
+  name: string | null;
   test_type: string;
   format: string;
   timestamp: Date;
@@ -199,7 +203,7 @@ function dbToRun(row: DbRun, prompts: DbPrompt[]): Run {
     .sort((a, b) => a.number - b.number);
 
   if (row.state === 'capturing' || row.state === 'captured') {
-    return {
+    const captureRun: CaptureRun = {
       id: row.id,
       testType: row.test_type,
       format: row.format,
@@ -214,6 +218,8 @@ function dbToRun(row: DbRun, prompts: DbPrompt[]): Run {
         capturedAt: p.captured_at?.toISOString() || ''
       }))
     };
+    if (row.name) captureRun.name = row.name;
+    return captureRun;
   }
 
   // Scored run
@@ -237,6 +243,7 @@ function dbToRun(row: DbRun, prompts: DbPrompt[]): Run {
     }))
   };
 
+  if (row.name) scoredRun.name = row.name;
   if (row.scores) scoredRun.scores = row.scores;
   if (row.summary) scoredRun.summary = row.summary;
   if (row.issues) scoredRun.issues = row.issues;
@@ -269,12 +276,14 @@ async function saveRunToDb(run: Run): Promise<void> {
     const summary = isScored(run) ? run.summary || null : null;
     const issues = isScored(run) ? run.issues || null : null;
     const iterationAnalysis = isScored(run) && 'iterationAnalysis' in run ? run.iterationAnalysis || null : null;
+    const name = 'name' in run ? run.name || null : null;
 
     // Upsert run
     await client.query(`
-      INSERT INTO runs (id, test_type, format, timestamp, state, rating, scores, good, bad, summary, issues, iteration_analysis, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
+      INSERT INTO runs (id, name, test_type, format, timestamp, state, rating, scores, good, bad, summary, issues, iteration_analysis, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
       ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
         test_type = EXCLUDED.test_type,
         format = EXCLUDED.format,
         timestamp = EXCLUDED.timestamp,
@@ -289,6 +298,7 @@ async function saveRunToDb(run: Run): Promise<void> {
         updated_at = NOW()
     `, [
       run.id,
+      name,
       run.testType || 'ai-generated-iteration',
       run.format,
       run.timestamp,
