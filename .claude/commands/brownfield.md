@@ -47,6 +47,7 @@ Each format has a pre-existing element on the board. Look up the element ID:
 - **title1**: Tighten Content
 - **title2**: Add Competitive Section
 - **title3**: Improve Metrics
+- **name**: Tighten brief + add competition
 
 ### table
 - **prompt1**: Add a column called "Risk Level" (Low/Medium/High) and fill it in for each feature.
@@ -55,6 +56,7 @@ Each format has a pre-existing element on the board. Look up the element ID:
 - **title1**: Add Risk Column
 - **title2**: Sort by Risk
 - **title3**: Add Dependencies
+- **name**: Add risk & dependencies columns
 
 ### stickies
 - **prompt1**: Consolidate duplicate stickies and remove any that are too vague.
@@ -63,6 +65,7 @@ Each format has a pre-existing element on the board. Look up the element ID:
 - **title1**: Consolidate
 - **title2**: Add Priorities
 - **title3**: Quick Wins Group
+- **name**: Prioritize + quick wins
 
 ### flowchart
 - **prompt1**: Add error handling paths for: invalid input, timeout, and user cancellation.
@@ -71,6 +74,7 @@ Each format has a pre-existing element on the board. Look up the element ID:
 - **title1**: Add Error Paths
 - **title2**: Simplify Steps
 - **title3**: Add Swimlanes
+- **name**: Add error paths + swimlanes
 
 ### slides
 - **prompt1**: Make the headlines punchier - each should be a complete thought, not a label.
@@ -79,6 +83,7 @@ Each format has a pre-existing element on the board. Look up the element ID:
 - **title1**: Punch Up Headlines
 - **title2**: Reduce Text
 - **title3**: Add Competition Slide
+- **name**: Punch up + add competition
 
 ### prototype
 - **prompt1**: Increase all font sizes by 20% and add more whitespace between elements.
@@ -87,6 +92,7 @@ Each format has a pre-existing element on the board. Look up the element ID:
 - **title1**: Improve Readability
 - **title2**: Add Confirmations
 - **title3**: Accessibility Mode
+- **name**: Readability + accessibility
 
 ### mindmap
 - **prompt1**: Expand the "Risks" branch with more specific risk categories and mitigations.
@@ -95,6 +101,7 @@ Each format has a pre-existing element on the board. Look up the element ID:
 - **title1**: Expand Risks
 - **title2**: Highlight Critical
 - **title3**: Add Metrics
+- **name**: Expand risks + add metrics
 
 ---
 
@@ -322,6 +329,7 @@ Issues found:
 ```bash
 cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-run.ts '{
   "id": "{run-id}",
+  "name": "{name}",
   "testType": "existing-content-iteration",
   "format": "{format}",
   "timestamp": "{ISO timestamp}",

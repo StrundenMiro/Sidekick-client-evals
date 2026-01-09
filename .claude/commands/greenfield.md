@@ -25,6 +25,7 @@ Look up the prompts based on format:
 - **title1**: Create Product Brief
 - **title2**: Tighten Content
 - **title3**: Add Section
+- **name**: Senior care product brief
 
 ### table
 - **prompt1**: Create a feature table for an "Uber for elderly care" app with columns: Feature, Who it helps, Why it matters, MVP or Later.
@@ -33,6 +34,7 @@ Look up the prompts based on format:
 - **title1**: Create Feature Table
 - **title2**: Add Test Column
 - **title3**: MVP Prioritization
+- **name**: Feature table + MVP scope
 
 ### stickies
 - **prompt1**: Create sticky notes for an "Uber for elderly care" app: user needs, pain points, and product ideas. Group them into clear themes.
@@ -41,6 +43,7 @@ Look up the prompts based on format:
 - **title1**: Create Stickies
 - **title2**: De-duplicate & Shorten
 - **title3**: Regroup & Highlight
+- **name**: User needs + pain points
 
 ### flowchart
 - **prompt1**: Create a flowchart showing the end-to-end booking flow for an "Uber for elderly care" app: from caregiver search to booking confirmation to visit completion.
@@ -49,6 +52,7 @@ Look up the prompts based on format:
 - **title1**: Create Booking Flow
 - **title2**: Simplify Flow
 - **title3**: Add Emergency Path
+- **name**: Booking flow + emergency path
 
 ### slides
 - **prompt1**: Create a 7-slide pitch deck for an "Uber for elderly care" app: problem, users, solution, critical features, trust/safety, MVP, metrics + ask. Use the context on this board.
@@ -57,6 +61,7 @@ Look up the prompts based on format:
 - **title1**: Create Pitch Deck
 - **title2**: Make Exec-Friendly
 - **title3**: Add Speaker Notes
+- **name**: Pitch deck + speaker notes
 
 ### image
 - **prompt1**: Generate an app icon for an "Uber for elderly care" app. Style: warm, friendly, and trustworthy. Include imagery that represents care/support.
@@ -65,6 +70,7 @@ Look up the prompts based on format:
 - **title1**: Create App Icon
 - **title2**: Simplify Design
 - **title3**: Color Variations
+- **name**: App icon + variations
 
 ### prototype
 - **prompt1**: Create a mobile prototype for an "Uber for elderly care" app. Include: caregiver search, caregiver profile (verified), booking, messaging/check-ins, payment, and an emergency button. Match the vibe of the screenshots on this board.
@@ -73,6 +79,7 @@ Look up the prompts based on format:
 - **title1**: Create Prototype
 - **title2**: Senior-Friendly
 - **title3**: Edge Cases
+- **name**: Mobile prototype + edge cases
 
 ### mindmap
 - **prompt1**: Create a mindmap exploring all aspects of an "Uber for elderly care" app - include users, features, concerns, and differentiators.
@@ -81,6 +88,7 @@ Look up the prompts based on format:
 - **title1**: Create Mindmap
 - **title2**: Expand Trust & Safety
 - **title3**: Add Competition
+- **name**: Care app mindmap
 
 ### erd
 - **prompt1**: Create an entity-relationship diagram for an "Uber for elderly care" app showing: Users, Caregivers, Bookings, Payments, Reviews, and Emergency Contacts.
@@ -89,6 +97,7 @@ Look up the prompts based on format:
 - **title1**: Create ERD
 - **title2**: Add Cardinality
 - **title3**: Add Entities
+- **name**: Care app ERD
 
 ### sequence
 - **prompt1**: Create a UML sequence diagram showing the booking flow: Family Member, App, Matching Service, Caregiver, Payment System.
@@ -97,6 +106,7 @@ Look up the prompts based on format:
 - **title1**: Create Sequence
 - **title2**: Simplify Messages
 - **title3**: Add Cancel Path
+- **name**: Booking sequence diagram
 
 ### class
 - **prompt1**: Create a UML class diagram for the core domain: User, Caregiver, Booking, Payment, Review, EmergencyContact.
@@ -105,6 +115,7 @@ Look up the prompts based on format:
 - **title1**: Create Class Diagram
 - **title2**: Add Inheritance
 - **title3**: Add Notifications
+- **name**: Domain class diagram
 
 ---
 
@@ -323,6 +334,7 @@ Issues found:
 ```bash
 cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-run.ts '{
   "id": "{run-id}",
+  "name": "{name}",
   "testType": "ai-generated-iteration",
   "format": "{format}",
   "timestamp": "{ISO timestamp}",
