@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Lightbox from '@/components/Lightbox';
 import RatingBadge from '@/components/RatingBadge';
 import PromptAnnotation from '@/components/PromptAnnotation';
@@ -123,12 +124,43 @@ interface Props {
 }
 
 export default function RunDetail({ run, testType, format, nav, annotationsByPrompt = {} }: Props) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [promptStatuses, setPromptStatuses] = useState<Record<number, string>>({});
-  const [layout, setLayout] = useState<'vertical' | 'horizontal'>('vertical');
+  const [layout, setLayout] = useState<'vertical' | 'horizontal'>(() => {
+    // Initialize from URL param
+    const layoutParam = searchParams.get('layout');
+    return layoutParam === 'horizontal' ? 'horizontal' : 'vertical';
+  });
   const [imageTopOffset, setImageTopOffset] = useState<number>(0);
   const [copied, setCopied] = useState<string | null>(null); // null or the id that was copied
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Update URL when layout changes (without full navigation)
+  const updateLayout = (newLayout: 'vertical' | 'horizontal') => {
+    setLayout(newLayout);
+    const params = new URLSearchParams(searchParams.toString());
+    if (newLayout === 'horizontal') {
+      params.set('layout', 'horizontal');
+    } else {
+      params.delete('layout');
+    }
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    router.replace(newUrl, { scroll: false });
+  };
+
+  // Helper to build nav links with layout preserved
+  const getNavLink = (runId: string) => {
+    const params = new URLSearchParams();
+    if (layout === 'horizontal') {
+      params.set('layout', 'horizontal');
+    }
+    const queryString = params.toString();
+    return queryString ? `/${testType}/${format}/${runId}?${queryString}` : `/${testType}/${format}/${runId}`;
+  };
 
   // Scroll to anchor on mount
   useEffect(() => {
@@ -215,7 +247,7 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
       <div className="flex items-center gap-1 text-sm">
         {nav.prevRunId ? (
           <Link
-            href={`/${testType}/${format}/${nav.prevRunId}`}
+            href={getNavLink(nav.prevRunId)}
             className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 hover:text-gray-900"
           >
             ←
@@ -228,7 +260,7 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
         </span>
         {nav.nextRunId ? (
           <Link
-            href={`/${testType}/${format}/${nav.nextRunId}`}
+            href={getNavLink(nav.nextRunId)}
             className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 hover:text-gray-900"
           >
             →
@@ -267,7 +299,7 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
             {scored && (
               <div className="inline-flex gap-0.5">
                 <button
-                  onClick={() => setLayout('vertical')}
+                  onClick={() => updateLayout('vertical')}
                   className={`px-1 py-0.5 rounded transition-colors ${
                     layout === 'vertical' ? 'text-gray-600' : 'hover:text-gray-500'
                   }`}
@@ -276,7 +308,7 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
                   ↕
                 </button>
                 <button
-                  onClick={() => setLayout('horizontal')}
+                  onClick={() => updateLayout('horizontal')}
                   className={`px-1 py-0.5 rounded transition-colors ${
                     layout === 'horizontal' ? 'text-gray-600' : 'hover:text-gray-500'
                   }`}
