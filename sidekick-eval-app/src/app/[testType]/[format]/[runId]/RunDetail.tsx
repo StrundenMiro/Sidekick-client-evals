@@ -327,47 +327,6 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
         )}
       </header>
 
-      {/* Good/Bad Summary (only for scored runs, hide in horizontal mode) */}
-      {scored && layout === 'vertical' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <h3 className="font-semibold text-green-600 mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500" />
-                What worked
-              </h3>
-              {run.good.length > 0 ? (
-                <ul className="space-y-2 text-sm text-gray-700">
-                  {run.good.map((item, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span className="text-green-500">+</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-400 text-sm italic">No items</p>
-              )}
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <h3 className="font-semibold text-red-600 mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-red-500" />
-                What didn&apos;t work
-              </h3>
-              {run.bad.length > 0 ? (
-                <ul className="space-y-2 text-sm text-gray-700">
-                  {run.bad.map((item, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span className="text-red-500">-</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-400 text-sm italic">No issues</p>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Iteration Analysis (only show if there are regressions) */}
         {scored && 'iterationAnalysis' in run && run.iterationAnalysis?.regressions && run.iterationAnalysis.regressions.length > 0 && (
@@ -402,52 +361,6 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
         }
         style={layout === 'horizontal' ? { scrollbarWidth: 'thin' } : undefined}
         >
-          {/* Summary card as first item in horizontal mode */}
-          {layout === 'horizontal' && scored && (
-            <div className="flex-shrink-0 w-[600px] bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-gray-100 border-b border-gray-200">
-                <h3 className="font-semibold text-gray-900">Summary</h3>
-              </div>
-              <div className="p-4 space-y-4">
-                <div>
-                  <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2 text-sm">
-                    <span className="w-2 h-2 rounded-full bg-green-500" />
-                    What worked
-                  </h4>
-                  {run.good.length > 0 ? (
-                    <ul className="space-y-1 text-sm text-gray-700">
-                      {run.good.map((item, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="text-green-500">+</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-400 text-sm italic">No items</p>
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-semibold text-red-600 mb-2 flex items-center gap-2 text-sm">
-                    <span className="w-2 h-2 rounded-full bg-red-500" />
-                    What didn&apos;t work
-                  </h4>
-                  {run.bad.length > 0 ? (
-                    <ul className="space-y-1 text-sm text-gray-700">
-                      {run.bad.map((item, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="text-red-500">-</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-400 text-sm italic">No issues</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
           {run.prompts.map((prompt) => {
             const promptScored = isScoredPrompt(prompt);
             const currentStatus = promptStatuses[prompt.number] ?? (promptScored ? prompt.status : null);

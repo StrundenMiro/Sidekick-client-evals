@@ -274,9 +274,6 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
   "state": "scored",
   "rating": "bad|good|great",
   "summary": "{One sentence summary}",
-  "good": ["What worked"],
-  "bad": ["Issues found"],
-  "followUpQuestions": ["Any questions Sidekick asked before generating (empty array if none)"],
   "prompts": [
     {
       "number": 0,

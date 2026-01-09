@@ -336,8 +336,6 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
   "state": "scored",
   "rating": "bad|good|great",
   "summary": "{One sentence summary of how well it iterated on existing content}",
-  "good": ["What worked"],
-  "bad": ["Issues found"],
   "prompts": [
     {
       "number": 0,
