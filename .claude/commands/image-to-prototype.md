@@ -295,23 +295,29 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
 }'
 ```
 
-**If Sidekick asked follow-up questions**, also save an annotation documenting them:
+**Save annotations for ISSUES ONLY** (no positive feedback):
+
+Only create annotations when expectations were NOT met. Be concise and explicit.
 
 ```bash
-cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"low","note":"Sidekick asked: {question} - this suggests the prompt was ambiguous"}'
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"text|layout|missing|wrong","severity":"medium|high","note":"Short explicit issue statement"}'
 ```
 
-**Then save findings as annotations** (saves directly to database, no server needed):
+**Annotation rules:**
+- **NO positive feedback** - Don't annotate what worked
+- **Only issues** - Where expectation ≠ reality
+- **Concise** - "Button text truncated: Bu tto" not "The submit button shows truncated text..."
+- **Accurate** - If unsure, don't annotate
 
-```bash
-cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"good|low|medium|high","note":"Finding in Franks voice"}'
-```
+**Severity (issues only):**
+- `medium` - Noticeable issue, usable but flawed
+- `high` - Critical failure, unusable or wrong output
 
-**Severity guide:**
-- `good` (green) - Something that worked well
-- `low` (blue) - Minor observation
-- `medium` (amber) - Moderate issue
-- `high` (red) - Critical failure
+**Issue types:**
+- `text` - Truncation, garbled text, wrong labels
+- `layout` - Broken structure, misalignment, overflow
+- `missing` - Expected element not present
+- `wrong` - Output doesn't match prompt/source
 
 ---
 

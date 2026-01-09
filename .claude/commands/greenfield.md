@@ -369,28 +369,31 @@ cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compi
 }'
 ```
 
-**Then save findings as annotations** (saves directly to database, no server needed) - one call per finding:
+**Save annotations for ISSUES ONLY** (no positive feedback) - one call per issue:
 
 ```bash
-cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"other","severity":"good|low|medium|high","note":"One specific finding in Franks voice"}'
+cd /Users/strunden/Sites/Sidekick\ Eval/sidekick-eval-app && npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/save-annotation.ts '{"runId":"{run-id}","promptNumber":1,"author":"frank","issueType":"text|layout|missing|wrong","severity":"medium|high","note":"Short explicit issue"}'
 ```
 
-**Severity guide:**
-- `good` (green) - Something that worked well
-- `low` (blue) - Minor observation
-- `medium` (amber) - Moderate issue
-- `high` (red) - Critical failure
+**Annotation rules:**
+- **NO positive feedback** - Don't annotate what worked
+- **Only issues** - Where expectation ≠ reality
+- **Concise** - "Lost 3 columns: Who, Why, MVP" not "The table lost several columns..."
+- **Accurate** - If unsure, don't annotate
 
-**Multiple findings per version are fine, but don't split a single finding across annotations:**
+**Severity (issues only):**
+- `medium` - Noticeable issue, usable but flawed
+- `high` - Critical failure, unusable or wrong output
 
-BAD (one finding split into 2):
-- "I asked to ADD a column and it DELETED three columns"
-- "Lost 'Who it helps', 'Why it matters', 'MVP or Later'"
+**Issue types:**
+- `text` - Truncation, garbled text, wrong labels
+- `layout` - Broken structure, misalignment
+- `missing` - Expected element not present
+- `wrong` - Output doesn't match prompt
 
-GOOD (one complete finding):
-- "I asked to ADD a column and it DELETED three columns (Who it helps, Why it matters, MVP or Later)"
-
-Each annotation should be self-contained: **Issue + specifics together**.
+**Self-contained**: Each annotation = issue + specifics together
+- BAD: "Lost columns" then "Who, Why, MVP"
+- GOOD: "Lost 3 columns: Who, Why, MVP"
 
 **Note**: The script reads DATABASE_URL from .env.local automatically.
 
