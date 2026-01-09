@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { EnrichedIssue, UseCase } from './page';
 import FormatIcon from '@/components/FormatIcon';
 import { PlannedFix } from '@/lib/plannedFixes';
+import { getRelativeDate, formatFullDate } from '@/lib/dateUtils';
 
 type Severity = 'high' | 'medium' | 'low' | 'good';
 type Tab = 'open' | 'fixed' | 'praise' | 'usecases';
@@ -759,6 +760,9 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Use-case
                     </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Found
+                    </th>
                     {activeTab !== 'praise' && (
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Planned Fix
@@ -790,6 +794,14 @@ export default function FormatClient({ format, issues, useCases, plannedFixes: i
                             : 'bg-amber-100 text-amber-700'
                         }`}>
                           {issue.useCase === 'greenfield' ? 'GF' : 'BF'}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span
+                          className="text-xs text-gray-500 cursor-default"
+                          title={formatFullDate(issue.createdAt)}
+                        >
+                          {getRelativeDate(issue.createdAt)}
                         </span>
                       </td>
                       {activeTab !== 'praise' && (

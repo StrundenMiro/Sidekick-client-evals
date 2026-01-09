@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import FormatIcon from '@/components/FormatIcon';
 import { PlannedFix } from '@/lib/plannedFixes';
+import { getRelativeDate, formatFullDate } from '@/lib/dateUtils';
 
 type Severity = 'high' | 'medium' | 'low' | 'good';
 type Tab = 'open' | 'fixed' | 'praise';
@@ -705,6 +706,7 @@ export default function IssuesClient({ issues, totalRuns, plannedFixes: initialF
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note</th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-14">Format</th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-14">Type</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Found</th>
                 {activeTab !== 'praise' && (
                   <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Planned Fix</th>
                 )}
@@ -741,6 +743,14 @@ export default function IssuesClient({ issues, totalRuns, plannedFixes: initialF
                         : 'bg-amber-100 text-amber-700'
                     }`}>
                       {issue.testType === 'greenfield' ? 'GF' : 'BF'}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <span
+                      className="text-xs text-gray-500 cursor-default"
+                      title={formatFullDate(issue.createdAt)}
+                    >
+                      {getRelativeDate(issue.createdAt)}
                     </span>
                   </td>
                   {activeTab !== 'praise' && (

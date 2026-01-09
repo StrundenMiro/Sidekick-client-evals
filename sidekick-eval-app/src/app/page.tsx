@@ -96,13 +96,21 @@ export default async function Dashboard() {
     return !a.plannedFixId || !resolvedFixIds.has(a.plannedFixId);
   }).length;
 
+  // Count issues per run (excluding praise)
+  const issueCountByRun = new Map<string, number>();
+  annotations.forEach(a => {
+    if (a.severity !== 'good') {
+      issueCountByRun.set(a.runId, (issueCountByRun.get(a.runId) || 0) + 1);
+    }
+  });
+
   // Prepare recent runs sorted by timestamp (newest first)
   const recentRuns = runs
     .map(run => ({
       id: run.id,
       format: run.format,
       timestamp: run.timestamp,
-      rating: 'rating' in run ? run.rating : undefined,
+      issueCount: issueCountByRun.get(run.id) || 0,
       testType: getRunTestType(run)
     }))
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());

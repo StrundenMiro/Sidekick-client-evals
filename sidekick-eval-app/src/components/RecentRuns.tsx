@@ -3,24 +3,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import FormatIcon from './FormatIcon';
+import { getRelativeDate, formatFullDate } from '@/lib/dateUtils';
 
 interface Run {
   id: string;
   format: string;
   timestamp: string;
-  rating?: string;
+  issueCount: number;
   testType: string;
 }
 
 interface RecentRunsProps {
   runs: Run[];
 }
-
-const ratingConfig: Record<string, { label: string; color: string; bg: string }> = {
-  great: { label: 'Great', color: 'text-green-700', bg: 'bg-green-100' },
-  good: { label: 'Good', color: 'text-blue-700', bg: 'bg-blue-100' },
-  bad: { label: 'Bad', color: 'text-red-700', bg: 'bg-red-100' }
-};
 
 export default function RecentRuns({ runs }: RecentRunsProps) {
   const [expanded, setExpanded] = useState(false);
@@ -45,13 +40,16 @@ export default function RecentRuns({ runs }: RecentRunsProps) {
                 <span className="font-mono text-sm text-gray-700">{run.id}</span>
               </div>
               <div className="flex items-center gap-3">
-                {run.rating && ratingConfig[run.rating] && (
-                  <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${ratingConfig[run.rating].bg} ${ratingConfig[run.rating].color}`}>
-                    {ratingConfig[run.rating].label}
+                {run.issueCount > 0 && (
+                  <span className="px-1.5 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-500 group-hover:bg-red-100 group-hover:text-red-700 transition-colors">
+                    {run.issueCount} issue{run.issueCount !== 1 ? 's' : ''}
                   </span>
                 )}
-                <span className="text-xs text-gray-400">
-                  {new Date(run.timestamp).toLocaleDateString()}
+                <span
+                  className="text-xs text-gray-400 cursor-default"
+                  title={formatFullDate(run.timestamp)}
+                >
+                  {getRelativeDate(run.timestamp)}
                 </span>
               </div>
             </Link>
