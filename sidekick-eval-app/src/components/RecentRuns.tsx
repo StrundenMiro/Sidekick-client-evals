@@ -11,17 +11,11 @@ interface Run {
   timestamp: string;
   issueCount: number;
   testType: string;
+  description: string;
 }
 
 interface RecentRunsProps {
   runs: Run[];
-}
-
-function getRunDisplayName(run: Run): string {
-  const useCase = run.testType === 'existing-content-iteration' ? 'Brownfield' : 'Greenfield';
-  const date = new Date(run.timestamp);
-  const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-  return `${useCase} · ${time}`;
 }
 
 export default function RecentRuns({ runs }: RecentRunsProps) {
@@ -42,9 +36,11 @@ export default function RecentRuns({ runs }: RecentRunsProps) {
               href={`/${run.testType}/${run.format}/${run.id}`}
               className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors group"
             >
-              <div className="flex items-center gap-2">
-                <FormatIcon format={run.format} size={18} />
-                <span className="text-sm text-gray-700">{getRunDisplayName(run)}</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <FormatIcon format={run.format} size={18} className="flex-shrink-0" />
+                <span className="text-sm text-gray-700 truncate">
+                  {run.description || 'Untitled run'}
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 {run.issueCount > 0 && (

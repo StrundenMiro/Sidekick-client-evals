@@ -106,13 +106,24 @@ export default async function Dashboard() {
 
   // Prepare recent runs sorted by timestamp (newest first)
   const recentRuns = runs
-    .map(run => ({
-      id: run.id,
-      format: run.format,
-      timestamp: run.timestamp,
-      issueCount: issueCountByRun.get(run.id) || 0,
-      testType: getRunTestType(run)
-    }))
+    .map(run => {
+      // Get description from summary or first prompt title
+      let description = '';
+      if ('summary' in run && run.summary) {
+        description = run.summary;
+      } else if ('prompts' in run && run.prompts.length > 0) {
+        description = run.prompts[0].title;
+      }
+
+      return {
+        id: run.id,
+        format: run.format,
+        timestamp: run.timestamp,
+        issueCount: issueCountByRun.get(run.id) || 0,
+        testType: getRunTestType(run),
+        description
+      };
+    })
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   return (
