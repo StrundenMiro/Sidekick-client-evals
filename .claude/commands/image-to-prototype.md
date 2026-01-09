@@ -109,16 +109,19 @@ Wait 2 seconds for Sidekick to fully open.
 7. Wait 500ms
 8. Press `Enter` to commit the result to the board
 
-Wait 2 seconds for commit to complete.
+Wait 3 seconds for commit to complete and element to be placed on board.
 
 ---
 
-### Step 8: Capture result (V1)
+### Step 8: Capture committed result (V1)
 
-1. The result should now be selected on the board
-2. Press `Meta+Shift+c` to copy
-3. Wait 1 second
-4. Save clipboard:
+**IMPORTANT: Capture AFTER the result is committed to the board**
+
+1. The committed result should now be selected on the board
+2. Press `Meta+Shift+c` (CMD+SHIFT+C) to copy the committed element as image
+3. Wait for "Copied to clipboard" confirmation
+4. Wait 1 second
+5. Save clipboard:
 ```bash
 osascript -e 'tell application "System Events" to write (the clipboard as «class PNGf») to (open for access POSIX file "/Users/strunden/Sites/Sidekick Eval/sidekick-eval-app/public/artifacts/{run-id}/v1.png" with write permission)'
 ```
