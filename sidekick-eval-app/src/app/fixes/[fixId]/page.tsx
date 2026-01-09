@@ -90,7 +90,7 @@ export default async function FixDetailPage({ params }: PageProps) {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-2xl">🔧</span>
+            <span className="text-2xl">⚠</span>
             <h1 className="text-2xl font-bold text-gray-900">{fix.name}</h1>
             {fix.resolved && (
               <span className="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700">
