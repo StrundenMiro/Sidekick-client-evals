@@ -312,41 +312,38 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
           </div>
 
           {/* Right: Layout toggle + Delete */}
-          <div className="flex items-center gap-3 text-sm text-gray-400">
+          <div className="flex items-center gap-2">
             {scored && (
-              <div className="inline-flex gap-0.5">
-                <button
-                  onClick={() => updateLayout('vertical')}
-                  className={`px-1 py-0.5 rounded transition-colors ${
-                    layout === 'vertical' ? 'text-gray-600' : 'hover:text-gray-500'
-                  }`}
-                  title="Vertical layout"
-                >
-                  ↕
-                </button>
-                <button
-                  onClick={() => updateLayout('horizontal')}
-                  className={`px-1 py-0.5 rounded transition-colors ${
-                    layout === 'horizontal' ? 'text-gray-600' : 'hover:text-gray-500'
-                  }`}
-                  title="Horizontal layout"
-                >
-                  ↔
-                </button>
-              </div>
+              <button
+                onClick={() => updateLayout(layout === 'vertical' ? 'horizontal' : 'vertical')}
+                className="p-1.5 rounded border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
+                title={layout === 'vertical' ? 'Switch to horizontal' : 'Switch to vertical'}
+              >
+                {layout === 'vertical' ? (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="3" width="5" height="10" rx="1" />
+                    <rect x="9" y="3" width="5" height="10" rx="1" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="2" width="12" height="5" rx="1" />
+                    <rect x="2" y="9" width="12" height="5" rx="1" />
+                  </svg>
+                )}
+              </button>
             )}
             {showDeleteConfirm ? (
               <div className="flex items-center gap-1">
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="px-2 py-0.5 rounded text-xs bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                  className="px-2 py-1 rounded text-xs font-medium bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                 >
-                  {isDeleting ? '...' : 'Confirm'}
+                  {isDeleting ? '...' : 'Delete'}
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-2 py-0.5 rounded text-xs text-gray-500 hover:text-gray-700"
+                  className="px-2 py-1 rounded text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                 >
                   Cancel
                 </button>
@@ -354,10 +351,12 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
             ) : (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="text-gray-300 hover:text-red-500 transition-colors"
+                className="p-1.5 rounded border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 text-gray-400 hover:text-red-500 transition-colors"
                 title="Delete run"
               >
-                ×
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v9a1 1 0 001 1h4a1 1 0 001-1V4" />
+                </svg>
               </button>
             )}
           </div>
