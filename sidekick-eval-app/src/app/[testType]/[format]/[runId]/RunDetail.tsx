@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Lightbox from '@/components/Lightbox';
 import PromptAnnotation from '@/components/PromptAnnotation';
+import ChatContainer from '@/components/chat/ChatContainer';
 import type { Run, CaptureRun, ScoredRun, LegacyRun, CapturePrompt, ScoredPrompt, VisualEvaluation } from '@/lib/runs';
 import type { Annotation } from '@/lib/annotations';
 import { getArtifactUrl } from '@/lib/artifact-url';
@@ -109,10 +110,11 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
   const pathname = usePathname();
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [layout, setLayout] = useState<'vertical' | 'horizontal'>(() => {
-    // Initialize from URL param
+  const [layout, setLayout] = useState<'horizontal' | 'chat'>(() => {
+    // Initialize from URL param - default to chat for new experience
     const layoutParam = searchParams.get('layout');
-    return layoutParam === 'horizontal' ? 'horizontal' : 'vertical';
+    if (layoutParam === 'horizontal') return 'horizontal';
+    return 'chat'; // Default to chat layout
   });
   const [imageTopOffset, setImageTopOffset] = useState<number>(0);
   const [copied, setCopied] = useState<string | null>(null); // null or the id that was copied
@@ -152,16 +154,21 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
   };
 
   // Update URL when layout changes (without full navigation)
-  const updateLayout = (newLayout: 'vertical' | 'horizontal') => {
+  const updateLayout = (newLayout: 'horizontal' | 'chat') => {
     setLayout(newLayout);
     const params = new URLSearchParams(searchParams.toString());
     if (newLayout === 'horizontal') {
       params.set('layout', 'horizontal');
     } else {
-      params.delete('layout');
+      params.delete('layout'); // chat is default
     }
     const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     router.replace(newUrl, { scroll: false });
+  };
+
+  // Toggle between chat and horizontal
+  const toggleLayout = () => {
+    updateLayout(layout === 'chat' ? 'horizontal' : 'chat');
   };
 
   // Scroll to anchor on mount
@@ -272,19 +279,20 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
           <div className="flex items-center gap-2">
             {scored && (
               <button
-                onClick={() => updateLayout(layout === 'vertical' ? 'horizontal' : 'vertical')}
+                onClick={toggleLayout}
                 className="p-1.5 rounded border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
-                title={layout === 'vertical' ? 'Switch to horizontal' : 'Switch to vertical'}
+                title={layout === 'chat' ? 'Switch to cards' : 'Switch to chat'}
               >
-                {layout === 'vertical' ? (
+                {layout === 'chat' ? (
+                  // Horizontal cards icon (switch to cards view)
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <rect x="2" y="3" width="5" height="10" rx="1" />
                     <rect x="9" y="3" width="5" height="10" rx="1" />
                   </svg>
                 ) : (
+                  // Chat bubble icon (switch to chat view)
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="2" y="2" width="12" height="5" rx="1" />
-                    <rect x="2" y="9" width="12" height="5" rx="1" />
+                    <path d="M2 4a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H6l-3 2v-2H4a2 2 0 01-2-2V4z" />
                   </svg>
                 )}
               </button>
@@ -352,101 +360,112 @@ export default function RunDetail({ run, testType, format, nav, annotationsByPro
           </div>
         )}
 
-        {/* Prompts */}
-        <div className={layout === 'horizontal'
-          ? 'flex gap-4 overflow-x-auto pb-4 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-6'
-          : 'space-y-4'
-        }
-        style={layout === 'horizontal' ? { scrollbarWidth: 'thin' } : undefined}
-        >
-          {run.prompts.map((prompt) => {
-            const promptScored = isScoredPrompt(prompt);
+        {/* Prompts - Chat Layout */}
+        {layout === 'chat' ? (
+          <ChatContainer
+            run={run}
+            testType={testType}
+            format={format}
+            annotationsByMessage={annotationsByPrompt}
+            onLightboxOpen={setLightboxIndex}
+          />
+        ) : (
+          /* Prompts - Card Layouts (vertical/horizontal) */
+          <div className={layout === 'horizontal'
+            ? 'flex gap-4 overflow-x-auto pb-4 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-6'
+            : 'space-y-4'
+          }
+          style={layout === 'horizontal' ? { scrollbarWidth: 'thin' } : undefined}
+          >
+            {run.prompts.map((prompt) => {
+              const promptScored = isScoredPrompt(prompt);
 
-            return (
-              <div
-                key={prompt.number}
-                id={`v${prompt.number}`}
-                className={`bg-white rounded-lg shadow-sm overflow-hidden scroll-mt-6 ${
-                  layout === 'horizontal' ? 'flex-shrink-0 w-[600px] flex flex-col' : ''
-                }`}
-              >
-                {/* Prompt Header */}
-                <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 border-b border-gray-200">
-                  <h3 className="font-semibold text-gray-900">
-                    V{prompt.number}: {prompt.title}
-                  </h3>
-                  <button
-                    onClick={() => copyShareLink(`v${prompt.number}`)}
-                    className="text-gray-300 hover:text-gray-500 text-xs transition-colors"
-                    title="Copy link to this version"
-                  >
-                    {copied === `v${prompt.number}` ? '✓' : '#'}
-                  </button>
-                </div>
-
-                {/* Prompt Content */}
+              return (
                 <div
-                  className="p-4"
-                  ref={el => { contentRefs.current[prompt.number] = el; }}
-                  style={layout === 'horizontal' && imageTopOffset > 0 ? { minHeight: imageTopOffset } : undefined}
+                  key={prompt.number}
+                  id={`v${prompt.number}`}
+                  className={`bg-white rounded-lg shadow-sm overflow-hidden scroll-mt-6 ${
+                    layout === 'horizontal' ? 'flex-shrink-0 w-[600px] flex flex-col' : ''
+                  }`}
                 >
-                  <div className="mb-4">
-                    <p className="text-sm text-gray-500 mb-1">Prompt:</p>
-                    <p className="text-gray-800 bg-gray-50 p-3 rounded border border-gray-100">
-                      {prompt.text}
-                    </p>
+                  {/* Prompt Header */}
+                  <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 border-b border-gray-200">
+                    <h3 className="font-semibold text-gray-900">
+                      V{prompt.number}: {prompt.title}
+                    </h3>
+                    <button
+                      onClick={() => copyShareLink(`v${prompt.number}`)}
+                      className="text-gray-300 hover:text-gray-500 text-xs transition-colors"
+                      title="Copy link to this version"
+                    >
+                      {copied === `v${prompt.number}` ? '✓' : '#'}
+                    </button>
                   </div>
 
-                  <div className="mb-4">
-                    {promptScored ? (
-                      <>
-                        {/* All annotations (Frank + Human) */}
-                        <PromptAnnotation
-                            runId={run.id}
-                            promptNumber={prompt.number}
-                            initialAnnotations={annotationsByPrompt[prompt.number] || []}
-                            minimal
-                          />
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm text-gray-500 mb-1">Observation:</p>
-                        <p className="text-gray-700">
-                          {(prompt as CapturePrompt).observation || 'No observation recorded'}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Artifact Image */}
-                {prompt.artifact && (
+                  {/* Prompt Content */}
                   <div
-                    className="relative cursor-pointer group px-4 pb-4"
-                    onClick={() => {
-                      const imageIndex = allImages.indexOf(getArtifactUrl(prompt.artifact));
-                      setLightboxIndex(imageIndex >= 0 ? imageIndex : 0);
-                    }}
+                    className="p-4"
+                    ref={el => { contentRefs.current[prompt.number] = el; }}
+                    style={layout === 'horizontal' && imageTopOffset > 0 ? { minHeight: imageTopOffset } : undefined}
                   >
-                    <div className="absolute inset-4 top-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg flex items-center justify-center">
-                      <span className="opacity-0 group-hover:opacity-100 text-white bg-black/50 px-3 py-1 rounded text-sm transition-opacity">
-                        Click to zoom
-                      </span>
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-500 mb-1">Prompt:</p>
+                      <p className="text-gray-800 bg-gray-50 p-3 rounded border border-gray-100">
+                        {prompt.text}
+                      </p>
                     </div>
-                    <Image
-                      src={getArtifactUrl(prompt.artifact)}
-                      alt={`V${prompt.number} artifact`}
-                      width={800}
-                      height={400}
-                      className="rounded-lg border border-gray-200 w-full"
-                      unoptimized
-                    />
+
+                    <div className="mb-4">
+                      {promptScored ? (
+                        <>
+                          {/* All annotations (Frank + Human) */}
+                          <PromptAnnotation
+                              runId={run.id}
+                              promptNumber={prompt.number}
+                              initialAnnotations={annotationsByPrompt[prompt.number] || []}
+                              minimal
+                            />
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm text-gray-500 mb-1">Observation:</p>
+                          <p className="text-gray-700">
+                            {(prompt as CapturePrompt).observation || 'No observation recorded'}
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+
+                  {/* Artifact Image */}
+                  {prompt.artifact && (
+                    <div
+                      className="relative cursor-pointer group px-4 pb-4"
+                      onClick={() => {
+                        const imageIndex = allImages.indexOf(getArtifactUrl(prompt.artifact));
+                        setLightboxIndex(imageIndex >= 0 ? imageIndex : 0);
+                      }}
+                    >
+                      <div className="absolute inset-4 top-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg flex items-center justify-center">
+                        <span className="opacity-0 group-hover:opacity-100 text-white bg-black/50 px-3 py-1 rounded text-sm transition-opacity">
+                          Click to zoom
+                        </span>
+                      </div>
+                      <Image
+                        src={getArtifactUrl(prompt.artifact)}
+                        alt={`V${prompt.number} artifact`}
+                        width={800}
+                        height={400}
+                        className="rounded-lg border border-gray-200 w-full"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
       {/* Lightbox */}
       {lightboxIndex !== null && allImages[lightboxIndex] && (

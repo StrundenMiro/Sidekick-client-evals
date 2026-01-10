@@ -7,7 +7,8 @@ import {
   deleteAnnotationAsync,
   deleteAnnotationByIdAsync,
   type IssueType,
-  type Severity
+  type Severity,
+  type AnnotationTarget
 } from '@/lib/annotations';
 
 // GET /api/annotations?runId=xxx or /api/annotations?runId=xxx&promptNumber=1
@@ -43,25 +44,50 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, runId, promptNumber, author, issueType, severity, note, plannedFixId, owner } = body;
+    const { id, runId, messageId, promptNumber, author, issueType, severity, note, plannedFixId, owner, target } = body;
 
-    if (!runId || promptNumber === undefined || !issueType || !severity) {
+    // Accept either messageId or promptNumber (for backward compat)
+    const resolvedMessageId = messageId ?? promptNumber;
+
+    if (!runId || resolvedMessageId === undefined || !issueType || !severity) {
       return NextResponse.json(
-        { error: 'Missing required fields: runId, promptNumber, issueType, severity' },
+        { error: 'Missing required fields: runId, messageId (or promptNumber), issueType, severity' },
         { status: 400 }
       );
+    }
+
+    // Build target object if provided (simplified)
+    let annotationTarget: AnnotationTarget | undefined;
+    if (target) {
+      if (target.type === 'image' && target.x !== undefined && target.y !== undefined) {
+        annotationTarget = {
+          type: 'image',
+          marker: {
+            x: target.x,
+            y: target.y,
+            ...(target.label ? { label: target.label } : {})
+          }
+        };
+      } else if (target.type === 'message') {
+        annotationTarget = { type: 'message' };
+      } else {
+        // Default to message-level annotation
+        annotationTarget = { type: 'message' };
+      }
     }
 
     const annotation = await saveAnnotationAsync({
       id, // Optional - if provided, updates existing
       runId,
-      promptNumber: parseInt(promptNumber, 10),
+      messageId: parseInt(String(resolvedMessageId), 10),
+      promptNumber: parseInt(String(promptNumber ?? resolvedMessageId), 10), // Legacy compat
       author: (author || 'human') as 'frank' | 'human',
       issueType: issueType as IssueType,
       severity: severity as Severity,
       note: note || '',
       plannedFixId: plannedFixId || null,
-      owner: owner || null
+      owner: owner || null,
+      ...(annotationTarget ? { target: annotationTarget } : { target: { type: 'message' } })
     });
 
     return NextResponse.json({ annotation });

@@ -4,7 +4,7 @@ import { saveCapturePromptAsync } from '@/lib/runs';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { runId, number, title, text, artifact, observation } = body;
+    const { runId, number, title, text, artifact, observation, response } = body;
 
     if (!runId || number === undefined || !title || !text) {
       return NextResponse.json(
@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
       title,
       text,
       artifact: artifact || '',
-      observation: observation || ''
+      observation: observation || '',
+      ...(response ? { response } : {})
     });
 
     if (!run) {

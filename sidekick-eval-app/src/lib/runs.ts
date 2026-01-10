@@ -3,6 +3,24 @@ import path from 'path';
 import { query, queryOne, transaction, isDatabaseConfigured } from './db';
 import type { PoolClient } from 'pg';
 
+// ============================================
+// Message-based conversation structure
+// ============================================
+
+export type MessageRole = 'user' | 'agent' | 'context';
+
+export interface Message {
+  id: number;                    // Sequential ID within the run
+  role: MessageRole;
+  text: string;
+  artifact?: string;             // Path to artifact (only agent messages)
+  contextPreview?: string;       // Thumbnail for context messages
+}
+
+// ============================================
+// Legacy prompt-based structure (for backward compatibility)
+// ============================================
+
 // Prompt during capture phase (before scoring)
 export interface CapturePrompt {
   number: number;
@@ -11,6 +29,7 @@ export interface CapturePrompt {
   artifact: string;
   observation: string;  // Raw observation before scoring
   capturedAt: string;
+  response?: string;    // Sidekick's text response (optional)
 }
 
 // Detailed visual evaluation for each prompt
@@ -43,6 +62,7 @@ export interface ScoredPrompt {
   note: string;
   artifact: string;
   evaluation?: VisualEvaluation;  // Detailed visual evaluation
+  response?: string;              // Sidekick's text response (optional)
 }
 
 // Legacy alias for backward compatibility
@@ -56,7 +76,8 @@ export interface CaptureRun {
   format: string;
   timestamp: string;
   state: 'capturing' | 'captured';
-  prompts: CapturePrompt[];
+  prompts: CapturePrompt[];       // Legacy prompt structure
+  messages?: Message[];           // New message-based structure
 }
 
 // Iteration analysis across versions
@@ -88,7 +109,8 @@ export interface ScoredRun {
   summary?: string;
   issues?: { severity: string; text: string }[];
   iterationAnalysis?: IterationAnalysis;
-  prompts: ScoredPrompt[];
+  prompts: ScoredPrompt[];        // Legacy prompt structure
+  messages?: Message[];           // New message-based structure
 }
 
 // Legacy Run type (scored runs without explicit state, defaults to ai-generated-iteration)
@@ -107,7 +129,8 @@ export interface LegacyRun {
   bad: string[];
   summary?: string;
   issues?: { severity: string; text: string }[];
-  prompts: ScoredPrompt[];
+  prompts: ScoredPrompt[];        // Legacy prompt structure
+  messages?: Message[];           // New message-based structure
 }
 
 // Union type for any run
@@ -121,6 +144,40 @@ export function isScored(run: Run): run is ScoredRun | LegacyRun {
 // Type guard to check if a run is in capture phase
 export function isCapturing(run: Run): run is CaptureRun {
   return 'state' in run && (run.state === 'capturing' || run.state === 'captured');
+}
+
+// Get messages from a run (returns messages array, or converts legacy prompts)
+export function getRunMessages(run: Run): Message[] {
+  // If run has messages array, use it
+  if (run.messages && run.messages.length > 0) {
+    return run.messages;
+  }
+
+  // Convert legacy prompts to messages
+  const messages: Message[] = [];
+  let messageId = 1;
+
+  run.prompts.forEach(prompt => {
+    // User message (the prompt text)
+    messages.push({
+      id: messageId++,
+      role: 'user',
+      text: prompt.text
+    });
+
+    // Agent response (if available)
+    const response = 'response' in prompt ? prompt.response : undefined;
+    if (response || prompt.artifact) {
+      messages.push({
+        id: messageId++,
+        role: 'agent',
+        text: response || '',
+        artifact: prompt.artifact || undefined
+      });
+    }
+  });
+
+  return messages;
 }
 
 // Get the rating for a run (converts legacy numeric scores if needed)
@@ -195,6 +252,7 @@ interface DbPrompt {
   status: string | null;
   note: string | null;
   evaluation: VisualEvaluation | null;
+  response: string | null;
 }
 
 function dbToRun(row: DbRun, prompts: DbPrompt[]): Run {
@@ -215,7 +273,8 @@ function dbToRun(row: DbRun, prompts: DbPrompt[]): Run {
         text: p.text,
         artifact: p.artifact || '',
         observation: p.observation || '',
-        capturedAt: p.captured_at?.toISOString() || ''
+        capturedAt: p.captured_at?.toISOString() || '',
+        ...(p.response ? { response: p.response } : {})
       }))
     };
     if (row.name) captureRun.name = row.name;
@@ -239,7 +298,8 @@ function dbToRun(row: DbRun, prompts: DbPrompt[]): Run {
       artifact: p.artifact || '',
       status: (p.status as 'pass' | 'warning' | 'fail') || 'warning',
       note: p.note || '',
-      evaluation: p.evaluation || undefined
+      evaluation: p.evaluation || undefined,
+      ...(p.response ? { response: p.response } : {})
     }))
   };
 
@@ -319,8 +379,8 @@ async function saveRunToDb(run: Run): Promise<void> {
       const isCapture = 'observation' in prompt;
 
       await client.query(`
-        INSERT INTO prompts (run_id, number, title, text, artifact, observation, captured_at, status, note, evaluation)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO prompts (run_id, number, title, text, artifact, observation, captured_at, status, note, evaluation, response)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       `, [
         run.id,
         prompt.number,
@@ -331,7 +391,8 @@ async function saveRunToDb(run: Run): Promise<void> {
         isCapture ? (prompt as CapturePrompt).capturedAt : null,
         !isCapture ? (prompt as ScoredPrompt).status : null,
         !isCapture ? (prompt as ScoredPrompt).note : null,
-        !isCapture && (prompt as ScoredPrompt).evaluation ? JSON.stringify((prompt as ScoredPrompt).evaluation) : null
+        !isCapture && (prompt as ScoredPrompt).evaluation ? JSON.stringify((prompt as ScoredPrompt).evaluation) : null,
+        prompt.response || null
       ]);
     }
   });
@@ -987,7 +1048,8 @@ export function scoreRun(input: ScoreInput): ScoredRun | null {
         text: cp.text,
         artifact: cp.artifact,
         status: evaluation?.status || 'warning',
-        note: evaluation?.note || cp.observation
+        note: evaluation?.note || cp.observation,
+        ...(cp.response ? { response: cp.response } : {})
       };
     });
   } else {
@@ -1033,14 +1095,16 @@ export async function scoreRunAsync(input: ScoreInput): Promise<ScoredRun | null
 
     if (isCapturing(run)) {
       scoredPrompts = run.prompts.map(cp => {
-        const evaluation = input.promptEvaluations.find(e => e.number === (cp as CapturePrompt).number);
+        const capPrompt = cp as CapturePrompt;
+        const evaluation = input.promptEvaluations.find(e => e.number === capPrompt.number);
         return {
-          number: (cp as CapturePrompt).number,
+          number: capPrompt.number,
           title: cp.title,
           text: cp.text,
           artifact: cp.artifact,
           status: evaluation?.status || 'warning',
-          note: evaluation?.note || (cp as CapturePrompt).observation
+          note: evaluation?.note || capPrompt.observation,
+          ...(capPrompt.response ? { response: capPrompt.response } : {})
         };
       });
     } else {
